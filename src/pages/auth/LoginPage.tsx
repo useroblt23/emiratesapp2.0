@@ -4,7 +4,9 @@ import { useApp } from '../../context/AppContext';
 import { demoUsers } from '../../data/mockData';
 import { Plane, Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '../../lib/supabase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../lib/firebase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -32,44 +34,43 @@ export default function LoginPage() {
         return;
       }
 
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      if (authError) throw authError;
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
 
-      if (!authData.user) {
-        throw new Error('Login failed. Please try again.');
-      }
-
-      const { data: userData, error: dbError } = await supabase
-        .from('users')
-        .select('*')
-        .eq('id', authData.user.id)
-        .maybeSingle();
-
-      if (dbError) throw dbError;
-
-      if (!userData) {
+      if (!userDoc.exists()) {
         throw new Error('User profile not found. Please contact support.');
       }
 
-      const user = {
-        uid: userData.id,
+      const userData = userDoc.data();
+      const currentUser = {
+        uid: user.uid,
         email: userData.email,
         name: userData.name,
         role: userData.role as 'student' | 'mentor' | 'governor',
         country: userData.country,
         bio: userData.bio || '',
-        photoURL: userData.photo_url || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
       };
 
-      setCurrentUser(user);
+      setCurrentUser(currentUser);
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      setError(err.message || 'Invalid email or password');
+      let errorMessage = 'Invalid email or password';
+
+      if (err.code === 'auth/user-not-found') {
+        errorMessage = 'No account found with this email.';
+      } else if (err.code === 'auth/wrong-password') {
+        errorMessage = 'Incorrect password.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      } else if (err.code === 'auth/too-many-requests') {
+        errorMessage = 'Too many failed attempts. Please try again later.';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

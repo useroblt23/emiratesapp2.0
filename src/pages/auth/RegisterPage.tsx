@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
-import { Plane, User, Mail, Lock, MapPin, FileText } from 'lucide-react';
+import { Plane, User, Mail, Lock, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '../../lib/supabase';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '../../lib/firebase';
 import { countries } from '../../data/countries';
 
 export default function RegisterPage() {
@@ -24,38 +26,24 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            country,
-          },
-        },
-      });
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
 
-      if (authError) throw authError;
-
-      if (!authData.user) {
-        throw new Error('Registration failed. Please try again.');
-      }
-
-      const { error: dbError } = await supabase.from('users').insert({
-        id: authData.user.id,
+      await setDoc(doc(db, 'users', user.uid), {
+        uid: user.uid,
         email,
         name,
         role: 'student',
         country,
         bio,
         expectations,
-        photo_url: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        photoURL: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       });
 
-      if (dbError) throw dbError;
-
       const newUser = {
-        uid: authData.user.id,
+        uid: user.uid,
         email,
         name,
         role: 'student' as const,
@@ -68,7 +56,17 @@ export default function RegisterPage() {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Registration error:', err);
-      setError(err.message || 'Registration failed. Please try again.');
+      let errorMessage = 'Registration failed. Please try again.';
+
+      if (err.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered. Please sign in.';
+      } else if (err.code === 'auth/weak-password') {
+        errorMessage = 'Password should be at least 6 characters.';
+      } else if (err.code === 'auth/invalid-email') {
+        errorMessage = 'Please enter a valid email address.';
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

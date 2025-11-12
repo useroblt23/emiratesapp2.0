@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import RecruitmentStages from './pages/RecruitmentStages';
 import InterviewQA from './pages/InterviewQA';
 import DressGuide from './pages/DressGuide';
+import OneStepProgram from './pages/OneStepProgram';
 import Profile from './pages/Profile';
 import Navigation from './components/Navigation';
 
@@ -54,6 +55,8 @@ function App() {
         return <InterviewQA />;
       case 'dress':
         return <DressGuide />;
+      case 'onestep':
+        return <OneStepProgram />;
       case 'profile':
         return <Profile />;
       default:

@@ -1,7 +1,7 @@
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { useEffect, useState } from 'react';
-import { Plane, Users, MessageCircle, Shirt, TrendingUp } from 'lucide-react';
+import { Plane, Users, MessageCircle, Shirt, TrendingUp, Star, Crown } from 'lucide-react';
 
 interface HomeProps {
   onNavigate: (page: string) => void;
@@ -20,6 +20,7 @@ export default function Home({ onNavigate }: HomeProps) {
     dressGuide: false,
   });
   const [userName, setUserName] = useState('');
+  const [hasStepProgram, setHasStepProgram] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -30,6 +31,7 @@ export default function Home({ onNavigate }: HomeProps) {
           const data = userDoc.data();
           setUserName(data.name);
           setProgress(data.progress);
+          setHasStepProgram(data.hasStepProgram || false);
         }
       }
     };
@@ -124,15 +126,36 @@ export default function Home({ onNavigate }: HomeProps) {
           })}
         </div>
 
-        <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white">
-          <h3 className="text-xl font-bold mb-2">✨ Unlock Advanced Training</h3>
-          <p className="text-sm mb-4">
-            Get AI-powered CV analysis, personalized interview coaching, and more with Step Program
-          </p>
-          <div className="inline-block bg-white text-[#C8A14B] px-6 py-2 rounded-xl font-semibold text-sm">
-            Coming Soon
-          </div>
-        </div>
+        {hasStepProgram ? (
+          <button
+            onClick={() => onNavigate('onestep')}
+            className="w-full bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition transform hover:-translate-y-1"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Crown className="w-6 h-6" />
+              <h3 className="text-xl font-bold">One Step Program</h3>
+            </div>
+            <p className="text-sm text-yellow-100">
+              Access your premium AI tools, advanced practice modules, and success strategies
+            </p>
+          </button>
+        ) : (
+          <button
+            onClick={() => onNavigate('onestep')}
+            className="w-full bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white hover:shadow-xl transition transform hover:-translate-y-1"
+          >
+            <div className="flex items-center gap-3 mb-2">
+              <Star className="w-6 h-6" />
+              <h3 className="text-xl font-bold">✨ Unlock One Step Program</h3>
+            </div>
+            <p className="text-sm text-yellow-100 mb-3">
+              Get AI-powered CV analysis, personalized interview coaching, and advanced preparation materials
+            </p>
+            <div className="inline-block bg-white text-[#C8A14B] px-4 py-2 rounded-xl font-semibold text-sm">
+              Coming Soon
+            </div>
+          </button>
+        )}
       </div>
     </div>
   );

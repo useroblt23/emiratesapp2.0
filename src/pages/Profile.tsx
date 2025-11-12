@@ -3,7 +3,7 @@ import { signOut } from 'firebase/auth';
 import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { truncateKey } from '../utils/encryption';
-import { User, Key, LogOut, Trash2, Copy, CheckCircle, Award } from 'lucide-react';
+import { User, Key, LogOut, Trash2, Copy, CheckCircle, Award, Star, Crown } from 'lucide-react';
 
 export default function Profile() {
   const [userData, setUserData] = useState({
@@ -11,6 +11,7 @@ export default function Profile() {
     email: '',
     publicKey: '',
   });
+  const [hasStepProgram, setHasStepProgram] = useState(false);
   const [progress, setProgress] = useState({
     recruitmentStages: false,
     interviewQA: false,
@@ -32,6 +33,7 @@ export default function Profile() {
             publicKey: data.publicKey,
           });
           setProgress(data.progress);
+          setHasStepProgram(data.hasStepProgram || false);
         }
       }
     };
@@ -71,14 +73,33 @@ export default function Profile() {
       <div className="max-w-4xl mx-auto px-6 -mt-8">
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-4 mb-6">
-            <div className="bg-[#D71920] p-4 rounded-full">
-              <User className="w-8 h-8 text-white" />
+            <div className={`p-4 rounded-full ${
+              hasStepProgram 
+                ? 'bg-gradient-to-r from-[#C8A14B] to-[#D4AF37]' 
+                : 'bg-[#D71920]'
+            }`}>
+              {hasStepProgram ? (
+                <Crown className="w-8 h-8 text-white" />
+              ) : (
+                <User className="w-8 h-8 text-white" />
+              )}
             </div>
             <div>
-              <h2 className="text-2xl font-bold text-[#2C2C2C]">
-                {userData.name}
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-2xl font-bold text-[#2C2C2C]">
+                  {userData.name}
+                </h2>
+                {hasStepProgram && (
+                  <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] text-white px-3 py-1 rounded-full flex items-center gap-1">
+                    <Star className="w-4 h-4" />
+                    <span className="text-sm font-semibold">One Step Member</span>
+                  </div>
+                )}
+              </div>
               <p className="text-gray-600">{userData.email}</p>
+              {!hasStepProgram && (
+                <p className="text-gray-500 text-sm">Free User</p>
+              )}
             </div>
           </div>
 
@@ -114,6 +135,51 @@ export default function Profile() {
               Your public key is used for secure end-to-end encrypted messaging (coming soon)
             </p>
           </div>
+        </div>
+
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <Star className="w-6 h-6 text-[#C8A14B]" />
+            <h3 className="text-xl font-bold text-[#2C2C2C]">
+              Subscription Status
+            </h3>
+          </div>
+          
+          {hasStepProgram ? (
+            <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-xl p-4 text-white">
+              <div className="flex items-center gap-3 mb-2">
+                <Crown className="w-6 h-6" />
+                <h4 className="text-lg font-bold">One Step Program Member</h4>
+              </div>
+              <p className="text-yellow-100 text-sm mb-3">
+                You have full access to all premium features including AI CV Analyzer, advanced interview practice, and the 80% success strategy guide.
+              </p>
+              <div className="flex items-center gap-4 text-sm">
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>AI Tools</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Premium Content</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <CheckCircle className="w-4 h-4" />
+                  <span>Priority Support</span>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#F5F3EF] rounded-xl p-4">
+              <h4 className="text-lg font-bold text-[#2C2C2C] mb-2">Free User</h4>
+              <p className="text-gray-600 text-sm mb-4">
+                You have access to basic preparation materials. Upgrade to One Step Program for AI-powered tools and advanced content.
+              </p>
+              <button className="bg-[#C8A14B] text-white px-6 py-2 rounded-xl font-semibold hover:bg-[#B8914B] transition">
+                Upgrade Now (Coming Soon)
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
@@ -161,17 +227,19 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white mb-6">
-          <h3 className="text-xl font-bold mb-2">
-            Upgrade to Step Program
-          </h3>
-          <p className="text-sm mb-4">
-            Get AI-powered CV analysis, mock interviews, personalized coaching, and advanced preparation materials
-          </p>
-          <div className="inline-block bg-white text-[#C8A14B] px-6 py-2 rounded-xl font-semibold text-sm">
-            Coming Soon
+        {!hasStepProgram && (
+          <div className="bg-gradient-to-r from-[#C8A14B] to-[#D4AF37] rounded-2xl shadow-lg p-6 text-white mb-6">
+            <h3 className="text-xl font-bold mb-2">
+              Upgrade to One Step Program
+            </h3>
+            <p className="text-sm mb-4">
+              Get AI-powered CV analysis, mock interviews, personalized coaching, and advanced preparation materials
+            </p>
+            <div className="inline-block bg-white text-[#C8A14B] px-6 py-2 rounded-xl font-semibold text-sm">
+              Coming Soon
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="space-y-3">
           <button

@@ -1,40 +1,77 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useApp, Role } from '../../context/AppContext';
-import { Plane, User, Mail, Lock, MapPin } from 'lucide-react';
+import { useApp } from '../../context/AppContext';
+import { Plane, User, Mail, Lock, MapPin, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
+import { countries } from '../../data/countries';
 
 export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [country, setCountry] = useState('');
-  const [role, setRole] = useState<Role>('student');
+  const [bio, setBio] = useState('');
+  const [expectations, setExpectations] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const newUser = {
-        uid: `user-${Date.now()}`,
-        name,
+    try {
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
+        password,
+        options: {
+          data: {
+            name,
+            country,
+          },
+        },
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error('Registration failed. Please try again.');
+      }
+
+      const { error: dbError } = await supabase.from('users').insert({
+        id: authData.user.id,
+        email,
+        name,
+        role: 'student',
         country,
-        role,
-        bio: '',
-        photoURL: 'https://images.pexels.com/photos/1386604/pexels-photo-1386604.jpeg?auto=compress&cs=tinysrgb&w=200',
+        bio,
+        expectations,
+        photo_url: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+      });
+
+      if (dbError) throw dbError;
+
+      const newUser = {
+        uid: authData.user.id,
+        email,
+        name,
+        role: 'student' as const,
+        country,
+        bio,
+        photoURL: 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
       };
 
       setCurrentUser(newUser);
       navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Registration error:', err);
+      setError(err.message || 'Registration failed. Please try again.');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   return (
@@ -44,24 +81,24 @@ export default function RegisterPage() {
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
           <div className="flex justify-center mb-6">
             <div className="w-16 h-16 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-2xl flex items-center justify-center shadow-lg">
               <Plane className="w-8 h-8 text-white" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-[#000000] mb-2">
-            Create Account
+          <h1 className="text-2xl md:text-3xl font-bold text-center text-[#000000] mb-2">
+            Join Crew's Academy
           </h1>
-          <p className="text-center text-gray-600 mb-8">
-            Join Crew's Academy today
+          <p className="text-center text-sm md:text-base text-gray-600 mb-6 md:mb-8">
+            Start your Emirates cabin crew journey
           </p>
 
-          <form onSubmit={handleRegister} className="space-y-5">
+          <form onSubmit={handleRegister} className="space-y-4 md:space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
-                Full Name
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                Full Name *
               </label>
               <div className="relative">
                 <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -77,8 +114,8 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
-                Email Address
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                Email Address *
               </label>
               <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -94,8 +131,8 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
-                Password
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                Password *
               </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -112,60 +149,54 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
-                Country
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                Country *
               </label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+                <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition"
-                  placeholder="Your country"
+                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition appearance-none bg-white"
+                >
+                  <option value="">Select your country</option>
+                  {countries.map((c) => (
+                    <option key={c} value={c}>
+                      {c}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                Brief Description About Yourself
+              </label>
+              <div className="relative">
+                <textarea
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
+                  placeholder="Tell us a bit about yourself..."
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
-                I am a...
+              <label className="block text-sm font-bold text-[#000000] mb-2">
+                What I Expect From This Academy
               </label>
-              <div className="grid grid-cols-3 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setRole('student')}
-                  className={`py-3 rounded-xl font-bold transition ${
-                    role === 'student'
-                      ? 'bg-[#D71921] text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Student
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('mentor')}
-                  className={`py-3 rounded-xl font-bold transition ${
-                    role === 'mentor'
-                      ? 'bg-[#D71921] text-white shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Mentor
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('governor')}
-                  className={`py-3 rounded-xl font-bold transition ${
-                    role === 'governor'
-                      ? 'bg-[#FFD700] text-[#000000] shadow-lg'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  Governor
-                </button>
+              <div className="relative">
+                <textarea
+                  value={expectations}
+                  onChange={(e) => setExpectations(e.target.value)}
+                  rows={3}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
+                  placeholder="What are your goals and expectations?"
+                />
               </div>
             </div>
 
@@ -182,7 +213,7 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#D71920] to-[#B91518] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition disabled:opacity-50"
+              className="w-full bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FFD700]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>

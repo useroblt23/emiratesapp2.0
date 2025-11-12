@@ -4,6 +4,7 @@ import { useApp } from '../../context/AppContext';
 import { demoUsers } from '../../data/mockData';
 import { Plane, Lock, Mail } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../../lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,30 +14,76 @@ export default function LoginPage() {
   const { setCurrentUser } = useApp();
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const user = demoUsers.find(
+    try {
+      const demoUser = demoUsers.find(
         (u) => u.email === email && u.password === password
       );
 
-      if (user) {
-        const { password: _, ...userWithoutPassword } = user;
+      if (demoUser) {
+        const { password: _, ...userWithoutPassword } = demoUser;
         setCurrentUser(userWithoutPassword);
         navigate('/dashboard');
-      } else {
-        setError('Invalid email or password');
+        setLoading(false);
+        return;
       }
+
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (authError) throw authError;
+
+      if (!authData.user) {
+        throw new Error('Login failed. Please try again.');
+      }
+
+      const { data: userData, error: dbError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', authData.user.id)
+        .maybeSingle();
+
+      if (dbError) throw dbError;
+
+      if (!userData) {
+        throw new Error('User profile not found. Please contact support.');
+      }
+
+      const user = {
+        uid: userData.id,
+        email: userData.email,
+        name: userData.name,
+        role: userData.role as 'student' | 'mentor' | 'governor',
+        country: userData.country,
+        bio: userData.bio || '',
+        photoURL: userData.photo_url || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+      };
+
+      setCurrentUser(user);
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setError(err.message || 'Invalid email or password');
+    } finally {
       setLoading(false);
-    }, 500);
+    }
   };
 
   const quickLogin = (email: string, password: string) => {
     setEmail(email);
     setPassword(password);
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) {
+        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      }
+    }, 100);
   };
 
   return (
@@ -60,9 +107,9 @@ export default function LoginPage() {
             Sign in to Crew's Academy
           </p>
 
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
+              <label className="block text-sm font-bold text-[#000000] mb-2">
                 Email Address
               </label>
               <div className="relative">
@@ -79,7 +126,7 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#1C1C1C] mb-2">
+              <label className="block text-sm font-bold text-[#000000] mb-2">
                 Password
               </label>
               <div className="relative">

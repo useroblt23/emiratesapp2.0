@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { signOut } from 'firebase/auth';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 import { truncateKey } from '../utils/encryption';
-import { User, Key, LogOut, Trash2, Copy, CheckCircle, Award, Star, Crown } from 'lucide-react';
+import { User, Key, LogOut, Trash2, Copy, CheckCircle, Award, Star, Crown, Settings } from 'lucide-react';
 
 export default function Profile() {
   const [userData, setUserData] = useState({
@@ -19,6 +19,7 @@ export default function Profile() {
   });
   const [copied, setCopied] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -34,11 +35,23 @@ export default function Profile() {
           });
           setProgress(data.progress);
           setHasStepProgram(data.hasStepProgram || false);
+          setIsAdmin(data.email === 'admin@cabinpro.app');
         }
       }
     };
     fetchUserData();
   }, []);
+
+  const toggleStepProgram = async () => {
+    const user = auth.currentUser;
+    if (user && isAdmin) {
+      const newStatus = !hasStepProgram;
+      await updateDoc(doc(db, 'users', user.uid), {
+        hasStepProgram: newStatus,
+      });
+      setHasStepProgram(newStatus);
+    }
+  };
 
   const handleCopyKey = () => {
     navigator.clipboard.writeText(userData.publicKey);
@@ -136,6 +149,35 @@ export default function Profile() {
             </p>
           </div>
         </div>
+
+        {isAdmin && (
+          <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-2xl shadow-lg p-6 text-white mb-6">
+            <div className="flex items-center gap-3 mb-4">
+              <Settings className="w-6 h-6" />
+              <h3 className="text-xl font-bold">Admin Controls</h3>
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold mb-1">One Step Program Access</h4>
+                <p className="text-purple-100 text-sm">
+                  Toggle premium access for testing
+                </p>
+              </div>
+              <button
+                onClick={toggleStepProgram}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  hasStepProgram ? 'bg-white' : 'bg-purple-400'
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-purple-600 transition-transform ${
+                    hasStepProgram ? 'translate-x-6' : 'translate-x-1'
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex items-center gap-3 mb-4">

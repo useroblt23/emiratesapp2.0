@@ -31,6 +31,7 @@ export default function Signup({ onToggleAuth }: SignupProps) {
         name,
         email,
         publicKey,
+        hasStepProgram: false,
         progress: {
           recruitmentStages: false,
           interviewQA: false,

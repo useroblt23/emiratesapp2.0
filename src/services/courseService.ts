@@ -62,7 +62,7 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
       pdfPath = uploadResult.path;
     }
 
-    const courseData = {
+    const courseData: any = {
       id: courseId,
       title: data.title,
       description: data.description,
@@ -74,14 +74,15 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
       category: data.category,
       lessons: data.lessons || 1,
       coach_id: coachId,
-      pdf_url: pdfUrl,
-      pdf_path: pdfPath,
-      video_url: data.video_url,
       allow_download: data.allow_download,
       content_type: data.content_type,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+
+    if (pdfUrl) courseData.pdf_url = pdfUrl;
+    if (pdfPath) courseData.pdf_path = pdfPath;
+    if (data.video_url) courseData.video_url = data.video_url;
 
     const docRef = doc(db, 'courses', courseId);
     await setDoc(docRef, courseData);

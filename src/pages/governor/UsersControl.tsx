@@ -1,12 +1,54 @@
 import { useState } from 'react';
+import { useEffect } from 'react';
 import { User as UserType } from '../../context/AppContext';
 import { Search, Ban, Volume2, VolumeX, TrendingUp, TrendingDown, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { collection, getDocs, doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export default function UsersControl() {
   const [users, setUsers] = useState<UserType[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    try {
+      const usersRef = collection(db, 'users');
+      const querySnapshot = await getDocs(usersRef);
+      
+      const usersData: UserType[] = querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          uid: doc.id,
+          email: data.email || '',
+          name: data.name || 'Unknown User',
+          role: data.role || 'student',
+          plan: data.plan || 'free',
+          country: data.country || '',
+          bio: data.bio || '',
+          photoURL: data.photo_base64 || data.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+          expectations: data.expectations || '',
+          hasCompletedOnboarding: data.hasCompletedOnboarding || false,
+          hasSeenWelcomeBanner: data.hasSeenWelcomeBanner || false,
+          createdAt: data.createdAt || new Date().toISOString(),
+          updatedAt: data.updatedAt || new Date().toISOString(),
+          banned: data.banned || false,
+          muted: data.muted || false,
+        };
+      });
+      
+      setUsers(usersData);
+    } catch (error) {
+      console.error('Error loading users:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -16,33 +58,92 @@ export default function UsersControl() {
     return matchesSearch && matchesRole;
   });
 
-  const handleBan = (userId: string) => {
-    setUsers(users.map(u => u.uid === userId ? { ...u, banned: !u.banned } : u));
+  const handleBan = async (userId: string) => {
+    try {
+      const user = users.find(u => u.uid === userId);
+      if (!user) return;
+      
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        banned: !user.banned,
+        updatedAt: new Date().toISOString()
+      });
+      
+      setUsers(users.map(u => u.uid === userId ? { ...u, banned: !u.banned } : u));
+    } catch (error) {
+      console.error('Error updating user ban status:', error);
+      alert('Failed to update user status. Please try again.');
+    }
   };
 
-  const handleMute = (userId: string) => {
-    setUsers(users.map(u => u.uid === userId ? { ...u, muted: !u.muted } : u));
+  const handleMute = async (userId: string) => {
+    try {
+      const user = users.find(u => u.uid === userId);
+      if (!user) return;
+      
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        muted: !user.muted,
+        updatedAt: new Date().toISOString()
+      });
+      
+      setUsers(users.map(u => u.uid === userId ? { ...u, muted: !u.muted } : u));
+    } catch (error) {
+      console.error('Error updating user mute status:', error);
+      alert('Failed to update user status. Please try again.');
+    }
   };
 
-  const handlePromote = (userId: string) => {
-    setUsers(users.map(u => {
-      if (u.uid === userId) {
-        const newRole = u.role === 'student' ? 'mentor' : u.role === 'mentor' ? 'governor' : 'governor';
-        return { ...u, role: newRole };
-      }
-      return u;
-    }));
+  const handlePromote = async (userId: string) => {
+    try {
+      const user = users.find(u => u.uid === userId);
+      if (!user) return;
+      
+      const newRole = user.role === 'student' ? 'mentor' : user.role === 'mentor' ? 'governor' : 'governor';
+      
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        role: newRole,
+        updatedAt: new Date().toISOString()
+      });
+      
+      setUsers(users.map(u => u.uid === userId ? { ...u, role: newRole } : u));
+    } catch (error) {
+      console.error('Error promoting user:', error);
+      alert('Failed to promote user. Please try again.');
+    }
   };
 
-  const handleDemote = (userId: string) => {
-    setUsers(users.map(u => {
-      if (u.uid === userId) {
-        const newRole = u.role === 'governor' ? 'mentor' : u.role === 'mentor' ? 'student' : 'student';
-        return { ...u, role: newRole };
-      }
-      return u;
-    }));
+  const handleDemote = async (userId: string) => {
+    try {
+      const user = users.find(u => u.uid === userId);
+      if (!user) return;
+      
+      const newRole = user.role === 'governor' ? 'mentor' : user.role === 'mentor' ? 'student' : 'student';
+      
+      const userRef = doc(db, 'users', userId);
+      await updateDoc(userRef, {
+        role: newRole,
+        updatedAt: new Date().toISOString()
+      });
+      
+      setUsers(users.map(u => u.uid === userId ? { ...u, role: newRole } : u));
+    } catch (error) {
+      console.error('Error demoting user:', error);
+      alert('Failed to demote user. Please try again.');
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#D71920] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading users...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>

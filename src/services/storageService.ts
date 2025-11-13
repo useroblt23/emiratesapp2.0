@@ -3,21 +3,38 @@ import { storage } from '../lib/firebase';
 
 export const uploadPDFToStorage = async (file: File, courseId: string): Promise<{ url: string; path: string }> => {
   try {
+    console.log('Starting PDF upload...', { fileName: file.name, size: file.size, courseId });
+
     const timestamp = Date.now();
     const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
     const path = `courses/${courseId}/${timestamp}_${sanitizedFileName}`;
     const storageRef = ref(storage, path);
 
-    await uploadBytes(storageRef, file, {
+    console.log('Uploading to path:', path);
+
+    const uploadResult = await uploadBytes(storageRef, file, {
       contentType: 'application/pdf',
     });
 
+    console.log('Upload complete, getting download URL...');
+
     const url = await getDownloadURL(storageRef);
 
+    console.log('Download URL retrieved:', url);
+
     return { url, path };
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error uploading PDF to Firebase Storage:', error);
-    throw new Error('Failed to upload PDF. Please try again.');
+
+    if (error.code === 'storage/unauthorized') {
+      throw new Error('Permission denied. Please check Firebase Storage rules.');
+    } else if (error.code === 'storage/canceled') {
+      throw new Error('Upload was canceled.');
+    } else if (error.code === 'storage/unknown') {
+      throw new Error('Unknown error occurred during upload. Check your internet connection.');
+    }
+
+    throw new Error(error.message || 'Failed to upload PDF. Please try again.');
   }
 };
 

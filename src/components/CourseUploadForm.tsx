@@ -67,6 +67,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     setIsUploading(true);
 
     try {
+      console.log('Starting course creation...');
       await createCourse(
         {
           ...formData,
@@ -77,6 +78,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
         coachId
       );
 
+      console.log('Course created successfully');
       onSuccess();
     } catch (err: any) {
       console.error('Upload error:', err);

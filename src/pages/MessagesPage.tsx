@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { MessageCircle } from 'lucide-react';
-import { mockConversations } from '../data/mockData';
 import EmptyState from '../components/EmptyState';
 
 export default function MessagesPage() {
   const navigate = useNavigate();
+  const conversations: any[] = [];
 
   return (
     <div className="min-h-screen">
@@ -17,7 +17,7 @@ export default function MessagesPage() {
         </p>
       </div>
 
-      {mockConversations.length === 0 ? (
+      {conversations.length === 0 ? (
         <EmptyState
           icon={MessageCircle}
           title="No Messages Yet"

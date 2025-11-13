@@ -1,11 +1,10 @@
 import { useState } from 'react';
-import { mockUsers } from '../../data/mockData';
 import { User as UserType } from '../../context/AppContext';
 import { Search, Ban, Volume2, VolumeX, TrendingUp, TrendingDown, Shield } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function UsersControl() {
-  const [users, setUsers] = useState(mockUsers);
+  const [users, setUsers] = useState<UserType[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
 

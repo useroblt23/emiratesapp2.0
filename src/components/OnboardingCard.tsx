@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronRight, Plane, BookOpen, Brain, MessageCircle, Sparkles } from 'lucide-react';
 
@@ -18,6 +18,14 @@ interface Slide {
 
 export default function OnboardingCard({ userName, onComplete, onSkip }: OnboardingCardProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   const slides: Slide[] = [
     {
@@ -69,7 +77,7 @@ export default function OnboardingCard({ userName, onComplete, onSkip }: Onboard
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-lg"
       onClick={handleSkip}
     >
       <motion.div

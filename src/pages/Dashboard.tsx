@@ -2,7 +2,6 @@ import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, MessageCircle, Users, TrendingUp, Award, GraduationCap, BarChart3 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { mockCourses } from '../data/mockData';
 import EmptyState from '../components/EmptyState';
 import { useState, useEffect } from 'react';
 import OnboardingCard from '../components/OnboardingCard';

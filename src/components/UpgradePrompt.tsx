@@ -1,6 +1,7 @@
 import { X, Crown, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 
 interface UpgradePromptProps {
   isOpen: boolean;
@@ -12,6 +13,18 @@ interface UpgradePromptProps {
 
 export default function UpgradePrompt({ isOpen, onClose, requiredPlan, message, feature }: UpgradePromptProps) {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
 
   const handleUpgrade = () => {
     onClose();
@@ -27,7 +40,7 @@ export default function UpgradePrompt({ isOpen, onClose, requiredPlan, message, 
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/70 backdrop-blur-md z-[9998] flex items-center justify-center p-4"
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-[99999] flex items-center justify-center p-4"
           >
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

@@ -1,4 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../lib/firebase';
 
 export type Role = 'student' | 'mentor' | 'governor';
 export type Plan = 'free' | 'pro' | 'vip';
@@ -51,21 +54,69 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [banners, setBanners] = useState<Banner[]>([]);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      setCurrentUser(JSON.parse(savedUser));
-    }
+    console.log('Setting up Firebase auth listener');
+
+    const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        console.log('User authenticated:', firebaseUser.uid);
+
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            console.log('User data updated from Firestore:', userData);
+
+            const updatedUser: User = {
+              uid: firebaseUser.uid,
+              email: userData.email || firebaseUser.email || '',
+              name: userData.name || 'User',
+              role: (userData.role || 'student') as Role,
+              plan: (userData.plan || 'free') as Plan,
+              country: userData.country || '',
+              bio: userData.bio || '',
+              expectations: userData.expectations || '',
+              photoURL: userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+              hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+              hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+              onboardingCompletedAt: userData.onboardingCompletedAt,
+              welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+              createdAt: userData.createdAt || new Date().toISOString(),
+              updatedAt: userData.updatedAt || new Date().toISOString(),
+              banned: userData.banned,
+              muted: userData.muted,
+            };
+
+            setCurrentUser(updatedUser);
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+          } else {
+            console.error('User document not found in Firestore');
+            setCurrentUser(null);
+            localStorage.removeItem('currentUser');
+          }
+        }, (error) => {
+          console.error('Error listening to user document:', error);
+        });
+
+        return () => {
+          console.log('Cleaning up Firestore listener');
+          unsubscribeFirestore();
+        };
+      } else {
+        console.log('User signed out');
+        setCurrentUser(null);
+        localStorage.removeItem('currentUser');
+      }
+    });
+
+    return () => {
+      console.log('Cleaning up auth listener');
+      unsubscribeAuth();
+    };
   }, []);
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem('currentUser');
-    }
-  }, [currentUser]);
-
   const logout = () => {
+    console.log('Logging out user');
+    auth.signOut();
     setCurrentUser(null);
     localStorage.removeItem('currentUser');
   };

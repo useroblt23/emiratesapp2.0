@@ -3,13 +3,15 @@ import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { db, storage } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
@@ -17,7 +19,7 @@ export default function ProfilePage() {
     email: currentUser?.email || '',
     country: currentUser?.country || '',
     bio: currentUser?.bio || '',
-    photo_base64: currentUser?.photoURL || '',
+    photoURL: currentUser?.photoURL || '',
   });
 
   if (!currentUser) return null;
@@ -33,9 +35,8 @@ export default function ProfilePage() {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result as string;
-      setPhotoPreview(base64String);
-      setFormData({ ...formData, photo_base64: base64String });
+      setPhotoPreview(reader.result as string);
+      setSelectedFile(file);
     };
     reader.readAsDataURL(file);
   };
@@ -45,12 +46,21 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
+      let photoURL = formData.photoURL;
+      
+      // Upload new photo to Firebase Storage if a file was selected
+      if (selectedFile) {
+        const storageRef = ref(storage, `profile-photos/${currentUser.uid}/${Date.now()}-${selectedFile.name}`);
+        const snapshot = await uploadBytes(storageRef, selectedFile);
+        photoURL = await getDownloadURL(snapshot.ref);
+      }
+
       const userDocRef = doc(db, 'users', currentUser.uid);
       await updateDoc(userDocRef, {
         name: formData.name,
         country: formData.country,
         bio: formData.bio,
-        photoURL: formData.photo_base64,
+        photoURL: photoURL,
         updatedAt: new Date().toISOString(),
       });
 
@@ -59,11 +69,12 @@ export default function ProfilePage() {
         name: formData.name,
         country: formData.country,
         bio: formData.bio,
-        photoURL: formData.photo_base64,
+        photoURL: photoURL,
       });
 
       setIsEditing(false);
       setPhotoPreview(null);
+      setSelectedFile(null);
     } catch (error) {
       console.error('Error updating profile:', error);
       alert('Failed to update profile. Please try again.');
@@ -72,7 +83,7 @@ export default function ProfilePage() {
     }
   };
 
-  const displayPhoto = photoPreview || formData.photo_base64 || currentUser.photoURL;
+  const displayPhoto = photoPreview || formData.photoURL || currentUser.photoURL;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -182,12 +193,13 @@ export default function ProfilePage() {
                     onClick={() => {
                       setIsEditing(false);
                       setPhotoPreview(null);
+                      setSelectedFile(null);
                       setFormData({
                         name: currentUser.name,
                         email: currentUser.email,
                         country: currentUser.country,
                         bio: currentUser.bio,
-                        photo_base64: currentUser.photoURL,
+                        photoURL: currentUser.photoURL,
                       });
                     }}
                     className="px-4 py-2 bg-gray-200 text-gray-900 rounded-xl font-bold hover:bg-gray-300 transition"

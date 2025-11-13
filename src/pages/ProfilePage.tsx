@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();

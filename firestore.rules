@@ -95,6 +95,37 @@ service cloud.firestore {
     }
 
     ///////////////////////////////////////////////////////////////////////////
+    // 🎯 OPEN DAY SIMULATIONS
+    ///////////////////////////////////////////////////////////////////////////
+    match /open_day_simulations/{simulationId} {
+      // Users can only access their own simulations
+      allow read, update, delete: if request.auth != null &&
+        resource.data.user_id == request.auth.uid;
+      
+      // Users can create simulations for themselves
+      allow create: if request.auth != null &&
+        request.resource.data.user_id == request.auth.uid;
+
+      // Governors can view any simulation
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
+    }
+
+    match /open_day_answers/{answerId} {
+      // Users can only access their own answers
+      allow read, delete: if request.auth != null &&
+        resource.data.user_id == request.auth.uid;
+      
+      // Users can create answers for themselves
+      allow create: if request.auth != null &&
+        request.resource.data.user_id == request.auth.uid;
+
+      // Governors can view any answers
+      allow read: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // ✈️ RECRUITERS & OPEN DAYS
     ///////////////////////////////////////////////////////////////////////////
     match /recruiters/{recruiterId} {

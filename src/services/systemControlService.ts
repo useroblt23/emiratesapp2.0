@@ -32,10 +32,54 @@ export const getSystemControl = async (): Promise<SystemControl | null> => {
       .eq('id', 'status')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      // If no rows found (PGRST116), create default entry
+      if (error.code === 'PGRST116') {
+        console.log('No system control entry found, creating default...');
+        return await createDefaultSystemControl();
+      }
+      throw error;
+    }
     return data;
   } catch (error) {
     console.error('Error fetching system control:', error);
+    return null;
+  }
+};
+
+const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
+  try {
+    const defaultControl = {
+      id: 'status',
+      features: {
+        chat: true,
+        quiz: true,
+        englishTest: true,
+        profileEdit: true,
+        openDayModule: true,
+      },
+      announcement: {
+        active: false,
+        message: '',
+        type: 'info' as const,
+        timestamp: null,
+      },
+      updated_by: null,
+      updated_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+
+    const { data, error } = await supabase
+      .from('system_control')
+      .insert(defaultControl)
+      .select()
+      .single();
+
+    if (error) throw error;
+    console.log('Default system control created successfully');
+    return data;
+  } catch (error) {
+    console.error('Error creating default system control:', error);
     return null;
   }
 };

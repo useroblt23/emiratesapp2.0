@@ -68,7 +68,7 @@ export default function CourseViewerPage() {
       videoId = videoId.trim();
 
       if (videoId && videoId.length === 11) {
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=0&rel=0&modestbranding=1`;
+        const embedUrl = `https://www.youtube.com/embed/${videoId}`;
         console.log('Embed URL:', embedUrl);
         return embedUrl;
       } else {

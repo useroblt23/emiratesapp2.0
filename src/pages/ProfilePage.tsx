@@ -2,7 +2,8 @@ import { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Camera, MapPin, Mail, Shield, Save, Upload } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { supabase } from '../lib/supabase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
@@ -44,18 +45,14 @@ export default function ProfilePage() {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('users')
-        .update({
-          name: formData.name,
-          country: formData.country,
-          bio: formData.bio,
-          photo_base64: formData.photo_base64,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', currentUser.uid);
-
-      if (error) throw error;
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        name: formData.name,
+        country: formData.country,
+        bio: formData.bio,
+        photoURL: formData.photo_base64,
+        updatedAt: new Date().toISOString(),
+      });
 
       setCurrentUser({
         ...currentUser,

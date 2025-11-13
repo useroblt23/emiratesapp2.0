@@ -153,15 +153,18 @@ export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
     const coursesRef = collection(db, 'courses');
     const q = query(
       coursesRef,
-      where('coach_id', '==', coachId),
-      orderBy('created_at', 'desc')
+      where('coach_id', '==', coachId)
     );
 
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    const courses = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Course[];
+
+    return courses.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   } catch (error) {
     console.error('Error fetching courses:', error);
     return [];
@@ -171,13 +174,16 @@ export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
 export const getAllCourses = async (): Promise<Course[]> => {
   try {
     const coursesRef = collection(db, 'courses');
-    const q = query(coursesRef, orderBy('created_at', 'desc'));
+    const querySnapshot = await getDocs(coursesRef);
 
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
+    const courses = querySnapshot.docs.map(doc => ({
       id: doc.id,
       ...doc.data()
     })) as Course[];
+
+    return courses.sort((a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   } catch (error) {
     console.error('Error fetching all courses:', error);
     return [];

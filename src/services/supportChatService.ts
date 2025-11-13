@@ -50,8 +50,12 @@ export const createSupportTicket = async (
   initialMessage: string
 ): Promise<string> => {
   try {
+    console.log('Creating support ticket with data:', { userId, userName, userEmail, subject });
+
     const ticketRef = doc(collection(db, 'supportTickets'));
     const ticketId = ticketRef.id;
+
+    console.log('Generated ticket ID:', ticketId);
 
     const ticketData: Omit<SupportTicket, 'id'> = {
       userId,
@@ -67,8 +71,11 @@ export const createSupportTicket = async (
       unreadByGovernor: 1,
     };
 
+    console.log('Writing ticket to Firestore...');
     await setDoc(ticketRef, ticketData);
+    console.log('Ticket created successfully');
 
+    console.log('Adding initial message...');
     await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
       ticketId,
       senderId: userId,
@@ -78,10 +85,13 @@ export const createSupportTicket = async (
       timestamp: serverTimestamp(),
       read: false,
     });
+    console.log('Initial message added successfully');
 
     return ticketId;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating support ticket:', error);
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
     throw error;
   }
 };

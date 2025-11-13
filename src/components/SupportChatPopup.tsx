@@ -46,8 +46,12 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
   }, [ticket?.id]);
 
   const handleCreateTicket = async () => {
-    if (!currentUser || !subject.trim() || !newMessage.trim()) return;
+    if (!currentUser || !subject.trim() || !newMessage.trim()) {
+      console.log('Validation failed:', { currentUser, subject: subject.trim(), message: newMessage.trim() });
+      return;
+    }
 
+    console.log('Creating support ticket...');
     setSending(true);
     try {
       const ticketId = await createSupportTicket(
@@ -57,6 +61,8 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
         subject,
         newMessage
       );
+
+      console.log('Ticket created with ID:', ticketId);
 
       setTicket({
         id: ticketId,
@@ -75,8 +81,9 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
 
       setSubject('');
       setNewMessage('');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating ticket:', error);
+      alert(`Failed to create support ticket: ${error.message || 'Unknown error'}`);
     } finally {
       setSending(false);
     }

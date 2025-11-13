@@ -3,6 +3,16 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     ///////////////////////////////////////////////////////////////////////////
+    // 👑 GOVERNOR GLOBAL ACCESS - Must be first for precedence
+    ///////////////////////////////////////////////////////////////////////////
+    match /{document=**} {
+      // Governors have full read access to everything
+      allow read: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
     // 🧍 USERS
     ///////////////////////////////////////////////////////////////////////////
     match /users/{userId} {
@@ -12,8 +22,9 @@ service cloud.firestore {
       // Users can only create their own profile document
       allow create: if request.auth != null && request.auth.uid == userId;
       
-      // Governors can read and update any user's document
-      allow read, update: if request.auth != null &&
+      // Governors can update any user's document (read covered by global rule)
+      allow update: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
       
       // No one can delete user documents
@@ -38,12 +49,14 @@ service cloud.firestore {
 
       // Mentors and governors can create or update courses
       allow create, update: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ["mentor", "governor"];
 
       // Only course owner or governor can delete
       allow delete: if request.auth != null &&
         (resource.data.mentorId == request.auth.uid ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor");
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor"));
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -60,6 +73,7 @@ service cloud.firestore {
 
       // No deletes except governor
       allow delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
 
       // MESSAGES subcollection
@@ -81,6 +95,7 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.senderId == request.auth.uid;
       allow delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -93,8 +108,9 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.userId == request.auth.uid;
 
-      // Governors can view any session
-      allow read: if request.auth != null &&
+      // Governors can manage any session (read covered by global rule)
+      allow create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -110,8 +126,9 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.user_id == request.auth.uid;
 
-      // Governors can view any simulation
-      allow read: if request.auth != null &&
+      // Governors can manage any simulation (read covered by global rule)
+      allow create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -124,8 +141,9 @@ service cloud.firestore {
       allow create: if request.auth != null &&
         request.resource.data.user_id == request.auth.uid;
 
-      // Governors can view any answers
-      allow read: if request.auth != null &&
+      // Governors can manage any answers (read covered by global rule)
+      allow create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -135,12 +153,15 @@ service cloud.firestore {
     match /open_days/{openDayId} {
       // Users with pro/vip plans and governors can read open days
       allow read: if request.auth != null && (
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan in ["pro", "vip"] ||
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor"
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor")
       );
       
       // Only governors can create, update, or delete open days
       allow create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -148,6 +169,7 @@ service cloud.firestore {
       allow read: if request.auth != null;
       // Only governor can create/update/delete
       allow create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -159,8 +181,10 @@ service cloud.firestore {
         request.resource.data.userId == request.auth.uid;
       allow read, update: if request.auth != null &&
         (resource.data.userId == request.auth.uid ||
-         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor");
+         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor"));
       allow delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -169,6 +193,7 @@ service cloud.firestore {
     ///////////////////////////////////////////////////////////////////////////
     match /metrics/{metricId} {
       allow read, create, update, delete: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 
@@ -178,6 +203,7 @@ service cloud.firestore {
     match /settings/{settingId} {
       allow read: if request.auth != null;
       allow write: if request.auth != null &&
+        exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
   }

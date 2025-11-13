@@ -9,6 +9,7 @@ import MessagesPage from './pages/MessagesPage';
 import ChatPage from './pages/ChatPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';
+import SupportChatManagerPage from './pages/SupportChatManagerPage';
 import CoachDashboard from './pages/CoachDashboard';
 import GovernorControlNexus from './pages/governor/GovernorControlNexus';
 import PlaceholderPage from './pages/PlaceholderPage';
@@ -76,6 +77,10 @@ function AppContent() {
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <Route path="/coach-dashboard" element={<CoachDashboard />} />
+        )}
+
+        {currentUser.role !== 'student' && (
+          <Route path="/support-manager" element={<SupportChatManagerPage />} />
         )}
 
         {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (

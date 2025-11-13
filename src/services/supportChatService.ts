@@ -15,6 +15,9 @@ import {
   Timestamp
 } from 'firebase/firestore';
 
+export type Department = 'general' | 'technical' | 'billing' | 'courses' | 'recruitment' | 'other';
+export type Topic = 'account' | 'payment' | 'course_access' | 'bug_report' | 'feature_request' | 'complaint' | 'other';
+
 export interface SupportTicket {
   id: string;
   userId: string;
@@ -23,12 +26,19 @@ export interface SupportTicket {
   status: 'open' | 'in_progress' | 'resolved' | 'closed';
   priority: 'low' | 'medium' | 'high';
   subject: string;
+  department: Department;
+  topic: Topic;
   createdAt: any;
   updatedAt: any;
   lastMessageAt: any;
   assignedTo?: string;
+  assignedToName?: string;
+  assignedToRole?: string;
   unreadByUser: number;
-  unreadByGovernor: number;
+  unreadByStaff: number;
+  escalatedTo?: string;
+  escalatedToName?: string;
+  participants: Array<{ id: string; name: string; role: string; joinedAt: any }>;
 }
 
 export interface SupportMessage {
@@ -36,10 +46,11 @@ export interface SupportMessage {
   ticketId: string;
   senderId: string;
   senderName: string;
-  senderRole: 'user' | 'governor';
+  senderRole: string;
   message: string;
   timestamp: any;
   read: boolean;
+  isSystemMessage?: boolean;
 }
 
 export const createSupportTicket = async (
@@ -47,7 +58,9 @@ export const createSupportTicket = async (
   userName: string,
   userEmail: string,
   subject: string,
-  initialMessage: string
+  initialMessage: string,
+  department: Department,
+  topic: Topic
 ): Promise<string> => {
   try {
     console.log('Creating support ticket with data:', { userId, userName, userEmail, subject });
@@ -64,11 +77,14 @@ export const createSupportTicket = async (
       status: 'open',
       priority: 'medium',
       subject,
+      department,
+      topic,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
       lastMessageAt: serverTimestamp(),
       unreadByUser: 0,
-      unreadByGovernor: 1,
+      unreadByStaff: 1,
+      participants: [{ id: userId, name: userName, role: 'student', joinedAt: serverTimestamp() }],
     };
 
     console.log('Writing ticket to Firestore...');
@@ -174,6 +190,99 @@ export const getUserSupportTickets = async (userId: string): Promise<SupportTick
   } catch (error) {
     console.error('Error fetching user support tickets:', error);
     return [];
+  }
+};
+
+export const escalateTicket = async (
+  ticketId: string,
+  escalatedToId: string,
+  escalatedToName: string,
+  escalatedToRole: string,
+  escalatedById: string,
+  escalatedByName: string
+): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'supportTickets', ticketId), {
+      escalatedTo: escalatedToId,
+      escalatedToName,
+      status: 'in_progress',
+      updatedAt: serverTimestamp(),
+    });
+
+    await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
+      ticketId,
+      senderId: 'system',
+      senderName: 'System',
+      senderRole: 'system',
+      message: `${escalatedByName} escalated this ticket to ${escalatedToName} (${escalatedToRole})`,
+      timestamp: serverTimestamp(),
+      read: false,
+      isSystemMessage: true,
+    });
+
+    const ticketDoc = await getDoc(doc(db, 'supportTickets', ticketId));
+    if (ticketDoc.exists()) {
+      const currentParticipants = ticketDoc.data().participants || [];
+      const alreadyParticipant = currentParticipants.some((p: any) => p.id === escalatedToId);
+
+      if (!alreadyParticipant) {
+        await updateDoc(doc(db, 'supportTickets', ticketId), {
+          participants: [
+            ...currentParticipants,
+            { id: escalatedToId, name: escalatedToName, role: escalatedToRole, joinedAt: serverTimestamp() }
+          ],
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error escalating ticket:', error);
+    throw error;
+  }
+};
+
+export const assignTicket = async (
+  ticketId: string,
+  assignedToId: string,
+  assignedToName: string,
+  assignedToRole: string
+): Promise<void> => {
+  try {
+    await updateDoc(doc(db, 'supportTickets', ticketId), {
+      assignedTo: assignedToId,
+      assignedToName,
+      assignedToRole,
+      status: 'in_progress',
+      updatedAt: serverTimestamp(),
+    });
+
+    await addDoc(collection(db, 'supportTickets', ticketId, 'messages'), {
+      ticketId,
+      senderId: 'system',
+      senderName: 'System',
+      senderRole: 'system',
+      message: `${assignedToName} (${assignedToRole}) has joined the conversation`,
+      timestamp: serverTimestamp(),
+      read: false,
+      isSystemMessage: true,
+    });
+
+    const ticketDoc = await getDoc(doc(db, 'supportTickets', ticketId));
+    if (ticketDoc.exists()) {
+      const currentParticipants = ticketDoc.data().participants || [];
+      const alreadyParticipant = currentParticipants.some((p: any) => p.id === assignedToId);
+
+      if (!alreadyParticipant) {
+        await updateDoc(doc(db, 'supportTickets', ticketId), {
+          participants: [
+            ...currentParticipants,
+            { id: assignedToId, name: assignedToName, role: assignedToRole, joinedAt: serverTimestamp() }
+          ],
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error assigning ticket:', error);
+    throw error;
   }
 };
 

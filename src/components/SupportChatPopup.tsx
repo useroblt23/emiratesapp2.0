@@ -1,14 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, MessageCircle, CheckCircle, Clock, AlertCircle, Minus } from 'lucide-react';
+import { X, Send, MessageCircle, CheckCircle, Clock, AlertCircle, Minus, AlertTriangle } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import {
   createSupportTicket,
   sendSupportMessage,
   subscribeToTicketMessages,
   markMessagesAsRead,
+  escalateTicket,
   SupportMessage,
-  SupportTicket
+  SupportTicket,
+  Department,
+  Topic
 } from '../services/supportChatService';
 
 interface SupportChatPopupProps {
@@ -22,9 +25,12 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
   const [messages, setMessages] = useState<SupportMessage[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [subject, setSubject] = useState('');
+  const [department, setDepartment] = useState<Department>('general');
+  const [topic, setTopic] = useState<Topic>('other');
   const [sending, setSending] = useState(false);
   const [ticket, setTicket] = useState<SupportTicket | null>(existingTicket || null);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [showEscalateConfirm, setShowEscalateConfirm] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -60,7 +66,9 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
         currentUser.name,
         currentUser.email,
         subject,
-        newMessage
+        newMessage,
+        department,
+        topic
       );
 
       console.log('Ticket created with ID:', ticketId);
@@ -73,18 +81,46 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
         status: 'open',
         priority: 'medium',
         subject,
+        department,
+        topic,
         createdAt: new Date(),
         updatedAt: new Date(),
         lastMessageAt: new Date(),
         unreadByUser: 0,
-        unreadByGovernor: 1,
+        unreadByStaff: 1,
+        participants: [{ id: currentUser.uid, name: currentUser.name, role: currentUser.role, joinedAt: new Date() }],
       });
 
       setSubject('');
       setNewMessage('');
+      setDepartment('general');
+      setTopic('other');
     } catch (error: any) {
       console.error('Error creating ticket:', error);
       alert(`Failed to create support ticket: ${error.message || 'Unknown error'}`);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleEscalate = async () => {
+    if (!currentUser || !ticket) return;
+
+    try {
+      setSending(true);
+      await escalateTicket(
+        ticket.id,
+        'governor_id',
+        'Governor',
+        'governor',
+        currentUser.uid,
+        currentUser.name
+      );
+      setShowEscalateConfirm(false);
+      alert('Ticket escalated to Governor successfully');
+    } catch (error: any) {
+      console.error('Error escalating ticket:', error);
+      alert(`Failed to escalate ticket: ${error.message || 'Unknown error'}`);
     } finally {
       setSending(false);
     }
@@ -202,6 +238,41 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Department
+                    </label>
+                    <select
+                      value={department}
+                      onChange={(e) => setDepartment(e.target.value as Department)}
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                    >
+                      <option value="general">General Support</option>
+                      <option value="technical">Technical Support</option>
+                      <option value="billing">Billing & Payments</option>
+                      <option value="courses">Course Support</option>
+                      <option value="recruitment">Recruitment</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
+                      Topic
+                    </label>
+                    <select
+                      value={topic}
+                      onChange={(e) => setTopic(e.target.value as Topic)}
+                      className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition"
+                    >
+                      <option value="account">Account Issues</option>
+                      <option value="payment">Payment Issues</option>
+                      <option value="course_access">Course Access</option>
+                      <option value="bug_report">Bug Report</option>
+                      <option value="feature_request">Feature Request</option>
+                      <option value="complaint">Complaint</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">
                       Subject
                     </label>
                     <input
@@ -220,7 +291,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder="Describe your issue..."
-                      rows={8}
+                      rows={6}
                       className="w-full px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition resize-none"
                     />
                   </div>
@@ -237,7 +308,19 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
               <>
                 <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-3">
                   {messages.map((message) => {
-                    const isUser = message.senderRole === 'user';
+                    const isUser = message.senderRole === 'student';
+                    const isSystemMessage = message.isSystemMessage || message.senderRole === 'system';
+
+                    if (isSystemMessage) {
+                      return (
+                        <div key={message.id} className="flex justify-center my-4">
+                          <div className="bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-xs font-bold">
+                            {message.message}
+                          </div>
+                        </div>
+                      );
+                    }
+
                     return (
                       <div
                         key={message.id}
@@ -267,7 +350,16 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                   <div ref={messagesEndRef} />
                 </div>
 
-                <div className="p-4 bg-white border-t border-gray-200">
+                <div className="p-4 bg-white border-t border-gray-200 space-y-2">
+                  {currentUser?.role !== 'student' && ticket && !ticket.escalatedTo && (
+                    <button
+                      onClick={() => setShowEscalateConfirm(true)}
+                      className="w-full px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold flex items-center justify-center gap-2 transition"
+                    >
+                      <AlertTriangle className="w-4 h-4" />
+                      Escalate to Governor
+                    </button>
+                  )}
                   <div className="flex gap-2">
                     <input
                       type="text"
@@ -289,6 +381,48 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
               </>
             ) : null}
           </motion.div>
+
+          {showEscalateConfirm && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[60] flex items-center justify-center"
+              onClick={() => setShowEscalateConfirm(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="bg-white rounded-2xl p-6 max-w-md mx-4 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Escalate Ticket</h3>
+                </div>
+                <p className="text-gray-600 mb-6">
+                  Are you sure you want to escalate this ticket to the Governor? This will notify the Governor and add them to the conversation.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowEscalateConfirm(false)}
+                    className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-lg font-bold text-gray-700 hover:bg-gray-50 transition"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleEscalate}
+                    disabled={sending}
+                    className="flex-1 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-bold transition disabled:opacity-50"
+                  >
+                    {sending ? 'Escalating...' : 'Escalate'}
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
         </>
       )}
     </AnimatePresence>

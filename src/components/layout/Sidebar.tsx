@@ -80,7 +80,8 @@ export default function Sidebar() {
       },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
-      { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null }
+      { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },
+      ...(currentUser.role !== 'student' ? [{ path: '/support-manager', icon: MessageCircle, label: 'Support Manager', feature: null }] : [])
     ];
 
     return baseLinks;

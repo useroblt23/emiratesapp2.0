@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, Timestamp } from 'firebase/firestore';
 
 export interface OpenDay {
   id?: string;
@@ -14,13 +15,14 @@ export interface OpenDay {
 
 export async function getAllOpenDays(): Promise<OpenDay[]> {
   try {
-    const { data, error } = await supabase
-      .from('open_days')
-      .select('*')
-      .order('date', { ascending: true });
+    const openDaysRef = collection(db, 'open_days');
+    const q = query(openDaysRef, orderBy('date', 'asc'));
+    const querySnapshot = await getDocs(q);
 
-    if (error) throw error;
-    return data || [];
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as OpenDay[];
   } catch (error) {
     console.error('Error fetching open days:', error);
     return [];
@@ -29,18 +31,19 @@ export async function getAllOpenDays(): Promise<OpenDay[]> {
 
 export async function createOpenDay(openDay: OpenDay, userId: string): Promise<OpenDay | null> {
   try {
-    const { data, error } = await supabase
-      .from('open_days')
-      .insert({
-        ...openDay,
-        created_by: userId,
-        last_updated: new Date().toISOString()
-      })
-      .select()
-      .single();
+    const openDaysRef = collection(db, 'open_days');
+    const docRef = await addDoc(openDaysRef, {
+      ...openDay,
+      created_by: userId,
+      created_at: Timestamp.now(),
+      last_updated: Timestamp.now()
+    });
 
-    if (error) throw error;
-    return data;
+    return {
+      id: docRef.id,
+      ...openDay,
+      created_by: userId
+    };
   } catch (error) {
     console.error('Error creating open day:', error);
     return null;
@@ -49,15 +52,11 @@ export async function createOpenDay(openDay: OpenDay, userId: string): Promise<O
 
 export async function updateOpenDay(id: string, updates: Partial<OpenDay>): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('open_days')
-      .update({
-        ...updates,
-        last_updated: new Date().toISOString()
-      })
-      .eq('id', id);
-
-    if (error) throw error;
+    const openDayRef = doc(db, 'open_days', id);
+    await updateDoc(openDayRef, {
+      ...updates,
+      last_updated: Timestamp.now()
+    });
     return true;
   } catch (error) {
     console.error('Error updating open day:', error);
@@ -67,12 +66,8 @@ export async function updateOpenDay(id: string, updates: Partial<OpenDay>): Prom
 
 export async function deleteOpenDay(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('open_days')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    const openDayRef = doc(db, 'open_days', id);
+    await deleteDoc(openDayRef);
     return true;
   } catch (error) {
     console.error('Error deleting open day:', error);

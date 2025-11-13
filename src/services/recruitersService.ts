@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { collection, doc, getDocs, addDoc, updateDoc, deleteDoc, query, orderBy, Timestamp } from 'firebase/firestore';
 
 export interface Recruiter {
   id?: string;
@@ -13,13 +14,14 @@ export interface Recruiter {
 
 export async function getAllRecruiters(): Promise<Recruiter[]> {
   try {
-    const { data, error } = await supabase
-      .from('recruiters')
-      .select('*')
-      .order('last_updated', { ascending: false });
+    const recruitersRef = collection(db, 'recruiters');
+    const q = query(recruitersRef, orderBy('last_updated', 'desc'));
+    const querySnapshot = await getDocs(q);
 
-    if (error) throw error;
-    return data || [];
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Recruiter[];
   } catch (error) {
     console.error('Error fetching recruiters:', error);
     return [];
@@ -28,18 +30,19 @@ export async function getAllRecruiters(): Promise<Recruiter[]> {
 
 export async function createRecruiter(recruiter: Recruiter, userId: string): Promise<Recruiter | null> {
   try {
-    const { data, error } = await supabase
-      .from('recruiters')
-      .insert({
-        ...recruiter,
-        created_by: userId,
-        last_updated: new Date().toISOString()
-      })
-      .select()
-      .single();
+    const recruitersRef = collection(db, 'recruiters');
+    const docRef = await addDoc(recruitersRef, {
+      ...recruiter,
+      created_by: userId,
+      created_at: Timestamp.now(),
+      last_updated: Timestamp.now()
+    });
 
-    if (error) throw error;
-    return data;
+    return {
+      id: docRef.id,
+      ...recruiter,
+      created_by: userId
+    };
   } catch (error) {
     console.error('Error creating recruiter:', error);
     return null;
@@ -48,15 +51,11 @@ export async function createRecruiter(recruiter: Recruiter, userId: string): Pro
 
 export async function updateRecruiter(id: string, updates: Partial<Recruiter>): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('recruiters')
-      .update({
-        ...updates,
-        last_updated: new Date().toISOString()
-      })
-      .eq('id', id);
-
-    if (error) throw error;
+    const recruiterRef = doc(db, 'recruiters', id);
+    await updateDoc(recruiterRef, {
+      ...updates,
+      last_updated: Timestamp.now()
+    });
     return true;
   } catch (error) {
     console.error('Error updating recruiter:', error);
@@ -66,12 +65,8 @@ export async function updateRecruiter(id: string, updates: Partial<Recruiter>): 
 
 export async function deleteRecruiter(id: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('recruiters')
-      .delete()
-      .eq('id', id);
-
-    if (error) throw error;
+    const recruiterRef = doc(db, 'recruiters', id);
+    await deleteDoc(recruiterRef);
     return true;
   } catch (error) {
     console.error('Error deleting recruiter:', error);

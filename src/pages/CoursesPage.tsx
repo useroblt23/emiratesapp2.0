@@ -4,7 +4,8 @@ import { Course } from '../data/coursesData';
 import { BookOpen, Clock, BarChart3, Lock, Crown, Zap } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion } from 'framer-motion';
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { collection, query, orderBy, getDocs } from 'firebase/firestore';
 
 export default function CoursesPage() {
   const { currentUser } = useApp();
@@ -21,13 +22,16 @@ export default function CoursesPage() {
 
   const fetchCourses = async () => {
     try {
-      const { data, error } = await supabase
-        .from('courses')
-        .select('*')
-        .order('created_at', { ascending: false });
+      const coursesRef = collection(db, 'courses');
+      const q = query(coursesRef, orderBy('created_at', 'desc'));
+      const querySnapshot = await getDocs(q);
 
-      if (error) throw error;
-      setCourses(data || []);
+      const coursesData = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Course[];
+
+      setCourses(coursesData);
     } catch (error) {
       console.error('Error fetching courses:', error);
       setCourses([]);

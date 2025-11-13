@@ -1,4 +1,5 @@
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import { collection, doc, getDoc, setDoc, updateDoc, deleteDoc, query, where, getDocs, orderBy, addDoc, Timestamp } from 'firebase/firestore';
 
 export interface SimulationData {
   id?: string;
@@ -23,33 +24,38 @@ export interface AnswerData {
 
 export async function getOrCreateSimulation(userId: string): Promise<SimulationData | null> {
   try {
-    const { data: existing, error: fetchError } = await supabase
-      .from('open_day_simulations')
-      .select('*')
-      .eq('user_id', userId)
-      .maybeSingle();
+    const simulationsRef = collection(db, 'open_day_simulations');
+    const q = query(simulationsRef, where('user_id', '==', userId));
+    const querySnapshot = await getDocs(q);
 
-    if (fetchError) throw fetchError;
-
-    if (existing) {
-      return existing;
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      return {
+        id: doc.id,
+        ...doc.data()
+      } as SimulationData;
     }
 
-    const { data: newSim, error: createError } = await supabase
-      .from('open_day_simulations')
-      .insert({
-        user_id: userId,
-        current_phase: 1,
-        quiz_score: 0,
-        english_score: 0,
-        completed: false
-      })
-      .select()
-      .single();
+    const newSimDoc = await addDoc(simulationsRef, {
+      user_id: userId,
+      current_phase: 1,
+      quiz_score: 0,
+      english_score: 0,
+      completed: false,
+      started_at: Timestamp.now(),
+      last_updated: Timestamp.now()
+    });
 
-    if (createError) throw createError;
-
-    return newSim;
+    return {
+      id: newSimDoc.id,
+      user_id: userId,
+      current_phase: 1,
+      quiz_score: 0,
+      english_score: 0,
+      completed: false,
+      started_at: new Date().toISOString(),
+      last_updated: new Date().toISOString()
+    };
   } catch (error) {
     console.error('Error in getOrCreateSimulation:', error);
     return null;
@@ -61,15 +67,11 @@ export async function updateSimulation(
   updates: Partial<SimulationData>
 ): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('open_day_simulations')
-      .update({
-        ...updates,
-        last_updated: new Date().toISOString()
-      })
-      .eq('id', simulationId);
-
-    if (error) throw error;
+    const simRef = doc(db, 'open_day_simulations', simulationId);
+    await updateDoc(simRef, {
+      ...updates,
+      last_updated: Timestamp.now()
+    });
     return true;
   } catch (error) {
     console.error('Error updating simulation:', error);
@@ -79,11 +81,14 @@ export async function updateSimulation(
 
 export async function saveAnswers(answers: AnswerData[]): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('open_day_answers')
-      .insert(answers);
-
-    if (error) throw error;
+    const answersRef = collection(db, 'open_day_answers');
+    const promises = answers.map(answer =>
+      addDoc(answersRef, {
+        ...answer,
+        created_at: Timestamp.now()
+      })
+    );
+    await Promise.all(promises);
     return true;
   } catch (error) {
     console.error('Error saving answers:', error);
@@ -93,12 +98,14 @@ export async function saveAnswers(answers: AnswerData[]): Promise<boolean> {
 
 export async function deleteSimulation(userId: string): Promise<boolean> {
   try {
-    const { error } = await supabase
-      .from('open_day_simulations')
-      .delete()
-      .eq('user_id', userId);
+    const simulationsRef = collection(db, 'open_day_simulations');
+    const q = query(simulationsRef, where('user_id', '==', userId));
+    const querySnapshot = await getDocs(q);
 
-    if (error) throw error;
+    const deletePromises = querySnapshot.docs.map(document =>
+      deleteDoc(doc(db, 'open_day_simulations', document.id))
+    );
+    await Promise.all(deletePromises);
     return true;
   } catch (error) {
     console.error('Error deleting simulation:', error);
@@ -108,13 +115,14 @@ export async function deleteSimulation(userId: string): Promise<boolean> {
 
 export async function getAllSimulations(): Promise<SimulationData[]> {
   try {
-    const { data, error } = await supabase
-      .from('open_day_simulations')
-      .select('*')
-      .order('last_updated', { ascending: false });
+    const simulationsRef = collection(db, 'open_day_simulations');
+    const q = query(simulationsRef, orderBy('last_updated', 'desc'));
+    const querySnapshot = await getDocs(q);
 
-    if (error) throw error;
-    return data || [];
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as SimulationData[];
   } catch (error) {
     console.error('Error fetching all simulations:', error);
     return [];

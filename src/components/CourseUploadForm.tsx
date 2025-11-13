@@ -13,6 +13,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState('');
 
   const [videoUrl, setVideoUrl] = useState('');
 
@@ -20,7 +21,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     title: '',
     description: '',
     instructor: '',
-    thumbnail: 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=400',
+    thumbnail: '',
     duration: '',
     level: 'beginner',
     plan: 'free',
@@ -48,6 +49,11 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     e.preventDefault();
     setError('');
 
+    if (!thumbnailUrl.trim()) {
+      setError('Please enter a thumbnail URL');
+      return;
+    }
+
     if (formData.content_type === 'pdf' && !pdfFile) {
       setError('Please select a PDF file to upload');
       return;
@@ -64,6 +70,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
       await createCourse(
         {
           ...formData,
+          thumbnail: thumbnailUrl,
           pdfFile: formData.content_type === 'pdf' ? pdfFile : undefined,
           video_url: formData.content_type === 'video' ? videoUrl : undefined,
         },
@@ -119,6 +126,35 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
               className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
               placeholder="Describe what students will learn..."
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-2">
+              Thumbnail Image URL *
+            </label>
+            <input
+              type="url"
+              value={thumbnailUrl}
+              onChange={(e) => setThumbnailUrl(e.target.value)}
+              required
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+              placeholder="https://example.com/image.jpg"
+            />
+            <p className="text-xs text-gray-500 mt-2">
+              Enter a URL for the course thumbnail image (e.g., from Pexels, Unsplash, or your own hosting)
+            </p>
+            {thumbnailUrl && (
+              <div className="mt-3 border-2 border-gray-200 rounded-xl overflow-hidden">
+                <img
+                  src={thumbnailUrl}
+                  alt="Thumbnail preview"
+                  className="w-full h-40 object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=400';
+                  }}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

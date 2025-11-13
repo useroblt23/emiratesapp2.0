@@ -30,16 +30,19 @@ export const getSystemControl = async (): Promise<SystemControl | null> => {
       .from('system_control')
       .select('*')
       .eq('id', 'status')
-      .single();
+      .maybeSingle();
 
     if (error) {
-      // If no rows found (PGRST116), create default entry
-      if (error.code === 'PGRST116') {
-        console.log('No system control entry found, creating default...');
-        return await createDefaultSystemControl();
-      }
-      throw error;
+      console.error('Error fetching system control:', error);
+      return null;
     }
+
+    // If no rows found, create default entry
+    if (!data) {
+      console.log('No system control entry found, creating default...');
+      return await createDefaultSystemControl();
+    }
+
     return data;
   } catch (error) {
     console.error('Error fetching system control:', error);
@@ -73,7 +76,7 @@ const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
       .from('system_control')
       .insert(defaultControl)
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     console.log('Default system control created successfully');
@@ -103,7 +106,7 @@ export const updateSystemControl = async (
       })
       .eq('id', 'status')
       .select()
-      .single();
+      .maybeSingle();
 
     if (error) throw error;
     return data;

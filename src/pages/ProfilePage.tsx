@@ -68,8 +68,6 @@ export default function ProfilePage() {
     }
   };
 
-  const displayPhoto = formData.photo_base64 || (currentUser as any)?.photo_base64 || currentUser.photoURL;
-
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="mb-8">

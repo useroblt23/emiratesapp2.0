@@ -128,6 +128,18 @@ service cloud.firestore {
     ///////////////////////////////////////////////////////////////////////////
     // ✈️ RECRUITERS & OPEN DAYS
     ///////////////////////////////////////////////////////////////////////////
+    match /open_days/{openDayId} {
+      // Users with pro/vip plans and governors can read open days
+      allow read: if request.auth != null && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan in ["pro", "vip"] ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor"
+      );
+      
+      // Only governors can create, update, or delete open days
+      allow create, update, delete: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
+    }
+
     match /recruiters/{recruiterId} {
       allow read: if request.auth != null;
       // Only governor can create/update/delete

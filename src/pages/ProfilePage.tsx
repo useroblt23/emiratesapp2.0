@@ -31,7 +31,7 @@ export default function ProfilePage() {
     }
 
     const reader = new FileReader();
-        photo_base64: (currentUser as any)?.photo_base64 || currentUser.photoURL,
+    reader.onload = () => {
       setFormData({ ...formData, photo_base64: reader.result as string });
     };
     reader.readAsDataURL(file);
@@ -67,6 +67,8 @@ export default function ProfilePage() {
       setSaving(false);
     }
   };
+
+  const displayPhoto = formData.photo_base64 || (currentUser as any)?.photo_base64 || currentUser.photoURL;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

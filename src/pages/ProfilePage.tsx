@@ -21,6 +21,8 @@ export default function ProfilePage() {
 
   if (!currentUser) return null;
 
+  const displayPhoto = formData.photo_base64 || currentUser.photoURL || '';
+
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -67,8 +69,6 @@ export default function ProfilePage() {
       setSaving(false);
     }
   };
-
-  const displayPhoto = formData.photo_base64 || (currentUser as any)?.photo_base64 || currentUser.photoURL;
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>

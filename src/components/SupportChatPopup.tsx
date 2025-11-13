@@ -122,6 +122,14 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
     );
   };
 
+  const handleClose = () => {
+    setTicket(null);
+    setMessages([]);
+    setNewMessage('');
+    setSubject('');
+    onClose();
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -131,13 +139,14 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
-            onClick={onClose}
+            onClick={handleClose}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             className="fixed bottom-4 right-4 w-96 h-[600px] bg-white rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
           >
             <div className="bg-gradient-to-r from-[#D71920] to-[#E6282C] text-white p-4 flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -154,7 +163,7 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
                 </div>
               </div>
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="p-2 hover:bg-white/10 rounded-lg transition"
               >
                 <X className="w-5 h-5" />

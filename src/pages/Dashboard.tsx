@@ -63,29 +63,36 @@ export default function Dashboard() {
     if (!currentUser) return;
 
     try {
-      // Load users count
-      const usersRef = collection(db, 'users');
-      const usersSnapshot = await getDocs(usersRef);
-      const totalUsers = usersSnapshot.size;
+      let totalUsers = 0;
+      let totalCourses = 0;
+      let activeSessions = 0;
+      let supportRequests = 0;
 
-      // Load courses count
-      const coursesRef = collection(db, 'courses');
-      const coursesSnapshot = await getDocs(coursesRef);
-      const totalCourses = coursesSnapshot.size;
+      if (currentUser.role === 'governor' || currentUser.role === 'mentor') {
+        // Load users count
+        const usersRef = collection(db, 'users');
+        const usersSnapshot = await getDocs(usersRef);
+        totalUsers = usersSnapshot.size;
 
-      // Load active simulations (as active sessions)
-      const simulationsRef = collection(db, 'open_day_simulations');
-      const activeSimsQuery = query(simulationsRef, where('completed', '==', false));
-      const activeSimsSnapshot = await getDocs(activeSimsQuery);
-      const activeSessions = activeSimsSnapshot.size;
+        // Load courses count
+        const coursesRef = collection(db, 'courses');
+        const coursesSnapshot = await getDocs(coursesRef);
+        totalCourses = coursesSnapshot.size;
 
-      // For now, set support requests to 0 (can be implemented later)
-      const supportRequests = 0;
+        // Load active simulations (as active sessions)
+        const simulationsRef = collection(db, 'open_day_simulations');
+        const activeSimsQuery = query(simulationsRef, where('completed', '==', false));
+        const activeSimsSnapshot = await getDocs(activeSimsQuery);
+        activeSessions = activeSimsSnapshot.size;
+      }
 
       // Role-specific data
       let roleSpecificData = {};
-      
+
       if (currentUser.role === 'mentor') {
+        const usersRef = collection(db, 'users');
+        const coursesRef = collection(db, 'courses');
+
         // Count students (for mentors)
         const studentsQuery = query(usersRef, where('role', '==', 'student'));
         const studentsSnapshot = await getDocs(studentsQuery);
@@ -99,10 +106,14 @@ export default function Dashboard() {
         roleSpecificData = {
           activeStudents,
           coursesCreated,
-          messages: 0 // Can be implemented later
+          messages: 0
         };
       } else if (currentUser.role === 'student') {
-        // For students, we can add enrollment tracking later
+        // For students, only load their own data
+        const simulationsRef = collection(db, 'open_day_simulations');
+        const userSimsQuery = query(simulationsRef, where('user_id', '==', currentUser.uid));
+        const userSimsSnapshot = await getDocs(userSimsQuery);
+
         roleSpecificData = {
           coursesEnrolled: 0,
           overallProgress: 0,

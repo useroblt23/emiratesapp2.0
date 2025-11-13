@@ -173,11 +173,9 @@ export default function CourseViewerPage() {
                 <iframe
                   src={getYouTubeEmbedUrl(course.video_url)}
                   className="w-full h-full"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                   title={course.title}
-                  frameBorder="0"
-                  loading="lazy"
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-white">

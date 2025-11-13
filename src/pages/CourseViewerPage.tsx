@@ -43,6 +43,14 @@ export default function CourseViewerPage() {
     return coursePlanLevel <= userPlanLevel;
   };
 
+  const getYouTubeEmbedUrl = (url: string) => {
+    const videoIdMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (videoIdMatch && videoIdMatch[1]) {
+      return `https://www.youtube.com/embed/${videoIdMatch[1]}`;
+    }
+    return url;
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -102,11 +110,11 @@ export default function CourseViewerPage() {
     );
   }
 
-  if (!course.pdf_url) {
+  if (!course.pdf_url && !course.video_url) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen">
         <h1 className="text-2xl font-bold text-gray-800 mb-4">No Content Available</h1>
-        <p className="text-gray-600 mb-6">This course doesn't have any PDF content yet.</p>
+        <p className="text-gray-600 mb-6">This course doesn't have any content yet.</p>
         <button
           onClick={() => navigate('/courses')}
           className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white rounded-xl font-bold hover:shadow-lg transition"
@@ -118,9 +126,53 @@ export default function CourseViewerPage() {
     );
   }
 
+  if (course.video_url) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="max-w-5xl mx-auto p-4 md:p-6">
+          <button
+            onClick={() => navigate('/courses')}
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 mb-4 transition"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Back to Courses
+          </button>
+
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+            <div className="aspect-video w-full bg-black">
+              <iframe
+                src={getYouTubeEmbedUrl(course.video_url)}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                title={course.title}
+              />
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
+            <p className="text-gray-600 mb-4">{course.description}</p>
+            <div className="flex flex-wrap gap-2 text-sm text-gray-500">
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.category}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.level}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 rounded-full">
+                {course.duration}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <PDFViewer
-      pdfUrl={course.pdf_url}
+      pdfUrl={course.pdf_url!}
       allowDownload={course.allow_download}
       onClose={() => navigate('/courses')}
     />

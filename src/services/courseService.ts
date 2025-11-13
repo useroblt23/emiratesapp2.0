@@ -27,6 +27,7 @@ export interface Course {
   coach_id: string;
   pdf_url?: string;
   pdf_path?: string;
+  video_url?: string;
   allow_download: boolean;
   content_type: 'pdf' | 'video' | 'text';
   created_at: string;
@@ -44,6 +45,7 @@ export interface CreateCourseData {
   category: 'grooming' | 'service' | 'safety' | 'interview' | 'language';
   lessons?: number;
   pdfFile?: File;
+  video_url?: string;
   allow_download: boolean;
   content_type: 'pdf' | 'video' | 'text';
 }
@@ -74,6 +76,7 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
       coach_id: coachId,
       pdf_url: pdfUrl,
       pdf_path: pdfPath,
+      video_url: data.video_url,
       allow_download: data.allow_download,
       content_type: data.content_type,
       created_at: new Date().toISOString(),

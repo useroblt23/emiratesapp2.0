@@ -14,6 +14,8 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
   const [error, setError] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
 
+  const [videoUrl, setVideoUrl] = useState('');
+
   const [formData, setFormData] = useState<CreateCourseData>({
     title: '',
     description: '',
@@ -46,8 +48,13 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     e.preventDefault();
     setError('');
 
-    if (!pdfFile) {
+    if (formData.content_type === 'pdf' && !pdfFile) {
       setError('Please select a PDF file to upload');
+      return;
+    }
+
+    if (formData.content_type === 'video' && !videoUrl) {
+      setError('Please enter a video URL');
       return;
     }
 
@@ -57,7 +64,8 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
       await createCourse(
         {
           ...formData,
-          pdfFile,
+          pdfFile: formData.content_type === 'pdf' ? pdfFile : undefined,
+          video_url: formData.content_type === 'video' ? videoUrl : undefined,
         },
         coachId
       );
@@ -194,31 +202,78 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              PDF File *
+              Content Type *
             </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#FF3B3F] transition">
-              <input
-                type="file"
-                accept=".pdf,application/pdf"
-                onChange={handlePDFUpload}
-                className="hidden"
-                id="pdf-upload"
-              />
-              <label htmlFor="pdf-upload" className="cursor-pointer">
-                <FileText className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                {pdfFile ? (
-                  <p className="text-sm font-medium text-gray-700">{pdfFile.name}</p>
-                ) : (
-                  <>
-                    <p className="text-sm font-medium text-gray-700 mb-1">
-                      Click to upload PDF
-                    </p>
-                    <p className="text-xs text-gray-500">Maximum file size: 50MB</p>
-                  </>
-                )}
-              </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, content_type: 'pdf' })}
+                className={`flex-1 py-3 px-4 rounded-xl font-bold transition ${
+                  formData.content_type === 'pdf'
+                    ? 'bg-[#FF3B3F] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                PDF Document
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, content_type: 'video' })}
+                className={`flex-1 py-3 px-4 rounded-xl font-bold transition ${
+                  formData.content_type === 'video'
+                    ? 'bg-[#FF3B3F] text-white'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                Video (YouTube)
+              </button>
             </div>
           </div>
+
+          {formData.content_type === 'pdf' ? (
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                PDF File *
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#FF3B3F] transition">
+                <input
+                  type="file"
+                  accept=".pdf,application/pdf"
+                  onChange={handlePDFUpload}
+                  className="hidden"
+                  id="pdf-upload"
+                />
+                <label htmlFor="pdf-upload" className="cursor-pointer">
+                  <FileText className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                  {pdfFile ? (
+                    <p className="text-sm font-medium text-gray-700">{pdfFile.name}</p>
+                  ) : (
+                    <>
+                      <p className="text-sm font-medium text-gray-700 mb-1">
+                        Click to upload PDF
+                      </p>
+                      <p className="text-xs text-gray-500">Maximum file size: 50MB</p>
+                    </>
+                  )}
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <label className="block text-sm font-bold text-gray-700 mb-2">
+                YouTube Video URL *
+              </label>
+              <input
+                type="url"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                required={formData.content_type === 'video'}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                placeholder="https://www.youtube.com/watch?v=..."
+              />
+              <p className="text-xs text-gray-500 mt-2">Paste a YouTube video URL. The video will play directly in the app.</p>
+            </div>
+          )}
 
           <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
             <label className="flex items-center gap-3 cursor-pointer">

@@ -18,7 +18,10 @@ import {
   Crown,
   Lock,
   Calendar,
-  UserCircle
+  UserCircle,
+  Terminal,
+  Megaphone,
+  Database
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -104,10 +107,14 @@ export default function Sidebar() {
   ];
 
   const governorLinks = [
+    { path: '/governor', icon: Shield, label: 'Control Center' },
+    { path: '/governor/commands', icon: Terminal, label: 'Commands' },
+    { path: '/governor/announcements', icon: Megaphone, label: 'Announcements' },
+    { path: '/governor/backups', icon: Database, label: 'Backups' },
     { path: '/dashboard', icon: LayoutDashboard, label: 'Overview' },
     { path: '/coach-dashboard', icon: GraduationCap, label: 'Coach Dashboard' },
     { path: '/users', icon: Users, label: 'Users' },
-    { path: '/system-control', icon: Shield, label: 'System Control' },
+    { path: '/system-control', icon: Settings, label: 'System Control' },
     { path: '/chat', icon: MessageCircle, label: 'Chat' },
     { path: '/recruiters', icon: Briefcase, label: 'Recruiters' },
     { path: '/open-days', icon: Calendar, label: 'Open Days' },

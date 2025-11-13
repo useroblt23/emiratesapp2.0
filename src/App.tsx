@@ -14,6 +14,10 @@ import UsersControl from './pages/governor/UsersControl';
 import GlobalAlerts from './pages/governor/GlobalAlerts';
 import MaintenanceMode from './pages/governor/MaintenanceMode';
 import SystemControl from './pages/governor/SystemControl';
+import GovernorDashboard from './pages/governor/GovernorDashboard';
+import CommandConsole from './pages/governor/CommandConsole';
+import AnnouncementManager from './pages/governor/AnnouncementManager';
+import BackupManager from './pages/governor/BackupManager';
 import PlaceholderPage from './pages/PlaceholderPage';
 import AITrainerPage from './pages/AITrainerPage';
 import OpenDaySimulatorPage from './pages/OpenDaySimulatorPage';
@@ -77,6 +81,15 @@ function AppContent() {
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <Route path="/coach-dashboard" element={<CoachDashboard />} />
+        )}
+
+        {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
+          <>
+            <Route path="/governor" element={<GovernorDashboard />} />
+            <Route path="/governor/commands" element={<CommandConsole />} />
+            <Route path="/governor/announcements" element={<AnnouncementManager />} />
+            <Route path="/governor/backups" element={<BackupManager />} />
+          </>
         )}
 
         {currentUser.role === 'governor' && (

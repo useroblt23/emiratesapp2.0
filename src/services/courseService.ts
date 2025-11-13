@@ -1,4 +1,16 @@
-import { supabase } from '../lib/supabase';
+import { db } from '../lib/firebase';
+import {
+  collection,
+  doc,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+  orderBy
+} from 'firebase/firestore';
 import { uploadPDFToStorage, deletePDFFromStorage } from './storageService';
 
 export interface Course {
@@ -48,30 +60,30 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
       pdfPath = uploadResult.path;
     }
 
-    const { data: course, error } = await supabase
-      .from('courses')
-      .insert({
-        id: courseId,
-        title: data.title,
-        description: data.description,
-        instructor: data.instructor,
-        thumbnail: data.thumbnail,
-        duration: data.duration,
-        level: data.level,
-        plan: data.plan,
-        category: data.category,
-        lessons: data.lessons || 1,
-        coach_id: coachId,
-        pdf_url: pdfUrl,
-        pdf_path: pdfPath,
-        allow_download: data.allow_download,
-        content_type: data.content_type,
-      })
-      .select()
-      .single();
+    const courseData = {
+      id: courseId,
+      title: data.title,
+      description: data.description,
+      instructor: data.instructor,
+      thumbnail: data.thumbnail,
+      duration: data.duration,
+      level: data.level,
+      plan: data.plan,
+      category: data.category,
+      lessons: data.lessons || 1,
+      coach_id: coachId,
+      pdf_url: pdfUrl,
+      pdf_path: pdfPath,
+      allow_download: data.allow_download,
+      content_type: data.content_type,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
-    if (error) throw error;
-    return course;
+    const docRef = doc(db, 'courses', courseId);
+    await setDoc(docRef, courseData);
+
+    return courseData as Course;
   } catch (error) {
     console.error('Error creating course:', error);
     throw error;
@@ -107,15 +119,11 @@ export const updateCourse = async (
 
     delete updateData.pdfFile;
 
-    const { data: course, error } = await supabase
-      .from('courses')
-      .update(updateData)
-      .eq('id', courseId)
-      .select()
-      .single();
+    const docRef = doc(db, 'courses', courseId);
+    await updateDoc(docRef, updateData);
 
-    if (error) throw error;
-    return course;
+    const docSnap = await getDoc(docRef);
+    return { id: docSnap.id, ...docSnap.data() } as Course;
   } catch (error) {
     console.error('Error updating course:', error);
     throw error;
@@ -128,9 +136,8 @@ export const deleteCourse = async (courseId: string, pdfPath?: string): Promise<
       await deletePDFFromStorage(pdfPath);
     }
 
-    const { error } = await supabase.from('courses').delete().eq('id', courseId);
-
-    if (error) throw error;
+    const docRef = doc(db, 'courses', courseId);
+    await deleteDoc(docRef);
   } catch (error) {
     console.error('Error deleting course:', error);
     throw error;
@@ -139,14 +146,18 @@ export const deleteCourse = async (courseId: string, pdfPath?: string): Promise<
 
 export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
   try {
-    const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .eq('coach_id', coachId)
-      .order('created_at', { ascending: false });
+    const coursesRef = collection(db, 'courses');
+    const q = query(
+      coursesRef,
+      where('coach_id', '==', coachId),
+      orderBy('created_at', 'desc')
+    );
 
-    if (error) throw error;
-    return data || [];
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
   } catch (error) {
     console.error('Error fetching courses:', error);
     return [];
@@ -155,13 +166,14 @@ export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
 
 export const getAllCourses = async (): Promise<Course[]> => {
   try {
-    const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, orderBy('created_at', 'desc'));
 
-    if (error) throw error;
-    return data || [];
+    const querySnapshot = await getDocs(q);
+    return querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
   } catch (error) {
     console.error('Error fetching all courses:', error);
     return [];
@@ -170,14 +182,14 @@ export const getAllCourses = async (): Promise<Course[]> => {
 
 export const getCourseById = async (courseId: string): Promise<Course | null> => {
   try {
-    const { data, error } = await supabase
-      .from('courses')
-      .select('*')
-      .eq('id', courseId)
-      .single();
+    const docRef = doc(db, 'courses', courseId);
+    const docSnap = await getDoc(docRef);
 
-    if (error) throw error;
-    return data;
+    if (!docSnap.exists()) {
+      return null;
+    }
+
+    return { id: docSnap.id, ...docSnap.data() } as Course;
   } catch (error) {
     console.error('Error fetching course:', error);
     return null;

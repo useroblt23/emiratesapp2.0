@@ -1,33 +1,43 @@
 import { db } from '../lib/firebase';
-import { doc, getDoc, setDoc, updateDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, Unsubscribe } from 'firebase/firestore';
 
 export interface SystemFeatures {
+  aiTrainer: boolean;
+  openDay: boolean;
   chat: boolean;
-  quiz: boolean;
-  englishTest: boolean;
+  courses: boolean;
   profileEdit: boolean;
-  openDayModule: boolean;
+  downloads: boolean;
+  stripePayments: boolean;
 }
 
 export interface SystemAnnouncement {
   active: boolean;
   message: string;
-  type: 'info' | 'success' | 'warning' | 'error';
-  timestamp: string | null;
+  type: 'info' | 'warning' | 'error' | 'success';
+  startedAt: any;
+  expiresAt: any;
+}
+
+export interface SystemMaintenance {
+  active: boolean;
+  message: string;
+  startedAt: any;
 }
 
 export interface SystemControl {
-  id: string;
   features: SystemFeatures;
   announcement: SystemAnnouncement;
-  updated_by: string | null;
-  updated_at: string;
-  created_at: string;
+  maintenance: SystemMaintenance;
+  updatedBy: string;
+  updatedAt: any;
 }
+
+const SYSTEM_CONTROL_DOC_ID = 'status';
 
 export const getSystemControl = async (): Promise<SystemControl | null> => {
   try {
-    const docRef = doc(db, 'system_control', 'status');
+    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
@@ -44,27 +54,33 @@ export const getSystemControl = async (): Promise<SystemControl | null> => {
 
 const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
   try {
-    const defaultControl: SystemControl = {
-      id: 'status',
+    const defaultControl = {
       features: {
+        aiTrainer: true,
+        openDay: true,
         chat: true,
-        quiz: true,
-        englishTest: true,
+        courses: true,
         profileEdit: true,
-        openDayModule: true,
+        downloads: true,
+        stripePayments: true,
       },
       announcement: {
         active: false,
         message: '',
         type: 'info' as const,
-        timestamp: null,
+        startedAt: null,
+        expiresAt: null,
       },
-      updated_by: null,
-      updated_at: new Date().toISOString(),
-      created_at: new Date().toISOString(),
+      maintenance: {
+        active: false,
+        message: '',
+        startedAt: null,
+      },
+      updatedBy: 'system',
+      updatedAt: serverTimestamp(),
     };
 
-    const docRef = doc(db, 'system_control', 'status');
+    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
     await setDoc(docRef, defaultControl);
     console.log('Default system control created successfully');
     return defaultControl;
@@ -75,20 +91,15 @@ const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
 };
 
 export const updateSystemControl = async (
-  features: SystemFeatures,
-  announcement: SystemAnnouncement,
+  updates: Partial<SystemControl>,
   userId: string
 ): Promise<SystemControl | null> => {
   try {
-    const docRef = doc(db, 'system_control', 'status');
+    const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
     const updateData = {
-      features,
-      announcement: {
-        ...announcement,
-        timestamp: announcement.active ? new Date().toISOString() : null,
-      },
-      updated_by: userId,
-      updated_at: new Date().toISOString(),
+      ...updates,
+      updatedBy: userId,
+      updatedAt: serverTimestamp(),
     };
 
     await updateDoc(docRef, updateData);
@@ -101,10 +112,71 @@ export const updateSystemControl = async (
   }
 };
 
+export const toggleFeature = async (
+  featureName: keyof SystemFeatures,
+  enabled: boolean,
+  userId: string
+): Promise<void> => {
+  try {
+    const systemControl = await getSystemControl();
+    if (!systemControl) throw new Error('System control not found');
+
+    const updatedFeatures = {
+      ...systemControl.features,
+      [featureName]: enabled,
+    };
+
+    await updateSystemControl({ features: updatedFeatures }, userId);
+  } catch (error) {
+    console.error('Error toggling feature:', error);
+    throw error;
+  }
+};
+
+export const updateAnnouncement = async (
+  announcement: Partial<SystemAnnouncement>,
+  userId: string
+): Promise<void> => {
+  try {
+    const systemControl = await getSystemControl();
+    if (!systemControl) throw new Error('System control not found');
+
+    const updatedAnnouncement = {
+      ...systemControl.announcement,
+      ...announcement,
+    };
+
+    await updateSystemControl({ announcement: updatedAnnouncement }, userId);
+  } catch (error) {
+    console.error('Error updating announcement:', error);
+    throw error;
+  }
+};
+
+export const updateMaintenance = async (
+  maintenance: Partial<SystemMaintenance>,
+  userId: string
+): Promise<void> => {
+  try {
+    const systemControl = await getSystemControl();
+    if (!systemControl) throw new Error('System control not found');
+
+    const updatedMaintenance = {
+      ...systemControl.maintenance,
+      ...maintenance,
+    };
+
+    await updateSystemControl({ maintenance: updatedMaintenance }, userId);
+  } catch (error) {
+    console.error('Error updating maintenance:', error);
+    throw error;
+  }
+};
+
 export const subscribeToSystemControl = (
   callback: (control: SystemControl | null) => void
-) => {
-  const docRef = doc(db, 'system_control', 'status');
+): Unsubscribe => {
+  const docRef = doc(db, 'systemControl', SYSTEM_CONTROL_DOC_ID);
 
   const unsubscribe = onSnapshot(docRef, (docSnap) => {
     if (docSnap.exists()) {

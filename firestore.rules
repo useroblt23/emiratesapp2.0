@@ -6,13 +6,17 @@ service cloud.firestore {
     // 🧍 USERS
     ///////////////////////////////////////////////////////////////////////////
     match /users/{userId} {
-      allow read: if request.auth != null;
+      allow read: if request.auth != null && request.auth.uid == userId;
       allow create: if request.auth != null;
       allow update: if request.auth != null && request.auth.uid == userId;
       allow delete: if false; // users cannot delete themselves manually
 
       // Only governor can edit any profile
       allow update: if request.auth != null &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
+
+      // Governors can read all users
+      allow read: if request.auth != null &&
         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == "governor";
     }
 

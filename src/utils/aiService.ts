@@ -3,6 +3,10 @@ import type { Message } from './openaiClient';
 
 export async function getAIResponse(prompt: string, userId: string, systemPrompt?: string): Promise<string> {
   try {
+    if (!userId) {
+      throw new Error('User ID is required. Please log in.');
+    }
+
     const messages: Message[] = [];
 
     if (systemPrompt) {
@@ -16,7 +20,7 @@ export async function getAIResponse(prompt: string, userId: string, systemPrompt
 
     messages.push({ role: 'user', content: prompt });
 
-    const result = await openaiClient.sendMessage(prompt, userId, messages);
+    const result = await openaiClient.sendMessage(messages, userId);
     return result.reply;
   } catch (error) {
     console.error('AI error:', error);

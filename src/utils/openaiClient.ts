@@ -11,39 +11,35 @@ interface AIResponse {
 }
 
 export class OpenAIClient {
+  private getAIEndpoint(): string {
+    const isWebContainer = window.location.origin.includes('webcontainer-api');
+
+    if (isWebContainer) {
+      return 'http://127.0.0.1:54321/functions/v1/ai';
+    }
+
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    return `${supabaseUrl}/functions/v1/ai`;
+  }
+
   async sendMessage(
-    prompt: string,
-    userId: string,
-    messages?: Message[]
+    messages: Message[],
+    userId: string
   ): Promise<{ reply: string; tokensUsed?: number }> {
     try {
       if (!userId) {
         throw new Error('User ID is required. Please log in.');
       }
 
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+      const aiEndpoint = this.getAIEndpoint();
 
-      if (!supabaseUrl || !supabaseKey) {
-        throw new Error('Supabase configuration is missing. Please check your environment variables.');
-      }
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/ai`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${supabaseKey}`,
-            'apikey': supabaseKey,
-          },
-          body: JSON.stringify({
-            prompt,
-            userId,
-            messages,
-          }),
-        }
-      );
+      const response = await fetch(aiEndpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ messages, userId }),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -79,10 +75,7 @@ export class OpenAIClient {
     }
   ): Promise<string> {
     try {
-      const lastUserMessage = messages.filter(m => m.role === 'user').pop();
-      const prompt = lastUserMessage?.content || '';
-
-      const result = await this.sendMessage(prompt, options.userId, messages);
+      const result = await this.sendMessage(messages, options.userId);
 
       if (options.onChunk) {
         options.onChunk(result.reply);

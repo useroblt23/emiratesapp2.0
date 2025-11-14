@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { analyzeCVForEmirates, getCabinCrewGuidance } from '../utils/aiService';
 import { checkFeatureAccess } from '../utils/featureAccess';
 import FeatureLock from '../components/FeatureLock';
+import CVAnalyzer from '../components/CVAnalyzer';
 
 interface ChatMessage {
   role: 'user' | 'assistant';
@@ -216,87 +217,28 @@ export default function AITrainerPage() {
           animate={{ opacity: 1 }}
           className="space-y-6"
         >
-          <div className="bg-white rounded-2xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-[#000000] mb-4">Upload or Paste Your CV</h2>
-            <p className="text-sm text-gray-600 mb-4">
-              Paste your CV content or upload a file to get detailed improvement feedback from our AI recruiter.
-            </p>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".txt,.pdf,.doc,.docx"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-
-            <div className="mb-4">
+          {currentUser?.cvUrl ? (
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-[#000000] mb-4">CV Optimization & Analysis</h2>
+              <p className="text-sm text-gray-600 mb-6">
+                Your CV has been uploaded. Use the tools below to analyze, convert to ATS format, or get interactive guidance.
+              </p>
+              <CVAnalyzer cvUrl={currentUser.cvUrl} userId={currentUser.uid} />
+            </div>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-lg p-6 text-center">
+              <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h2 className="text-xl font-bold text-[#000000] mb-2">No CV Uploaded</h2>
+              <p className="text-gray-600 mb-6">
+                Please upload your CV in your profile first to use CV optimization features.
+              </p>
               <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#D71921] transition cursor-pointer bg-gray-50 hover:bg-gray-100"
+                onClick={() => window.location.href = '/profile'}
+                className="px-6 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
               >
-                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <p className="text-sm text-gray-600 font-semibold">Click to upload your CV</p>
-                <p className="text-xs text-gray-400 mt-1">PDF, DOC, DOCX, or TXT (Max 5MB)</p>
+                Go to Profile
               </button>
             </div>
-
-            <div className="text-center text-gray-500 text-sm mb-4">or</div>
-
-            <textarea
-              value={cvText}
-              onChange={(e) => setCvText(e.target.value)}
-              placeholder="Paste your CV content here...
-
-Example:
-John Doe
-Email: john@example.com
-Phone: +971 50 123 4567
-
-PROFESSIONAL SUMMARY
-Customer service professional with 3 years of experience in hospitality..."
-              className="w-full h-64 px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:ring-2 focus:ring-[#D71921]/20 transition resize-none"
-            />
-
-            {cvError && (
-              <div className="mt-4 p-3 bg-red-50 border-2 border-red-200 rounded-xl text-red-700 text-sm">
-                {cvError}
-              </div>
-            )}
-
-            <button
-              onClick={handleAnalyzeCV}
-              disabled={cvLoading || !cvText.trim()}
-              className="w-full mt-4 px-6 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {cvLoading ? (
-                <>
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing...
-                </>
-              ) : (
-                <>
-                  <Brain className="w-5 h-5" />
-                  Analyze & Improve
-                </>
-              )}
-            </button>
-          </div>
-
-          {cvFeedback && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-6"
-            >
-              <h3 className="text-xl font-bold text-[#000000] mb-4 flex items-center gap-2">
-                <Sparkles className="w-6 h-6 text-[#D71921]" />
-                AI Feedback
-              </h3>
-              <div className="prose prose-sm max-w-none text-gray-800 whitespace-pre-wrap">
-                {cvFeedback}
-              </div>
-            </motion.div>
           )}
         </motion.div>
       )}

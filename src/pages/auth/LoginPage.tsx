@@ -97,9 +97,9 @@ export default function LoginPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-8">
           <div className="flex justify-center mb-6">
             <img
-              src="/Crews.png"
+              src="/logo.png"
               alt="The Crew Academy"
-              className="h-16 w-auto"
+              className="h-24 w-auto"
             />
           </div>
 

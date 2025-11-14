@@ -86,7 +86,7 @@ export default function RegisterPage() {
         <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
           <div className="flex justify-center mb-6">
             <img
-              src="/Crews.png"
+              src="/logo.png"
               alt="The Crew Academy"
               className="h-16 w-auto"
             />

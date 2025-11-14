@@ -1,14 +1,33 @@
 import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import PlanBadge from '../PlanBadge';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { db } from '../../lib/firebase';
 
 export default function Navbar() {
   const { currentUser, logout } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!currentUser) return;
+
+    const q = query(
+      collection(db, 'notifications'),
+      where('userId', '==', currentUser.uid),
+      where('read', '==', false)
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      setUnreadCount(snapshot.size);
+    });
+
+    return unsubscribe;
+  }, [currentUser]);
 
   if (!currentUser) return null;
 
@@ -18,7 +37,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/dashboard" className="flex items-center">
             <img
-              src="/Crews.png"
+              src="/logo.png"
               alt="The Crew Academy"
               className="h-12 md:h-16 w-auto object-contain"
             />
@@ -30,11 +49,15 @@ export default function Navbar() {
             </div>
 
             <button
-              onClick={() => alert('No new notifications')}
+              onClick={() => navigate('/notifications')}
               className="relative p-1.5 md:p-2 hover:bg-white/10 rounded-lg transition"
             >
               <Bell className="w-4 h-4 md:w-5 md:h-5" />
-              <span className="absolute top-0.5 right-0.5 md:top-1 md:right-1 w-1.5 h-1.5 md:w-2 md:h-2 bg-white rounded-full"></span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-white text-[#D71920] rounded-full text-xs font-bold flex items-center justify-center">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
             </button>
 
             <div className="relative">

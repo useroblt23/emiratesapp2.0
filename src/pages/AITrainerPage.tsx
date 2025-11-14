@@ -76,12 +76,17 @@ export default function AITrainerPage() {
       return;
     }
 
+    if (!currentUser) {
+      setCvError('You must be logged in to use this feature');
+      return;
+    }
+
     setCvLoading(true);
     setCvError('');
     setCvFeedback('');
 
     try {
-      const feedback = await analyzeCVForEmirates(cvText);
+      const feedback = await analyzeCVForEmirates(cvText, currentUser.uid);
       setCvFeedback(feedback);
     } catch (error: any) {
       setCvError(error.message || 'Failed to analyze CV. Please try again.');
@@ -92,6 +97,11 @@ export default function AITrainerPage() {
 
   const handleSendMessage = async () => {
     if (!chatInput.trim() || chatLoading) return;
+
+    if (!currentUser) {
+      setChatError('You must be logged in to use this feature');
+      return;
+    }
 
     const userMessage: ChatMessage = {
       role: 'user',
@@ -105,7 +115,7 @@ export default function AITrainerPage() {
     setChatError('');
 
     try {
-      const response = await getCabinCrewGuidance(chatInput);
+      const response = await getCabinCrewGuidance(chatInput, currentUser.uid);
       const assistantMessage: ChatMessage = {
         role: 'assistant',
         content: response,

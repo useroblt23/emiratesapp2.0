@@ -1,13 +1,9 @@
-const apiKey = import.meta.env.VITE_DEEPSEEK_API_KEY;
+import { openaiClient } from './openaiClient';
+import type { Message } from './openaiClient';
 
-export interface AIMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-export async function getAIResponse(prompt: string, systemPrompt?: string): Promise<string> {
+export async function getAIResponse(prompt: string, userId: string, systemPrompt?: string): Promise<string> {
   try {
-    const messages: AIMessage[] = [];
+    const messages: Message[] = [];
 
     if (systemPrompt) {
       messages.push({ role: 'system', content: systemPrompt });
@@ -20,33 +16,15 @@ export async function getAIResponse(prompt: string, systemPrompt?: string): Prom
 
     messages.push({ role: 'user', content: prompt });
 
-    const response = await fetch('https://api.opensource.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'deepseek-chat',
-        messages,
-        temperature: 0.7,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error?.message || `API Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    return data.choices?.[0]?.message?.content || 'No response generated.';
+    const result = await openaiClient.sendMessage(prompt, userId, messages);
+    return result.reply;
   } catch (error) {
     console.error('AI error:', error);
-    return 'Sorry, I couldn\'t generate a response.';
+    throw error;
   }
 }
 
-export async function analyzeCVForEmirates(cvContent: string): Promise<string> {
+export async function analyzeCVForEmirates(cvContent: string, userId: string): Promise<string> {
   const systemPrompt = `You are an experienced Emirates cabin crew recruiter with 10+ years of experience reviewing CVs. You understand what makes a candidate stand out for Emirates cabin crew positions. Provide honest, constructive feedback that helps candidates improve their applications.`;
 
   const userPrompt = `Please review the following CV for an Emirates cabin crew position and provide detailed feedback in the following format:
@@ -68,11 +46,11 @@ export async function analyzeCVForEmirates(cvContent: string): Promise<string> {
 CV CONTENT:
 ${cvContent}`;
 
-  return getAIResponse(userPrompt, systemPrompt);
+  return getAIResponse(userPrompt, userId, systemPrompt);
 }
 
-export async function getCabinCrewGuidance(question: string): Promise<string> {
+export async function getCabinCrewGuidance(question: string, userId: string): Promise<string> {
   const systemPrompt = `You are a friendly and knowledgeable Emirates cabin crew coach. You help aspiring cabin crew members prepare for their assessment day, interviews, and career. Provide practical, actionable advice with a warm and encouraging tone. Keep responses concise (2-3 paragraphs max) but helpful.`;
 
-  return getAIResponse(question, systemPrompt);
+  return getAIResponse(question, userId, systemPrompt);
 }

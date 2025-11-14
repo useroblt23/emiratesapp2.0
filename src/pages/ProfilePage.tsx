@@ -1,15 +1,19 @@
 import { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
-import { Camera, MapPin, Mail, Shield, Save, Upload } from 'lucide-react';
+import { Camera, MapPin, Mail, Shield, Save, Upload, FileText, Download, Trash2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../lib/firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage } from '../lib/firebase';
+import CVAnalyzer from '../components/CVAnalyzer';
 
 export default function ProfilePage() {
   const { currentUser, setCurrentUser } = useApp();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [uploadingCV, setUploadingCV] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const cvInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     name: currentUser?.name || '',
@@ -37,6 +41,77 @@ export default function ProfilePage() {
       setFormData({ ...formData, photo_base64: reader.result as string });
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleCVUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !currentUser) return;
+
+    const allowedTypes = [
+      'application/pdf',
+      'application/msword',
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      alert('Please upload a PDF, DOC, or DOCX file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('CV file size should be less than 5MB');
+      return;
+    }
+
+    setUploadingCV(true);
+    try {
+      const cvRef = ref(storage, `cvs/${currentUser.uid}/${Date.now()}_${file.name}`);
+      await uploadBytes(cvRef, file);
+      const downloadURL = await getDownloadURL(cvRef);
+
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        cvUrl: downloadURL,
+        updated_at: new Date().toISOString(),
+      });
+
+      setCurrentUser({
+        ...currentUser,
+        cvUrl: downloadURL,
+      });
+
+      alert('CV uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading CV:', error);
+      alert('Failed to upload CV. Please try again.');
+    } finally {
+      setUploadingCV(false);
+      if (cvInputRef.current) {
+        cvInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteCV = async () => {
+    if (!currentUser?.cvUrl || !window.confirm('Are you sure you want to delete your CV?')) return;
+
+    try {
+      const userDocRef = doc(db, 'users', currentUser.uid);
+      await updateDoc(userDocRef, {
+        cvUrl: null,
+        updated_at: new Date().toISOString(),
+      });
+
+      setCurrentUser({
+        ...currentUser,
+        cvUrl: undefined,
+      });
+
+      alert('CV deleted successfully');
+    } catch (error) {
+      console.error('Error deleting CV:', error);
+      alert('Failed to delete CV. Please try again.');
+    }
   };
 
   const handleSave = async () => {
@@ -273,10 +348,79 @@ export default function ProfilePage() {
                   placeholder="Tell us about yourself..."
                 />
               </div>
+
+              <div>
+                <label className="block text-sm font-bold text-gray-900 mb-2">
+                  CV / Resume
+                </label>
+                <p className="text-xs text-gray-500 mb-3">
+                  Upload your CV in PDF, DOC, or DOCX format (max 5MB)
+                </p>
+
+                {currentUser.cvUrl ? (
+                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                    <div className="w-12 h-12 bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-lg flex items-center justify-center">
+                      <FileText className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-bold text-gray-900 text-sm">CV Uploaded</p>
+                      <p className="text-xs text-gray-500 truncate">
+                        Click download to view your CV
+                      </p>
+                    </div>
+                    <div className="flex gap-2">
+                      <a
+                        href={currentUser.cvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-2 bg-white hover:bg-gray-100 rounded-lg border-2 border-gray-200 transition"
+                        title="Download CV"
+                      >
+                        <Download className="w-5 h-5 text-gray-700" />
+                      </a>
+                      <button
+                        onClick={handleDeleteCV}
+                        className="p-2 bg-white hover:bg-red-50 rounded-lg border-2 border-gray-200 hover:border-red-300 transition"
+                        title="Delete CV"
+                      >
+                        <Trash2 className="w-5 h-5 text-red-600" />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => cvInputRef.current?.click()}
+                    disabled={uploadingCV}
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 hover:border-[#D71920] rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Upload className="w-5 h-5 text-gray-600" />
+                    <span className="font-bold text-gray-700">
+                      {uploadingCV ? 'Uploading...' : 'Upload CV'}
+                    </span>
+                  </button>
+                )}
+
+                <input
+                  ref={cvInputRef}
+                  type="file"
+                  accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                  onChange={handleCVUpload}
+                  className="hidden"
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {currentUser.cvUrl && (
+        <div className="mt-6">
+          <div className="bg-white rounded-2xl shadow-lg p-6">
+            <h3 className="text-2xl font-bold text-gray-900 mb-6">CV Analysis & ATS Converter</h3>
+            <CVAnalyzer cvUrl={currentUser.cvUrl} userId={currentUser.uid} />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

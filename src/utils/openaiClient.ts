@@ -12,12 +12,7 @@ interface AIResponse {
 
 export class OpenAIClient {
   private getAIEndpoint(): string {
-    const isWebContainer = window.location.origin.includes('webcontainer-api');
-
-    if (isWebContainer) {
-      return 'http://127.0.0.1:54321/functions/v1/ai';
-    }
-
+    // Always use the Supabase URL from environment variables
     const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
     return `${supabaseUrl}/functions/v1/ai`;
   }

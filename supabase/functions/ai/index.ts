@@ -43,7 +43,9 @@ Deno.serve(async (req: Request) => {
     const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
     if (!openaiApiKey) {
       return new Response(
-        JSON.stringify({ error: "OpenAI API key not configured" }),
+        JSON.stringify({
+          error: "OpenAI API key not configured. Please set your OpenAI API key in the Supabase Edge Function secrets."
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },

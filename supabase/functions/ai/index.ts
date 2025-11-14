@@ -24,25 +24,8 @@ Deno.serve(async (req: Request) => {
   try {
     const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      {
-        global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
-        },
-      }
+      Deno.env.get("SUPABASE_ANON_KEY") ?? ""
     );
-
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
-    
-    if (authError || !user) {
-      return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
-        {
-          status: 401,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
 
     const body: RequestBody = await req.json();
     const { prompt, userId, messages } = body;
@@ -52,16 +35,6 @@ Deno.serve(async (req: Request) => {
         JSON.stringify({ error: "Missing required fields: prompt, userId" }),
         {
           status: 400,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    if (user.id !== userId) {
-      return new Response(
-        JSON.stringify({ error: "User ID mismatch" }),
-        {
-          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         }
       );

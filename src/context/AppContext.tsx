@@ -105,41 +105,80 @@ export function AppProvider({ children }: { children: ReactNode }) {
         console.log('User authenticated:', firebaseUser.uid);
 
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const unsubscribeFirestore = onSnapshot(userDocRef, (docSnap) => {
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            console.log('User data updated from Firestore:', userData);
+        const unsubscribeFirestore = onSnapshot(
+          userDocRef,
+          (docSnap) => {
+            if (docSnap.exists()) {
+              const userData = docSnap.data();
+              console.log('User data updated from Firestore:', userData);
 
-            const updatedUser: User = {
-              uid: firebaseUser.uid,
-              email: userData.email || firebaseUser.email || '',
-              name: userData.name || 'User',
-              role: (userData.role || 'student') as Role,
-              plan: (userData.plan || 'free') as Plan,
-              country: userData.country || '',
-              bio: userData.bio || '',
-              expectations: userData.expectations || '',
-              photoURL: userData.photo_base64 || userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
-              hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
-              hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
-              onboardingCompletedAt: userData.onboardingCompletedAt,
-              welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
-              createdAt: userData.createdAt || new Date().toISOString(),
-              updatedAt: userData.updatedAt || new Date().toISOString(),
-              banned: userData.banned,
-              muted: userData.muted,
-            };
+              const updatedUser: User = {
+                uid: firebaseUser.uid,
+                email: userData.email || firebaseUser.email || '',
+                name: userData.name || 'User',
+                role: (userData.role || 'student') as Role,
+                plan: (userData.plan || 'free') as Plan,
+                country: userData.country || '',
+                bio: userData.bio || '',
+                expectations: userData.expectations || '',
+                photoURL: userData.photo_base64 || userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+                hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
+                hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
+                onboardingCompletedAt: userData.onboardingCompletedAt,
+                welcomeBannerSeenAt: userData.welcomeBannerSeenAt,
+                createdAt: userData.createdAt || new Date().toISOString(),
+                updatedAt: userData.updatedAt || new Date().toISOString(),
+                banned: userData.banned,
+                muted: userData.muted,
+              };
 
-            setCurrentUser(updatedUser);
-            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
-          } else {
-            console.error('User document not found in Firestore');
-            setCurrentUser(null);
-            localStorage.removeItem('currentUser');
+              setCurrentUser(updatedUser);
+              localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            } else {
+              console.warn('User document not found in Firestore. User may need to complete registration.');
+              const basicUser: User = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                name: firebaseUser.displayName || 'User',
+                role: 'student',
+                plan: 'free',
+                country: '',
+                bio: '',
+                expectations: '',
+                photoURL: firebaseUser.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+                hasCompletedOnboarding: false,
+                hasSeenWelcomeBanner: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              setCurrentUser(basicUser);
+              localStorage.setItem('currentUser', JSON.stringify(basicUser));
+            }
+          },
+          (error) => {
+            console.error('Error listening to user document:', error);
+            if (error.code === 'permission-denied') {
+              console.warn('Permission denied for user document. This may happen if the user document does not exist yet.');
+              const basicUser: User = {
+                uid: firebaseUser.uid,
+                email: firebaseUser.email || '',
+                name: firebaseUser.displayName || 'User',
+                role: 'student',
+                plan: 'free',
+                country: '',
+                bio: '',
+                expectations: '',
+                photoURL: firebaseUser.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+                hasCompletedOnboarding: false,
+                hasSeenWelcomeBanner: false,
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+              };
+              setCurrentUser(basicUser);
+              localStorage.setItem('currentUser', JSON.stringify(basicUser));
+            }
           }
-        }, (error) => {
-          console.error('Error listening to user document:', error);
-        });
+        );
 
         return () => {
           console.log('Cleaning up Firestore listener');

@@ -21,6 +21,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
   const [modules, setModules] = useState<Module[]>([]);
   const [selectedModule, setSelectedModule] = useState<string>('');
   const [orderInModule, setOrderInModule] = useState<number>(1);
+  const [isVisible, setIsVisible] = useState(editingCourse?.visible ?? true);
 
   const [videoUrl, setVideoUrl] = useState(editingCourse?.video_url || '');
 
@@ -137,6 +138,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
         video_url: formData.content_type === 'video' ? videoUrl : undefined,
         module_id: uploadType === 'module' ? selectedModule : undefined,
         order_in_module: uploadType === 'module' ? orderInModule : undefined,
+        visible: isVisible,
       };
 
       if (editingCourse) {
@@ -154,6 +156,14 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
           coachId
         );
         console.log('Course created successfully');
+      }
+
+      // Update module visibility if course is part of module
+      if (uploadType === 'module' && selectedModule) {
+        console.log('Updating module visibility...');
+        const { updateModule } = await import('../services/moduleService');
+        await updateModule(selectedModule, { visible: isVisible });
+        console.log('Module visibility updated');
       }
 
       onSuccess();
@@ -467,7 +477,7 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
             </div>
           )}
 
-          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4">
+          <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 space-y-3">
             <label className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -478,6 +488,19 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
               <div>
                 <span className="text-sm font-bold text-gray-700">Allow Download</span>
                 <p className="text-xs text-gray-500">Enable students to download this PDF</p>
+              </div>
+            </label>
+
+            <label className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isVisible}
+                onChange={(e) => setIsVisible(e.target.checked)}
+                className="w-5 h-5 text-[#FF3B3F] border-gray-300 rounded focus:ring-[#FF3B3F]"
+              />
+              <div>
+                <span className="text-sm font-bold text-gray-700">Make Visible to Students</span>
+                <p className="text-xs text-gray-500">Show this course{uploadType === 'module' ? ' and module' : ''} to students</p>
               </div>
             </label>
           </div>

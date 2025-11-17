@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, BarChart3, GraduationCap } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { getAllModules, Module } from '../services/moduleService';
+import { getVisibleRootModules, Module } from '../services/moduleService';
 
 export default function CoursesPage() {
   const navigate = useNavigate();
@@ -16,9 +16,9 @@ export default function CoursesPage() {
 
   const fetchModules = async () => {
     try {
-      console.log('CoursesPage: Fetching modules...');
-      const modulesData = await getAllModules();
-      console.log('CoursesPage: Modules fetched:', modulesData.length);
+      console.log('CoursesPage: Fetching visible root modules (Module 1 only)...');
+      const modulesData = await getVisibleRootModules();
+      console.log('CoursesPage: Visible root modules fetched:', modulesData.length);
       setModules(modulesData);
     } catch (error) {
       console.error('CoursesPage: Error fetching modules:', error);

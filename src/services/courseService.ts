@@ -68,6 +68,7 @@ export interface Course {
   suppressed_at?: string;
   module_id?: string;
   order_in_module?: number;
+  visible?: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -213,26 +214,6 @@ export const getCoursesByCoach = async (coachId: string): Promise<Course[]> => {
   }
 };
 
-export const getCoursesByModule = async (moduleId: string): Promise<Course[]> => {
-  try {
-    const coursesRef = collection(db, 'courses');
-    const q = query(
-      coursesRef,
-      where('module_id', '==', moduleId),
-      orderBy('order_in_module', 'asc')
-    );
-
-    const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    })) as Course[];
-  } catch (error) {
-    console.error('Error fetching courses by module:', error);
-    return [];
-  }
-};
-
 export const getStandaloneCourses = async (category?: string): Promise<Course[]> => {
   try {
     const coursesRef = collection(db, 'courses');
@@ -291,6 +272,26 @@ export const getAllCourses = async (): Promise<Course[]> => {
   } catch (error) {
     console.error('Error fetching all courses:', error);
     console.error('Error details:', JSON.stringify(error, null, 2));
+    return [];
+  }
+};
+
+export const getCoursesByModule = async (moduleId: string): Promise<Course[]> => {
+  try {
+    console.log('Fetching courses for module:', moduleId);
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, where('module_id', '==', moduleId), where('visible', '==', true));
+    const querySnapshot = await getDocs(q);
+
+    const courses = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
+
+    console.log('Courses found for module:', courses.length);
+    return courses.sort((a, b) => (a.order_in_module || 0) - (b.order_in_module || 0));
+  } catch (error) {
+    console.error('Error fetching courses by module:', error);
     return [];
   }
 };

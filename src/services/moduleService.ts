@@ -30,6 +30,7 @@ export interface Module {
   order: number;
   lessons: ModuleLesson[];
   quiz_id?: string;
+  visible: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -128,6 +129,27 @@ export const getAllModules = async (): Promise<Module[]> => {
     }
   } catch (error) {
     console.error('Error in getAllModules:', error);
+    throw error;
+  }
+};
+
+export const getVisibleRootModules = async (): Promise<Module[]> => {
+  try {
+    const modulesRef = collection(db, 'modules');
+    console.log('Fetching visible root modules (order = 1)...');
+
+    const snapshot = await getDocs(modulesRef);
+    const modules = snapshot.docs.map(doc => doc.data() as Module);
+
+    // Filter for visible modules with order = 1
+    const rootModules = modules.filter(module =>
+      module.visible === true && module.order === 1
+    );
+
+    console.log('Visible root modules found:', rootModules.length);
+    return rootModules.sort((a, b) => a.category.localeCompare(b.category));
+  } catch (error) {
+    console.error('Error in getVisibleRootModules:', error);
     throw error;
   }
 };

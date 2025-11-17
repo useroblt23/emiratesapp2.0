@@ -7,6 +7,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Master the basics of cabin crew interviews including common questions, body language, and first impressions',
       category: 'interview' as const,
       order: 1,
+      visible: false,
       lessons: [
         {
           id: 'intro-interview-1',
@@ -14,6 +15,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '8:30',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -22,6 +24,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '12:45',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -39,6 +42,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Advanced interview techniques, scenario-based questions, and assessment day preparation',
       category: 'interview' as const,
       order: 2,
+      visible: false,
       lessons: [
         {
           id: 'intro-interview-2',
@@ -46,6 +50,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '9:15',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -54,6 +59,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '14:00',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -71,6 +77,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Essential grooming standards for cabin crew including uniform guidelines, hair, makeup, and personal presentation',
       category: 'grooming' as const,
       order: 1,
+      visible: false,
       lessons: [
         {
           id: 'intro-grooming-1',
@@ -78,6 +85,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '7:45',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -86,6 +94,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '13:20',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -103,6 +112,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Advanced grooming techniques and maintaining professional appearance during long flights',
       category: 'grooming' as const,
       order: 2,
+      visible: false,
       lessons: [
         {
           id: 'intro-grooming-2',
@@ -110,6 +120,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '8:00',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -118,6 +129,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '12:00',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -135,6 +147,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Fundamentals of exceptional customer service, communication skills, and handling passenger requests',
       category: 'service' as const,
       order: 1,
+      visible: false,
       lessons: [
         {
           id: 'intro-service-1',
@@ -142,6 +155,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '9:30',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -150,6 +164,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '14:15',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -167,6 +182,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Managing difficult passengers, conflict resolution, and delivering premium service',
       category: 'service' as const,
       order: 2,
+      visible: false,
       lessons: [
         {
           id: 'intro-service-2',
@@ -174,6 +190,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '8:50',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -182,6 +199,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '16:00',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -199,6 +217,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Core aviation safety procedures, emergency equipment, and pre-flight safety checks',
       category: 'safety' as const,
       order: 1,
+      visible: false,
       lessons: [
         {
           id: 'intro-safety-1',
@@ -206,6 +225,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '10:00',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -214,6 +234,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '18:30',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -231,6 +252,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Advanced emergency procedures, evacuations, medical emergencies, and crisis management',
       category: 'safety' as const,
       order: 2,
+      visible: false,
       lessons: [
         {
           id: 'intro-safety-2',
@@ -238,6 +260,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '11:15',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -246,6 +269,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '20:00',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -263,6 +287,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Essential aviation English terminology, announcements, and basic passenger communication',
       category: 'language' as const,
       order: 1,
+      visible: false,
       lessons: [
         {
           id: 'intro-language-1',
@@ -270,6 +295,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '9:00',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -278,6 +304,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '15:20',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {
@@ -295,6 +322,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
       description: 'Advanced language skills, cultural awareness, and multilingual passenger interactions',
       category: 'language' as const,
       order: 2,
+      visible: false,
       lessons: [
         {
           id: 'intro-language-2',
@@ -302,6 +330,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '10:30',
           order: 1,
+      visible: false,
           isIntro: true
         },
         {
@@ -310,6 +339,7 @@ export const initializeDefaultModules = async (): Promise<void> => {
           videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
           duration: '16:45',
           order: 2,
+      visible: false,
           isIntro: false
         },
         {

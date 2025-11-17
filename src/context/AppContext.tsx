@@ -121,7 +121,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 country: userData.country || '',
                 bio: userData.bio || '',
                 expectations: userData.expectations || '',
-                photoURL: userData.photo_base64 || userData.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
+                photoURL: userData.photo_base64 || 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2260%22 dy=%2210.5rem%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E' + (userData.name?.[0] || 'U') + '%3C/text%3E%3C/svg%3E',
                 hasCompletedOnboarding: userData.hasCompletedOnboarding || false,
                 hasSeenWelcomeBanner: userData.hasSeenWelcomeBanner || false,
                 onboardingCompletedAt: userData.onboardingCompletedAt,
@@ -197,11 +197,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const logout = () => {
+  const logout = async () => {
     console.log('Logging out user');
-    auth.signOut();
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
+    try {
+      await auth.signOut();
+      setCurrentUser(null);
+      localStorage.removeItem('currentUser');
+      sessionStorage.clear();
+      console.log('Logout successful');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
   const isFeatureEnabled = (feature: keyof SystemFeatures): boolean => {

@@ -30,19 +30,31 @@ export default function CoursesPage() {
     try {
       console.log('CoursesPage: Fetching main modules with content...');
       const modulesData = await getAllMainModules();
+      console.log('CoursesPage: Main modules fetched:', modulesData.length, modulesData);
+
+      if (modulesData.length === 0) {
+        console.log('CoursesPage: No main modules found');
+        setModulesWithContent([]);
+        setLoading(false);
+        return;
+      }
 
       const modulesWithContentData = await Promise.all(
         modulesData.map(async (module) => {
+          console.log(`CoursesPage: Fetching content for module ${module.id}...`);
           const [courses, submodules] = await Promise.all([
             getCoursesByModule(module.id),
             getSubmodulesByParent(module.id)
           ]);
+
+          console.log(`CoursesPage: Module ${module.id} - courses: ${courses.length}, submodules: ${submodules.length}`);
 
           const mainModuleCourses = courses.filter(course => !course.submodule_id);
 
           const submodulesWithCourses = await Promise.all(
             submodules.map(async (submodule) => {
               const submoduleCourses = await getCoursesBySubmodule(submodule.id);
+              console.log(`CoursesPage: Submodule ${submodule.id} has ${submoduleCourses.length} courses`);
               return {
                 ...submodule,
                 courses: submoduleCourses
@@ -58,7 +70,7 @@ export default function CoursesPage() {
         })
       );
 
-      console.log('CoursesPage: Modules with content loaded:', modulesWithContentData.length);
+      console.log('CoursesPage: Modules with content loaded:', modulesWithContentData.length, modulesWithContentData);
       setModulesWithContent(modulesWithContentData);
     } catch (error) {
       console.error('CoursesPage: Error fetching data:', error);

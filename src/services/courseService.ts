@@ -50,6 +50,7 @@ export const updateCourseProgress = async (userId: string, courseId: string, pro
 export interface Course {
   id: string;
   title: string;
+  subtitle?: string;
   description: string;
   instructor: string;
   thumbnail: string;
@@ -67,6 +68,7 @@ export interface Course {
   suppressed?: boolean;
   suppressed_at?: string;
   module_id?: string;
+  submodule_id?: string;
   order_in_module?: number;
   visible?: boolean;
   created_at: string;
@@ -292,6 +294,26 @@ export const getCoursesByModule = async (moduleId: string): Promise<Course[]> =>
     return courses.sort((a, b) => (a.order_in_module || 0) - (b.order_in_module || 0));
   } catch (error) {
     console.error('Error fetching courses by module:', error);
+    return [];
+  }
+};
+
+export const getCoursesBySubmodule = async (submoduleId: string): Promise<Course[]> => {
+  try {
+    console.log('Fetching courses for submodule:', submoduleId);
+    const coursesRef = collection(db, 'courses');
+    const q = query(coursesRef, where('submodule_id', '==', submoduleId));
+    const querySnapshot = await getDocs(q);
+
+    const courses = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    })) as Course[];
+
+    console.log('Courses found for submodule:', courses.length);
+    return courses.sort((a, b) => (a.order_in_module || 0) - (b.order_in_module || 0));
+  } catch (error) {
+    console.error('Error fetching courses by submodule:', error);
     return [];
   }
 };

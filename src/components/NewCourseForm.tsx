@@ -92,8 +92,13 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!title.trim() || !description.trim() || !videoUrl.trim() || !thumbnail || !submoduleId) {
+    if (!title.trim() || !description.trim() || !videoUrl.trim() || !thumbnail) {
       alert('Please fill in all required fields');
+      return;
+    }
+
+    if (!selectedMainModule && !preselectedSubmoduleId) {
+      alert('Please select a main module');
       return;
     }
 
@@ -113,7 +118,8 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
           thumbnail,
           video_url: embedUrl,
           subtitle: subtitle.trim() || undefined,
-          submodule_id: submoduleId
+          module_id: selectedMainModule || undefined,
+          submodule_id: submoduleId || undefined
         });
         alert('Course updated successfully!');
       } else {
@@ -131,7 +137,8 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
           content_type: 'video',
           video_url: embedUrl,
           subtitle: subtitle.trim() || undefined,
-          submodule_id: submoduleId,
+          module_id: selectedMainModule || undefined,
+          submodule_id: submoduleId || undefined,
           visible: true
         }, currentUser.uid);
         alert('Course created successfully!');
@@ -308,24 +315,27 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
 
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Assign to Submodule *
+                      Assign to Submodule (Optional)
                     </label>
                     <select
                       value={submoduleId}
                       onChange={(e) => setSubmoduleId(e.target.value)}
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:outline-none transition"
                       disabled={!selectedMainModule}
-                      required
                     >
-                      <option value="">Select submodule...</option>
+                      <option value="">No submodule (assign to main module only)</option>
                       {submodules.map((sub) => (
                         <option key={sub.id} value={sub.id}>
                           Submodule {sub.order}: {sub.title}
                         </option>
                       ))}
                     </select>
-                    {!selectedMainModule && (
+                    {!selectedMainModule ? (
                       <p className="text-xs text-gray-500 mt-1">Select a main module first</p>
+                    ) : submodules.length === 0 ? (
+                      <p className="text-xs text-gray-500 mt-1">This module has no submodules yet</p>
+                    ) : (
+                      <p className="text-xs text-gray-500 mt-1">Leave empty to assign to main module only</p>
                     )}
                   </div>
                 </>

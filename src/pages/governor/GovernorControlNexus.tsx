@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, AlertCircle, Globe } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Shield, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -120,24 +119,6 @@ export default function GovernorControlNexus() {
         <AnnouncementManager />
 
         <BugReportsManager />
-
-        <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Globe className="w-6 h-6 text-blue-400" />
-              <div>
-                <h2 className="text-xl font-bold text-slate-100">Emirates Web Scraper</h2>
-                <p className="text-slate-400 text-sm mt-1">Extract and import Open Day events</p>
-              </div>
-            </div>
-            <Link
-              to="/web-scraper"
-              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:shadow-lg transition"
-            >
-              Open Scraper
-            </Link>
-          </div>
-        </div>
 
         <SupportChatManager />
       </div>

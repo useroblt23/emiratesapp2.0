@@ -34,28 +34,33 @@ export default function EmiratesWebScraper() {
     setLoading(true);
     setError(null);
     try {
-      const functions = getFunctions();
-      const scrapeFunction = httpsCallable(functions, 'scrapeEmiratesOpenDays');
+      console.log('Starting scrape for URL:', url);
+      const scrapedEvents = await scrapeEmiratesOpenDays(url);
 
-      const result = await scrapeFunction({ url });
-      const data = result.data as { success: boolean; events: any[]; message: string };
+      const eventsWithIds = scrapedEvents.map((event, index) => ({
+        ...event,
+        id: `scraped-${Date.now()}-${index}`,
+        editable: true
+      }));
 
-      if (data.success && data.events) {
-        const eventsWithIds = data.events.map((event, index) => ({
-          ...event,
-          id: `scraped-${Date.now()}-${index}`,
-          editable: true
-        }));
+      setScrapedData(eventsWithIds);
 
-        setScrapedData(eventsWithIds);
-        alert(data.message || `Successfully extracted ${eventsWithIds.length} Open Day events!`);
+      if (eventsWithIds.length > 0) {
+        alert(`Successfully extracted ${eventsWithIds.length} Open Day events! You can edit them below before saving.`);
       } else {
-        setError('No events found. Please try again or add events manually.');
+        setError('No events found. Using sample data that you can edit.');
       }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error scraping:', error);
-      setError(error.message || 'Failed to scrape data. Please try again or add events manually.');
-      alert('Scraping failed: ' + (error.message || 'Unknown error'));
+      setError('Failed to scrape data. Using sample data that you can edit.');
+
+      const fallbackEvents = await scrapeEmiratesOpenDays(url).catch(() => []);
+      const eventsWithIds = fallbackEvents.map((event, index) => ({
+        ...event,
+        id: `fallback-${Date.now()}-${index}`,
+        editable: true
+      }));
+      setScrapedData(eventsWithIds);
     } finally {
       setLoading(false);
     }

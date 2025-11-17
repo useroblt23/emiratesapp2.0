@@ -24,6 +24,7 @@ import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
 import DocumentationPage from './pages/DocumentationPage';
 import StudentsPage from './pages/StudentsPage';
+import LeaderboardPage from './pages/LeaderboardPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -75,6 +76,7 @@ function AppContent() {
         <Route path="/upgrade" element={<UpgradePlanPage />} />
 
         <Route path="/students" element={<StudentsPage />} />
+        <Route path="/leaderboard" element={<LeaderboardPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <Route path="/coach-dashboard" element={<CoachDashboard />} />

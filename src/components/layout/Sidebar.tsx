@@ -13,7 +13,8 @@ import {
   Calendar,
   UserCircle,
   Zap,
-  Shield
+  Shield,
+  Trophy
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -78,6 +79,7 @@ export default function Sidebar() {
         feature: 'opendays' as Feature,
         badge: openDaysAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
       },
+      { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },
       { path: '/support', icon: HelpCircle, label: 'Support', feature: null },
       { path: '/upgrade', icon: Crown, label: 'Upgrade Plan', highlight: currentUser.plan !== 'vip', feature: null },

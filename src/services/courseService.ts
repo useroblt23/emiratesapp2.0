@@ -87,10 +87,13 @@ export interface CreateCourseData {
   lessons?: number;
   pdfFile?: File;
   video_url?: string;
+  subtitle?: string;
   allow_download: boolean;
   content_type: 'pdf' | 'video' | 'text';
   module_id?: string;
+  submodule_id?: string;
   order_in_module?: number;
+  visible?: boolean;
 }
 
 export const createCourse = async (data: CreateCourseData, coachId: string): Promise<Course> => {
@@ -126,8 +129,11 @@ export const createCourse = async (data: CreateCourseData, coachId: string): Pro
     if (pdfUrl) courseData.pdf_url = pdfUrl;
     if (pdfPath) courseData.pdf_path = pdfPath;
     if (data.video_url) courseData.video_url = data.video_url;
+    if (data.subtitle) courseData.subtitle = data.subtitle;
     if (data.module_id) courseData.module_id = data.module_id;
+    if (data.submodule_id) courseData.submodule_id = data.submodule_id;
     if (data.order_in_module !== undefined) courseData.order_in_module = data.order_in_module;
+    if (data.visible !== undefined) courseData.visible = data.visible;
 
     const docRef = doc(db, 'courses', courseId);
     await setDoc(docRef, courseData);

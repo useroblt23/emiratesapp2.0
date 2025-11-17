@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Upload, Plus } from 'lucide-react';
+import { X, Upload, Plus, Edit } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { createCourse } from '../services/courseService';
+import { createCourse, updateCourse, Course } from '../services/courseService';
 import { getAllMainModules, getSubmodulesByParent, MainModule, Submodule } from '../services/mainModuleService';
 import { useApp } from '../context/AppContext';
 
@@ -10,9 +10,10 @@ interface NewCourseFormProps {
   onClose: () => void;
   onSuccess: () => void;
   preselectedSubmoduleId?: string;
+  editingCourse?: Course;
 }
 
-export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedSubmoduleId }: NewCourseFormProps) {
+export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedSubmoduleId, editingCourse }: NewCourseFormProps) {
   const { currentUser } = useApp();
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
@@ -29,11 +30,18 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
   useEffect(() => {
     if (isOpen) {
       loadMainModules();
-      if (preselectedSubmoduleId) {
+      if (editingCourse) {
+        setTitle(editingCourse.title);
+        setSubtitle(editingCourse.subtitle || '');
+        setDescription(editingCourse.description);
+        setVideoUrl(editingCourse.video_url || '');
+        setThumbnail(editingCourse.thumbnail);
+        setSubmoduleId(editingCourse.submodule_id || '');
+      } else if (preselectedSubmoduleId) {
         setSubmoduleId(preselectedSubmoduleId);
       }
     }
-  }, [isOpen, preselectedSubmoduleId]);
+  }, [isOpen, preselectedSubmoduleId, editingCourse]);
 
   useEffect(() => {
     if (selectedMainModule) {
@@ -98,32 +106,43 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
     try {
       const embedUrl = convertToEmbedUrl(videoUrl);
 
-      await createCourse({
-        title: title.trim(),
-        description: description.trim(),
-        instructor: currentUser.name,
-        thumbnail,
-        duration: '45 min',
-        level: 'beginner',
-        plan: 'free',
-        category: 'interview',
-        lessons: 1,
-        allow_download: false,
-        content_type: 'video',
-        coach_id: currentUser.uid,
-        video_url: embedUrl,
-        subtitle: subtitle.trim() || undefined,
-        submodule_id: submoduleId,
-        visible: true
-      });
+      if (editingCourse) {
+        await updateCourse(editingCourse.id, {
+          title: title.trim(),
+          description: description.trim(),
+          thumbnail,
+          video_url: embedUrl,
+          subtitle: subtitle.trim() || undefined,
+          submodule_id: submoduleId
+        });
+        alert('Course updated successfully!');
+      } else {
+        await createCourse({
+          title: title.trim(),
+          description: description.trim(),
+          instructor: currentUser.name,
+          thumbnail,
+          duration: '45 min',
+          level: 'beginner',
+          plan: 'free',
+          category: 'interview',
+          lessons: 1,
+          allow_download: false,
+          content_type: 'video',
+          video_url: embedUrl,
+          subtitle: subtitle.trim() || undefined,
+          submodule_id: submoduleId,
+          visible: true
+        }, currentUser.uid);
+        alert('Course created successfully!');
+      }
 
-      alert('Course created successfully!');
       resetForm();
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error creating course:', error);
-      alert('Failed to create course. Please try again.');
+      console.error('Error saving course:', error);
+      alert('Failed to save course. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -161,8 +180,8 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
             >
             <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-4 sm:p-6 rounded-t-2xl flex items-center justify-between">
               <div className="flex items-center gap-2 sm:gap-3">
-                <Upload className="w-5 h-5 sm:w-6 sm:h-6" />
-                <h2 className="text-xl sm:text-2xl font-bold">Add New Course</h2>
+                {editingCourse ? <Edit className="w-5 h-5 sm:w-6 sm:h-6" /> : <Upload className="w-5 h-5 sm:w-6 sm:h-6" />}
+                <h2 className="text-xl sm:text-2xl font-bold">{editingCourse ? 'Edit Course' : 'Add New Course'}</h2>
               </div>
               <button
                 onClick={onClose}
@@ -321,12 +340,12 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
                   {loading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      <span className="text-sm sm:text-base">Creating...</span>
+                      <span className="text-sm sm:text-base">{editingCourse ? 'Updating...' : 'Creating...'}</span>
                     </>
                   ) : (
                     <>
-                      <Plus className="w-5 h-5" />
-                      <span className="text-sm sm:text-base">Create Course</span>
+                      {editingCourse ? <Edit className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                      <span className="text-sm sm:text-base">{editingCourse ? 'Update Course' : 'Create Course'}</span>
                     </>
                   )}
                 </button>

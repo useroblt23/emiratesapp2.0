@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { Plus, FolderPlus, Upload, Layers, BookOpen, Play, FileText } from 'lucide-react';
+import { Plus, FolderPlus, Upload, Layers, BookOpen, Play, FileText, Edit } from 'lucide-react';
 import { getAllMainModules, getSubmodulesByParent, MainModule } from '../services/mainModuleService';
 import { getAllCourses, Course } from '../services/courseService';
 import { motion } from 'framer-motion';
@@ -17,6 +17,7 @@ export default function NewCoachDashboard() {
   const [loading, setLoading] = useState(true);
   const [showCreateModule, setShowCreateModule] = useState(false);
   const [showAddCourse, setShowAddCourse] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | undefined>(undefined);
 
   useEffect(() => {
     if (!currentUser || (currentUser.role !== 'mentor' && currentUser.role !== 'governor')) {
@@ -188,13 +189,13 @@ export default function NewCoachDashboard() {
               key={course.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
-              onClick={() => navigate(`/course/${course.id}`)}
+              className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition"
             >
               <img
                 src={course.thumbnail}
                 alt={course.title}
-                className="w-full h-48 object-cover"
+                className="w-full h-48 object-cover cursor-pointer"
+                onClick={() => navigate(`/course/${course.id}`)}
               />
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-3">
@@ -216,14 +217,29 @@ export default function NewCoachDashboard() {
                     {course.level.toUpperCase()}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{course.title}</h3>
+                <h3
+                  className="text-xl font-bold text-gray-900 mb-2 cursor-pointer hover:text-[#D71920] transition"
+                  onClick={() => navigate(`/course/${course.id}`)}
+                >
+                  {course.title}
+                </h3>
                 <p className="text-gray-600 text-sm line-clamp-2 mb-4">{course.description}</p>
-                <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span className="flex items-center gap-1">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="flex items-center gap-1 text-gray-500">
                     <BookOpen className="w-4 h-4" />
                     {course.lessons} Lessons
                   </span>
-                  <span>{course.duration}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingCourse(course);
+                      setShowAddCourse(true);
+                    }}
+                    className="flex items-center gap-1 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg font-semibold transition"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -239,8 +255,15 @@ export default function NewCoachDashboard() {
 
       <NewCourseForm
         isOpen={showAddCourse}
-        onClose={() => setShowAddCourse(false)}
-        onSuccess={loadModules}
+        onClose={() => {
+          setShowAddCourse(false);
+          setEditingCourse(undefined);
+        }}
+        onSuccess={() => {
+          loadModules();
+          setEditingCourse(undefined);
+        }}
+        editingCourse={editingCourse}
       />
     </div>
   );

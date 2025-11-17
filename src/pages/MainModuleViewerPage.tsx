@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, FolderPlus } from 'lucide-react';
+import { ArrowLeft, Plus, FolderPlus, Upload } from 'lucide-react';
 import { getMainModule, getSubmodulesByParent, MainModule, Submodule } from '../services/mainModuleService';
 import { motion } from 'framer-motion';
 import CreateModuleForm from '../components/CreateModuleForm';
+import NewCourseForm from '../components/NewCourseForm';
 
 export default function MainModuleViewerPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -12,6 +13,7 @@ export default function MainModuleViewerPage() {
   const [submodules, setSubmodules] = useState<Submodule[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAddCourse, setShowAddCourse] = useState(false);
 
   useEffect(() => {
     if (moduleId) {
@@ -79,13 +81,20 @@ export default function MainModuleViewerPage() {
         <div className="p-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">{mainModule.title}</h1>
           <p className="text-lg text-gray-600 mb-6">{mainModule.description}</p>
-          <div className="flex gap-3">
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => setShowCreateForm(true)}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold hover:shadow-lg transition"
             >
               <Plus className="w-5 h-5" />
               Add Submodule
+            </button>
+            <button
+              onClick={() => setShowAddCourse(true)}
+              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-semibold hover:shadow-lg transition"
+            >
+              <Upload className="w-5 h-5" />
+              Add Course
             </button>
           </div>
         </div>
@@ -144,6 +153,12 @@ export default function MainModuleViewerPage() {
       <CreateModuleForm
         isOpen={showCreateForm}
         onClose={() => setShowCreateForm(false)}
+        onSuccess={loadModuleData}
+      />
+
+      <NewCourseForm
+        isOpen={showAddCourse}
+        onClose={() => setShowAddCourse(false)}
         onSuccess={loadModuleData}
       />
     </div>

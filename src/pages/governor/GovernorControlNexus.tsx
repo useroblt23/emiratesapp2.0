@@ -33,11 +33,11 @@ export default function GovernorControlNexus() {
   useEffect(() => {
     const loadAnnouncement = async () => {
       try {
-        const announcementDoc = await getDoc(doc(db, 'systemControl', 'announcement'));
+        const announcementDoc = await getDoc(doc(db, 'systemControl', 'status'));
         if (announcementDoc.exists()) {
-          const data = announcementDoc.data() as Announcement;
-          if (data.active) {
-            setAnnouncement(data);
+          const data = announcementDoc.data();
+          if (data?.announcement?.active) {
+            setAnnouncement(data.announcement as Announcement);
           }
         }
       } catch (error) {

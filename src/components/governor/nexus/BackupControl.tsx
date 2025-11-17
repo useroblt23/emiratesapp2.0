@@ -12,7 +12,7 @@ interface Backup {
 }
 
 export default function BackupControl() {
-  const { data: backups, loading } = useFirestoreCollection<Backup>('backupHistory');
+  const { data: backups, loading } = useFirestoreCollection<Backup>('backups');
   const [triggering, setTriggering] = useState(false);
 
   const sortedBackups = [...backups].sort((a, b) => {

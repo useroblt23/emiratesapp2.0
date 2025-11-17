@@ -193,6 +193,14 @@
         { "fieldPath": "issuedBy", "order": "ASCENDING" },
         { "fieldPath": "issuedAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "modules",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "category", "order": "ASCENDING" },
+        { "fieldPath": "order", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

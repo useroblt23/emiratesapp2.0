@@ -101,10 +101,35 @@ export const getModulesByCategory = async (category: string): Promise<Module[]> 
 };
 
 export const getAllModules = async (): Promise<Module[]> => {
-  const modulesRef = collection(db, 'modules');
-  const q = query(modulesRef, orderBy('category', 'asc'), orderBy('order', 'asc'));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => doc.data() as Module);
+  try {
+    const modulesRef = collection(db, 'modules');
+    console.log('Fetching modules from Firestore...');
+
+    // Try with composite index first
+    try {
+      const q = query(modulesRef, orderBy('category', 'asc'), orderBy('order', 'asc'));
+      const snapshot = await getDocs(q);
+      console.log('Modules fetched with composite index:', snapshot.size);
+      return snapshot.docs.map(doc => doc.data() as Module);
+    } catch (indexError: any) {
+      // If composite index doesn't exist, fetch all and sort in memory
+      console.warn('Composite index not found, fetching all modules:', indexError.message);
+      const snapshot = await getDocs(modulesRef);
+      console.log('Modules fetched without index:', snapshot.size);
+      const modules = snapshot.docs.map(doc => doc.data() as Module);
+
+      // Sort in memory
+      return modules.sort((a, b) => {
+        if (a.category !== b.category) {
+          return a.category.localeCompare(b.category);
+        }
+        return a.order - b.order;
+      });
+    }
+  } catch (error) {
+    console.error('Error in getAllModules:', error);
+    throw error;
+  }
 };
 
 export const getUserModuleProgress = async (userId: string, moduleId: string): Promise<UserModuleProgress | null> => {

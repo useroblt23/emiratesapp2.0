@@ -53,8 +53,16 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel, editing
 
   useEffect(() => {
     const loadModules = async () => {
-      const allModules = await getAllModules();
-      setModules(allModules);
+      try {
+        console.log('CourseUploadForm: Loading modules...');
+        const allModules = await getAllModules();
+        console.log('CourseUploadForm: Modules loaded:', allModules.length);
+        console.log('CourseUploadForm: Module data:', allModules);
+        setModules(allModules);
+      } catch (error) {
+        console.error('CourseUploadForm: Error loading modules:', error);
+        setError('Failed to load modules. Check console for details.');
+      }
     };
     loadModules();
   }, []);

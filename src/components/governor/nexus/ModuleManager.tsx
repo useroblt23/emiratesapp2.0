@@ -28,9 +28,18 @@ export default function ModuleManager() {
 
   const loadModules = async () => {
     setLoading(true);
-    const data = await getAllModules();
-    setModules(data);
-    setLoading(false);
+    try {
+      console.log('Loading modules from Firestore...');
+      const data = await getAllModules();
+      console.log('Modules loaded:', data.length);
+      console.log('Module data:', data);
+      setModules(data);
+    } catch (error) {
+      console.error('Error loading modules:', error);
+      alert('Failed to load modules. Check console for details.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +50,11 @@ export default function ModuleManager() {
         await updateModule(editingModule.id, formData);
         alert('Module updated successfully!');
       } else {
-        await createModule(formData);
+        const moduleData = {
+          ...formData,
+          lessons: []
+        };
+        await createModule(moduleData);
         alert('Module created successfully!');
       }
 
@@ -49,7 +62,7 @@ export default function ModuleManager() {
       loadModules();
     } catch (error) {
       console.error('Error saving module:', error);
-      alert('Failed to save module');
+      alert('Failed to save module. Check console for details.');
     }
   };
 

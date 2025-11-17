@@ -111,10 +111,26 @@ export default function CoursesPage() {
           </div>
         </div>
       ) : modulesWithContent.length === 0 ? (
-        <div className="text-center py-12">
+        <div className="text-center py-12 bg-white rounded-xl shadow-lg p-8">
           <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-gray-800 mb-2">No Modules Available</h3>
-          <p className="text-gray-600">Training modules will be available soon.</p>
+          <h3 className="text-xl font-bold text-gray-800 mb-2">No Training Modules Found</h3>
+          <p className="text-gray-600 mb-4">
+            No main modules have been created yet in the main_modules collection.
+          </p>
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-2xl mx-auto">
+            <p className="text-sm text-blue-900 mb-2">
+              <strong>For Administrators:</strong> To create training modules:
+            </p>
+            <ol className="text-sm text-blue-800 space-y-1 ml-4">
+              <li>1. Go to Coach Dashboard or Governor Control Nexus</li>
+              <li>2. Click "Create Module" to create a new Main Module</li>
+              <li>3. Add courses to your modules</li>
+              <li>4. They will appear here for students</li>
+            </ol>
+            <p className="text-xs text-blue-700 mt-3">
+              Note: Check browser console for debugging information about what was fetched from Firebase.
+            </p>
+          </div>
         </div>
       ) : (
         <div className="space-y-6">

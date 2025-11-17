@@ -10,10 +10,11 @@ interface NewCourseFormProps {
   onClose: () => void;
   onSuccess: () => void;
   preselectedSubmoduleId?: string;
+  preselectedMainModuleId?: string;
   editingCourse?: Course;
 }
 
-export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedSubmoduleId, editingCourse }: NewCourseFormProps) {
+export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedSubmoduleId, preselectedMainModuleId, editingCourse }: NewCourseFormProps) {
   const { currentUser } = useApp();
   const [title, setTitle] = useState('');
   const [subtitle, setSubtitle] = useState('');
@@ -37,11 +38,17 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
         setVideoUrl(editingCourse.video_url || '');
         setThumbnail(editingCourse.thumbnail);
         setSubmoduleId(editingCourse.submodule_id || '');
-      } else if (preselectedSubmoduleId) {
-        setSubmoduleId(preselectedSubmoduleId);
+        setSelectedMainModule(editingCourse.module_id || '');
+      } else {
+        if (preselectedMainModuleId) {
+          setSelectedMainModule(preselectedMainModuleId);
+        }
+        if (preselectedSubmoduleId) {
+          setSubmoduleId(preselectedSubmoduleId);
+        }
       }
     }
-  }, [isOpen, preselectedSubmoduleId, editingCourse]);
+  }, [isOpen, preselectedSubmoduleId, preselectedMainModuleId, editingCourse]);
 
   useEffect(() => {
     if (selectedMainModule) {
@@ -97,7 +104,7 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
       return;
     }
 
-    if (!selectedMainModule && !preselectedSubmoduleId) {
+    if (!selectedMainModule && !preselectedSubmoduleId && !preselectedMainModuleId) {
       alert('Please select a main module');
       return;
     }
@@ -162,7 +169,7 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
     setVideoUrl('');
     setThumbnail('');
     setSubmoduleId(preselectedSubmoduleId || '');
-    setSelectedMainModule('');
+    setSelectedMainModule(preselectedMainModuleId || '');
   };
 
   return (
@@ -289,7 +296,7 @@ export default function NewCourseForm({ isOpen, onClose, onSuccess, preselectedS
                 </div>
               </div>
 
-              {!preselectedSubmoduleId && (
+              {!preselectedSubmoduleId && !preselectedMainModuleId && (
                 <>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">

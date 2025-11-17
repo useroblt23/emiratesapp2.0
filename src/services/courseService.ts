@@ -288,7 +288,7 @@ export const getCoursesByModule = async (moduleId: string): Promise<Course[]> =>
   try {
     console.log('Fetching courses for module:', moduleId);
     const coursesRef = collection(db, 'courses');
-    const q = query(coursesRef, where('module_id', '==', moduleId), where('visible', '==', true));
+    const q = query(coursesRef, where('module_id', '==', moduleId));
     const querySnapshot = await getDocs(q);
 
     const courses = querySnapshot.docs.map(doc => ({
@@ -296,8 +296,9 @@ export const getCoursesByModule = async (moduleId: string): Promise<Course[]> =>
       ...doc.data()
     })) as Course[];
 
-    console.log('Courses found for module:', courses.length);
-    return courses.sort((a, b) => (a.order_in_module || 0) - (b.order_in_module || 0));
+    const visibleCourses = courses.filter(course => course.visible !== false);
+    console.log('Courses found for module:', visibleCourses.length);
+    return visibleCourses.sort((a, b) => (a.order_in_module || 0) - (b.order_in_module || 0));
   } catch (error) {
     console.error('Error fetching courses by module:', error);
     return [];

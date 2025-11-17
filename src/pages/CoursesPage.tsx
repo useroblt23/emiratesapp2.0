@@ -1,15 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, Clock, BarChart3, Lock, Crown, Zap } from 'lucide-react';
+import { BookOpen, Clock, BarChart3, Lock, Crown, Zap, GraduationCap } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { motion } from 'framer-motion';
 import { getAllCourses, Course } from '../services/courseService';
+import { getAllModules, Module } from '../services/moduleService';
 
 export default function CoursesPage() {
   const { currentUser } = useApp();
   const navigate = useNavigate();
+  const [viewMode, setViewMode] = useState<'courses' | 'modules'>('courses');
   const [selectedCategory, setSelectedCategory] = useState<'all' | Course['category']>('all');
   const [courses, setCourses] = useState<Course[]>([]);
+  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
 
   const userPlan = currentUser?.plan || 'free';
@@ -23,9 +26,13 @@ export default function CoursesPage() {
       const coursesData = await getAllCourses();
       const visibleCourses = coursesData.filter(course => !course.suppressed);
       setCourses(visibleCourses);
+
+      const modulesData = await getAllModules();
+      setModules(modulesData);
     } catch (error) {
       console.error('Error fetching courses:', error);
       setCourses([]);
+      setModules([]);
     } finally {
       setLoading(false);
     }
@@ -76,15 +83,45 @@ export default function CoursesPage() {
     );
   };
 
+  const displayModules = useMemo(() => {
+    if (selectedCategory === 'all') return modules;
+    return modules.filter(module => module.category === selectedCategory);
+  }, [selectedCategory, modules]);
+
   return (
     <div className="min-h-screen">
       <div className="mb-6 md:mb-8">
         <h1 className="text-3xl md:text-4xl font-bold text-[#000000] mb-2">
-          Training Courses
+          Training {viewMode === 'courses' ? 'Courses' : 'Modules'}
         </h1>
         <p className="text-sm md:text-base text-gray-600">
           Master the skills needed to become a successful cabin crew member
         </p>
+      </div>
+
+      <div className="mb-6 flex gap-2">
+        <button
+          onClick={() => setViewMode('courses')}
+          className={`px-6 py-2 rounded-lg font-semibold transition ${
+            viewMode === 'courses'
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <BookOpen className="w-4 h-4 inline mr-2" />
+          Courses
+        </button>
+        <button
+          onClick={() => setViewMode('modules')}
+          className={`px-6 py-2 rounded-lg font-semibold transition ${
+            viewMode === 'modules'
+              ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <GraduationCap className="w-4 h-4 inline mr-2" />
+          Modules
+        </button>
       </div>
 
       <div className="mb-6 flex flex-wrap gap-2">
@@ -130,9 +167,55 @@ export default function CoursesPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#D71920] mx-auto mb-4"></div>
-            <p className="text-gray-600">Loading courses...</p>
+            <p className="text-gray-600">Loading {viewMode}...</p>
           </div>
         </div>
+      ) : viewMode === 'modules' ? (
+        displayModules.length === 0 ? (
+          <div className="text-center py-12">
+            <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold text-gray-800 mb-2">No Modules Available</h3>
+            <p className="text-gray-600">Modules will be available soon.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {displayModules.map((module) => (
+              <motion.div
+                key={module.id}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                onClick={() => navigate(`/modules/${module.id}`)}
+              >
+                <div className="bg-gradient-to-br from-blue-600 to-blue-700 h-48 flex items-center justify-center">
+                  <GraduationCap className="w-20 h-20 text-white opacity-80" />
+                </div>
+
+                <div className="p-6">
+                  <div className="mb-2">
+                    <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold uppercase">
+                      {module.category}
+                    </span>
+                  </div>
+
+                  <h3 className="text-xl font-bold text-gray-900 mb-2">{module.name}</h3>
+                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">{module.description}</p>
+
+                  <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <div className="flex items-center gap-1">
+                      <BookOpen className="w-4 h-4" />
+                      <span>{module.lessons.length} Lessons</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <BarChart3 className="w-4 h-4" />
+                      <span>Module {module.order}</span>
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )
       ) : displayCourses.length === 0 ? (
         <div className="text-center py-12">
           <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />

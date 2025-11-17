@@ -22,6 +22,7 @@ import RecruitersPage from './pages/RecruitersPage';
 import OpenDaysPage from './pages/OpenDaysPage';
 import UpgradePlanPage from './pages/UpgradePlanPage';
 import CourseViewerPage from './pages/CourseViewerPage';
+import ModuleViewerPage from './pages/ModuleViewerPage';
 import DocumentationPage from './pages/DocumentationPage';
 import StudentsPage from './pages/StudentsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
@@ -65,6 +66,7 @@ function AppContent() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/courses/:courseId" element={<CourseViewerPage />} />
+        <Route path="/modules/:moduleId" element={<ModuleViewerPage />} />
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />

@@ -13,6 +13,40 @@ import {
 } from 'firebase/firestore';
 import { uploadPDFToStorage, deletePDFFromStorage } from './storageService';
 
+export const enrollInCourse = async (userId: string, courseId: string): Promise<void> => {
+  const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+
+  await setDoc(enrollmentRef, {
+    user_id: userId,
+    course_id: courseId,
+    enrolled_at: new Date().toISOString(),
+    progress: 0,
+    completed: false
+  });
+};
+
+export const isEnrolledInCourse = async (userId: string, courseId: string): Promise<boolean> => {
+  const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+  const enrollmentSnap = await getDoc(enrollmentRef);
+  return enrollmentSnap.exists();
+};
+
+export const getUserEnrollments = async (userId: string): Promise<any[]> => {
+  const enrollmentsRef = collection(db, 'course_enrollments');
+  const q = query(enrollmentsRef, where('user_id', '==', userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+};
+
+export const updateCourseProgress = async (userId: string, courseId: string, progress: number): Promise<void> => {
+  const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+  await updateDoc(enrollmentRef, {
+    progress,
+    completed: progress >= 100,
+    updated_at: new Date().toISOString()
+  });
+};
+
 export interface Course {
   id: string;
   title: string;

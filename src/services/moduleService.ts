@@ -13,12 +13,22 @@ import {
   Timestamp
 } from 'firebase/firestore';
 
+export interface ModuleLesson {
+  id: string;
+  title: string;
+  videoUrl: string;
+  duration: string;
+  order: number;
+  isIntro: boolean;
+}
+
 export interface Module {
   id: string;
   name: string;
   description: string;
   category: 'grooming' | 'service' | 'safety' | 'interview' | 'language';
   order: number;
+  lessons: ModuleLesson[];
   quiz_id?: string;
   created_at: string;
   updated_at: string;
@@ -28,6 +38,7 @@ export interface UserModuleProgress {
   user_id: string;
   module_id: string;
   completed_courses: string[];
+  completed_lessons: string[];
   quiz_passed: boolean;
   quiz_score?: number;
   quiz_attempts: number;
@@ -101,6 +112,7 @@ export const initializeUserModuleProgress = async (userId: string, moduleId: str
     user_id: userId,
     module_id: moduleId,
     completed_courses: [],
+    completed_lessons: [],
     quiz_passed: false,
     quiz_attempts: 0,
     unlocked: isFirstModule,
@@ -222,4 +234,45 @@ export const canTakeModuleQuiz = async (userId: string, moduleId: string, course
   if (!progress) return false;
 
   return coursesInModule.every(courseId => progress.completed_courses.includes(courseId));
+};
+
+export const markLessonComplete = async (userId: string, moduleId: string, lessonId: string): Promise<void> => {
+  const progressRef = doc(db, 'user_module_progress', `${userId}_${moduleId}`);
+  const progressSnap = await getDoc(progressRef);
+
+  if (progressSnap.exists()) {
+    const progress = progressSnap.data() as UserModuleProgress;
+    if (!progress.completed_lessons.includes(lessonId)) {
+      progress.completed_lessons.push(lessonId);
+      await updateDoc(progressRef, { completed_lessons: progress.completed_lessons });
+    }
+  } else {
+    await initializeUserModuleProgress(userId, moduleId);
+    await updateDoc(progressRef, { completed_lessons: [lessonId] });
+  }
+};
+
+export const isLessonUnlocked = async (userId: string, moduleId: string, module: Module, lessonId: string): Promise<boolean> => {
+  const lesson = module.lessons.find(l => l.id === lessonId);
+  if (!lesson) return false;
+
+  if (lesson.isIntro) return true;
+
+  const progress = await getUserModuleProgress(userId, moduleId);
+  if (!progress) return false;
+
+  const prevLesson = module.lessons.find(l => l.order === lesson.order - 1);
+  if (!prevLesson) return false;
+
+  return progress.completed_lessons.includes(prevLesson.id) && progress.quiz_passed;
+};
+
+export const canWatchNextLesson = async (userId: string, moduleId: string, currentLessonId: string, module: Module): Promise<boolean> => {
+  const progress = await getUserModuleProgress(userId, moduleId);
+  if (!progress) return false;
+
+  const currentLesson = module.lessons.find(l => l.id === currentLessonId);
+  if (!currentLesson || currentLesson.isIntro) return true;
+
+  return progress.quiz_passed;
 };

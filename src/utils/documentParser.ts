@@ -9,36 +9,60 @@ export interface ParsedDocument {
 export async function parseDocument(file: File): Promise<ParsedDocument> {
   const fileType = file.type;
   const fileName = file.name;
+  const fileExtension = fileName.split('.').pop()?.toLowerCase();
 
-  if (fileType === 'application/pdf') {
+  console.log('Parsing document:', { fileName, fileType, fileExtension });
+
+  if (fileType === 'application/pdf' || fileExtension === 'pdf') {
     return parsePDF(file, fileName);
   } else if (
     fileType === 'application/msword' ||
-    fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    fileType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+    fileExtension === 'doc' ||
+    fileExtension === 'docx'
   ) {
     return parseDOCX(file, fileName);
   } else {
-    throw new Error('Unsupported file type');
+    throw new Error('Unsupported file type. Please use PDF, DOC, or DOCX files.');
   }
 }
 
 async function parsePDF(file: File, fileName: string): Promise<ParsedDocument> {
   try {
+    console.log('Starting PDF parse for:', fileName);
     const arrayBuffer = await file.arrayBuffer();
+    console.log('ArrayBuffer size:', arrayBuffer.byteLength);
 
     const pdfjsLib = await import('pdfjs-dist');
+    console.log('PDF.js version:', pdfjsLib.version);
+
     pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    console.log('Loading PDF document...');
+    const loadingTask = pdfjsLib.getDocument({
+      data: arrayBuffer,
+      verbosity: 0
+    });
+
+    const pdf = await loadingTask.promise;
+    console.log('PDF loaded successfully. Pages:', pdf.numPages);
+
     let fullText = '';
 
     for (let i = 1; i <= pdf.numPages; i++) {
+      console.log(`Processing page ${i}/${pdf.numPages}`);
       const page = await pdf.getPage(i);
       const textContent = await page.getTextContent();
       const pageText = textContent.items
         .map((item: any) => item.str)
         .join(' ');
       fullText += pageText + '\n';
+    }
+
+    console.log('PDF parsed successfully. Text length:', fullText.length);
+
+    if (fullText.trim().length === 0) {
+      throw new Error('PDF appears to be empty or contains only images. Please use a PDF with text content.');
     }
 
     return {
@@ -48,7 +72,13 @@ async function parsePDF(file: File, fileName: string): Promise<ParsedDocument> {
     };
   } catch (error) {
     console.error('Error parsing PDF:', error);
-    throw new Error('Failed to parse PDF. Please ensure the file is a valid PDF document.');
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+
+    if (errorMessage.includes('empty') || errorMessage.includes('images')) {
+      throw error;
+    }
+
+    throw new Error(`Failed to parse PDF: ${errorMessage}. The file may be corrupted or password-protected.`);
   }
 }
 

@@ -40,8 +40,10 @@ export const createMainModule = async (data: {
   coverImage: string;
 }): Promise<string> => {
   try {
+    console.log('createMainModule: Starting creation with data:', data);
     const moduleRef = doc(collection(db, 'main_modules'));
     const moduleId = moduleRef.id;
+    console.log('createMainModule: Generated module ID:', moduleId);
 
     const mainModule: MainModule = {
       id: moduleId,
@@ -53,11 +55,14 @@ export const createMainModule = async (data: {
       updated_at: new Date().toISOString()
     };
 
+    console.log('createMainModule: Module object to save:', mainModule);
+    console.log('createMainModule: Saving to collection path: main_modules');
     await setDoc(moduleRef, mainModule);
-    console.log('Main module created:', moduleId);
+    console.log('createMainModule: Successfully saved main module with ID:', moduleId);
+    console.log('createMainModule: Module should now be in Firestore at: main_modules/' + moduleId);
     return moduleId;
   } catch (error) {
-    console.error('Error creating main module:', error);
+    console.error('createMainModule: Error creating main module:', error);
     throw error;
   }
 };
@@ -96,13 +101,21 @@ export const createSubmodule = async (data: {
 
 export const getAllMainModules = async (): Promise<MainModule[]> => {
   try {
+    console.log('getAllMainModules: Fetching from collection: main_modules');
     const modulesRef = collection(db, 'main_modules');
     const q = query(modulesRef, orderBy('created_at', 'desc'));
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => doc.data() as MainModule);
+    console.log('getAllMainModules: Found', snapshot.docs.length, 'main modules');
+    const modules = snapshot.docs.map(doc => {
+      const data = doc.data() as MainModule;
+      console.log('getAllMainModules: Module:', doc.id, data);
+      return data;
+    });
+
+    return modules;
   } catch (error) {
-    console.error('Error fetching main modules:', error);
+    console.error('getAllMainModules: Error fetching main modules:', error);
     return [];
   }
 };

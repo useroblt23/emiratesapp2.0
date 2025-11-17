@@ -25,6 +25,7 @@ import CourseViewerPage from './pages/CourseViewerPage';
 import DocumentationPage from './pages/DocumentationPage';
 import StudentsPage from './pages/StudentsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
+import InitializeData from './pages/governor/InitializeData';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -89,6 +90,7 @@ function AppContent() {
         {(currentUser.role === 'governor' || currentUser.role === 'mentor') && (
           <>
             <Route path="/governor/nexus" element={<GovernorControlNexus />} />
+            <Route path="/governor/initialize" element={<InitializeData />} />
           </>
         )}
 

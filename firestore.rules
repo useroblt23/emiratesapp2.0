@@ -88,13 +88,13 @@ service cloud.firestore {
     ///////////////////////////////////////////////////////////////////////////
     match /courses/{courseId} {
       allow read: if isAuthenticated() && (
-        resource.data.layer == 'Free' ||
+        resource.data.plan == 'free' ||
         (
-          resource.data.layer == 'Pro' &&
+          resource.data.plan == 'pro' &&
           getUserData().plan in ['pro', 'vip']
         ) ||
         (
-          resource.data.layer == 'VIP' &&
+          resource.data.plan == 'vip' &&
           getUserData().plan == 'vip'
         ) ||
         isStaff()

@@ -13,6 +13,7 @@ export default function ModuleManager() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingModule, setEditingModule] = useState<Module | null>(null);
+  const [viewMode, setViewMode] = useState<'grouped' | 'all'>('grouped');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -123,16 +124,40 @@ export default function ModuleManager() {
           <FolderPlus className="w-6 h-6 text-blue-400" />
           <div>
             <h2 className="text-xl font-bold text-slate-100">Module Management</h2>
-            <p className="text-slate-400 text-sm">Create and organize course modules</p>
+            <p className="text-slate-400 text-sm">Create and organize course modules ({modules.length} total)</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition flex items-center gap-2"
-        >
-          {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-          {showForm ? 'Cancel' : 'New Module'}
-        </button>
+        <div className="flex gap-2">
+          <div className="flex bg-slate-700 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('grouped')}
+              className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
+                viewMode === 'grouped'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              Grouped
+            </button>
+            <button
+              onClick={() => setViewMode('all')}
+              className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
+                viewMode === 'all'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-400 hover:text-slate-300'
+              }`}
+            >
+              All Modules
+            </button>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition flex items-center gap-2"
+          >
+            {showForm ? <X className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {showForm ? 'Cancel' : 'New Module'}
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -260,6 +285,71 @@ export default function ModuleManager() {
           <p className="text-slate-300 font-semibold">No modules created yet</p>
           <p className="text-slate-400 text-sm mt-1">Create your first module to organize courses</p>
         </div>
+      ) : viewMode === 'all' ? (
+        <div className="bg-slate-700 rounded-lg p-4">
+          <h3 className="text-lg font-bold text-slate-100 mb-3">
+            All Modules ({modules.length})
+          </h3>
+          <div className="space-y-2">
+            {modules
+              .sort((a, b) => {
+                if (a.category !== b.category) {
+                  return a.category.localeCompare(b.category);
+                }
+                return a.order - b.order;
+              })
+              .map((module) => (
+                <div
+                  key={module.id}
+                  className="bg-slate-600 rounded-lg p-4 flex items-center justify-between hover:bg-slate-550 transition"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center gap-3">
+                      <span className="px-2 py-1 bg-purple-500/20 text-purple-300 text-xs font-bold rounded uppercase">
+                        {module.category}
+                      </span>
+                      <span className="px-2 py-1 bg-blue-500/20 text-blue-300 text-xs font-bold rounded">
+                        #{module.order}
+                      </span>
+                      <h4 className="font-bold text-slate-100">{module.name}</h4>
+                      {module.visible && (
+                        <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs font-bold rounded">
+                          VISIBLE
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-400 mt-1">{module.description}</p>
+                    {module.quiz_id && (
+                      <p className="text-xs text-green-400 mt-2">
+                        Quiz Required: {module.quiz_id}
+                      </p>
+                    )}
+                    {module.cover_image && (
+                      <p className="text-xs text-cyan-400 mt-1">
+                        📷 Has cover image
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEdit(module)}
+                      className="p-2 bg-slate-700 hover:bg-slate-800 text-blue-400 rounded-lg transition"
+                      title="Edit Module"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(module.id)}
+                      className="p-2 bg-slate-700 hover:bg-slate-800 text-red-400 rounded-lg transition"
+                      title="Delete Module"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
       ) : (
         <div className="space-y-6">
           {Object.entries(groupedModules).map(([category, categoryModules]) => (
@@ -279,6 +369,11 @@ export default function ModuleManager() {
                           #{module.order}
                         </span>
                         <h4 className="font-bold text-slate-100">{module.name}</h4>
+                        {module.visible && (
+                          <span className="px-2 py-1 bg-green-500/20 text-green-300 text-xs font-bold rounded">
+                            VISIBLE
+                          </span>
+                        )}
                       </div>
                       <p className="text-sm text-slate-400 mt-1">{module.description}</p>
                       {module.quiz_id && (
@@ -291,12 +386,14 @@ export default function ModuleManager() {
                       <button
                         onClick={() => handleEdit(module)}
                         className="p-2 bg-slate-700 hover:bg-slate-800 text-blue-400 rounded-lg transition"
+                        title="Edit Module"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(module.id)}
                         className="p-2 bg-slate-700 hover:bg-slate-800 text-red-400 rounded-lg transition"
+                        title="Delete Module"
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>

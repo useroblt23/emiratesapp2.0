@@ -1,24 +1,19 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Settings, MessageCircle, Brain, Download, FileQuestion, AlertCircle } from 'lucide-react';
+import { Settings, MessageCircle, Brain, FileQuestion, AlertCircle, Calendar, Users } from 'lucide-react';
 import { doc, getDoc, updateDoc, collection, addDoc } from 'firebase/firestore';
 import { db } from '../../../lib/firebase';
 import { useApp } from '../../../context/AppContext';
-
-interface SystemFlags {
-  chatEnabled: boolean;
-  quizEnabled: boolean;
-  aiEnabled: boolean;
-  downloadsEnabled: boolean;
-}
+import { getSystemControl, SystemFeatures } from '../../../services/systemControlService';
 
 export default function SystemFlags() {
   const { currentUser } = useApp();
-  const [flags, setFlags] = useState<SystemFlags>({
-    chatEnabled: true,
-    quizEnabled: true,
-    aiEnabled: true,
-    downloadsEnabled: true,
+  const [features, setFeatures] = useState<SystemFeatures>({
+    chat: true,
+    quiz: true,
+    englishTest: true,
+    profileEdit: true,
+    openDayModule: true
   });
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
@@ -26,21 +21,21 @@ export default function SystemFlags() {
   const isGovernor = currentUser?.role === 'governor';
 
   useEffect(() => {
-    const loadFlags = async () => {
-      try {
-        const statusDoc = await getDoc(doc(db, 'systemControl', 'status'));
-        if (statusDoc.exists()) {
-          setFlags(statusDoc.data() as SystemFlags);
-        }
-      } catch (error) {
-        console.error('Error loading system flags:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadFlags();
+    loadFeatures();
   }, []);
+
+  const loadFeatures = async () => {
+    try {
+      const control = await getSystemControl();
+      if (control && control.features) {
+        setFeatures(control.features);
+      }
+    } catch (error) {
+      console.error('Error loading system features:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const logAction = async (flagName: string, newValue: boolean) => {
     try {
@@ -56,21 +51,32 @@ export default function SystemFlags() {
     }
   };
 
-  const handleToggle = async (flagName: keyof SystemFlags) => {
-    if (!isGovernor) return;
+  const handleToggle = async (featureName: keyof SystemFeatures) => {
+    if (!isGovernor || !currentUser) return;
 
-    setUpdating(flagName);
-    const newValue = !flags[flagName];
+    setUpdating(featureName);
+    const newValue = !features[featureName];
 
     try {
-      await updateDoc(doc(db, 'systemControl', 'status'), {
-        [flagName]: newValue,
-      });
-      setFlags((prev) => ({ ...prev, [flagName]: newValue }));
-      await logAction(flagName, newValue);
+      const control = await getSystemControl();
+      if (control) {
+        const updatedFeatures = {
+          ...control.features,
+          [featureName]: newValue
+        };
+
+        await updateDoc(doc(db, 'systemControl', 'status'), {
+          features: updatedFeatures,
+          updatedBy: currentUser.uid,
+          updatedAt: new Date()
+        });
+
+        setFeatures(updatedFeatures);
+        await logAction(featureName, newValue);
+      }
     } catch (error) {
-      console.error(`Error toggling ${flagName}:`, error);
-      alert(`Failed to update ${flagName}`);
+      console.error(`Error toggling ${featureName}:`, error);
+      alert(`Failed to update ${featureName}`);
     } finally {
       setUpdating(null);
     }
@@ -78,32 +84,39 @@ export default function SystemFlags() {
 
   const flagConfig = [
     {
-      key: 'chatEnabled' as keyof SystemFlags,
+      key: 'chat' as keyof SystemFeatures,
       label: 'Chat System',
       icon: MessageCircle,
       color: 'blue',
       description: 'Enable/disable platform chat functionality',
     },
     {
-      key: 'quizEnabled' as keyof SystemFlags,
+      key: 'quiz' as keyof SystemFeatures,
       label: 'Quiz System',
       icon: FileQuestion,
       color: 'green',
       description: 'Enable/disable quiz and assessment features',
     },
     {
-      key: 'aiEnabled' as keyof SystemFlags,
-      label: 'AI Assistant',
+      key: 'englishTest' as keyof SystemFeatures,
+      label: 'English Test',
       icon: Brain,
       color: 'purple',
-      description: 'Enable/disable AI assistant functionality',
+      description: 'Enable/disable English test functionality',
     },
     {
-      key: 'downloadsEnabled' as keyof SystemFlags,
-      label: 'Downloads',
-      icon: Download,
+      key: 'profileEdit' as keyof SystemFeatures,
+      label: 'Profile Editing',
+      icon: Users,
       color: 'orange',
-      description: 'Enable/disable file downloads',
+      description: 'Enable/disable profile editing',
+    },
+    {
+      key: 'openDayModule' as keyof SystemFeatures,
+      label: 'Open Day Module',
+      icon: Calendar,
+      color: 'red',
+      description: 'Enable/disable Open Day simulator',
     },
   ];
 
@@ -123,17 +136,17 @@ export default function SystemFlags() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="backdrop-blur-lg bg-white/80 rounded-xl shadow-lg border border-gray-200/50 p-6"
+      className="bg-slate-800 border border-slate-700 rounded-lg p-6"
     >
       <div className="flex items-center gap-2 mb-4">
-        <Settings className="w-5 h-5 text-gray-700" />
-        <h2 className="text-xl font-bold text-gray-900">System Flags</h2>
+        <Settings className="w-5 h-5 text-slate-300" />
+        <h2 className="text-xl font-bold text-slate-100">System Feature Flags</h2>
       </div>
 
       {!isGovernor && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-yellow-700">
+        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-lg flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-yellow-300">
             View only mode. System flag control requires governor access.
           </p>
         </div>
@@ -142,7 +155,7 @@ export default function SystemFlags() {
       <div className="space-y-3">
         {flagConfig.map((flag, index) => {
           const Icon = flag.icon;
-          const isEnabled = flags[flag.key];
+          const isEnabled = features[flag.key];
           const isUpdating = updating === flag.key;
 
           return (
@@ -151,16 +164,28 @@ export default function SystemFlags() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 bg-white/50 rounded-lg border border-gray-200/50"
+              className="p-4 bg-slate-700 rounded-lg border border-slate-600"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg bg-${flag.color}-100 flex items-center justify-center`}>
-                    <Icon className={`w-5 h-5 text-${flag.color}-600`} />
+                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                    flag.color === 'blue' ? 'bg-blue-900/50' :
+                    flag.color === 'green' ? 'bg-green-900/50' :
+                    flag.color === 'purple' ? 'bg-purple-900/50' :
+                    flag.color === 'orange' ? 'bg-orange-900/50' :
+                    'bg-red-900/50'
+                  }`}>
+                    <Icon className={`w-5 h-5 ${
+                      flag.color === 'blue' ? 'text-blue-400' :
+                      flag.color === 'green' ? 'text-green-400' :
+                      flag.color === 'purple' ? 'text-purple-400' :
+                      flag.color === 'orange' ? 'text-orange-400' :
+                      'text-red-400'
+                    }`} />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{flag.label}</h3>
-                    <p className="text-xs text-gray-500">{flag.description}</p>
+                    <h3 className="font-semibold text-slate-100">{flag.label}</h3>
+                    <p className="text-xs text-slate-400">{flag.description}</p>
                   </div>
                 </div>
 
@@ -168,7 +193,7 @@ export default function SystemFlags() {
                   onClick={() => handleToggle(flag.key)}
                   disabled={!isGovernor || isUpdating}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isEnabled ? 'bg-green-500' : 'bg-gray-300'
+                    isEnabled ? 'bg-green-500' : 'bg-slate-600'
                   }`}
                 >
                   <span
@@ -180,7 +205,7 @@ export default function SystemFlags() {
               </div>
 
               {isEnabled && (
-                <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
+                <div className="mt-2 flex items-center gap-1 text-xs text-green-400">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                   Active across platform
                 </div>
@@ -190,8 +215,8 @@ export default function SystemFlags() {
         })}
       </div>
 
-      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <p className="text-xs text-blue-700">
+      <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700/50 rounded-lg">
+        <p className="text-xs text-blue-300">
           <strong>Note:</strong> Changes to system flags are instantly reflected across the entire platform.
         </p>
       </div>

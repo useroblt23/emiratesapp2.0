@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import SystemAnnouncementBanner from '../SystemAnnouncementBanner';
+import BugReportButton from '../BugReportButton';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -46,6 +47,8 @@ export default function Layout({ children }: LayoutProps) {
           </div>
         </main>
       </div>
+
+      <BugReportButton />
     </div>
   );
 }

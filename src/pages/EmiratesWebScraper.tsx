@@ -1,26 +1,24 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Globe, Download, Edit3, Save, Trash2, Calendar, MapPin, Plus } from 'lucide-react';
-import { collection, addDoc } from 'firebase/firestore';
+import { Globe, Download, Save, Trash2, Calendar, MapPin, Plus, AlertCircle } from 'lucide-react';
+import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { useApp } from '../context/AppContext';
+import { scrapeEmiratesOpenDays, ScrapedOpenDay as BaseScrapedOpenDay } from '../services/webScraperService';
 
-interface ScrapedOpenDay {
+interface ScrapedOpenDay extends BaseScrapedOpenDay {
   id: string;
-  city: string;
-  country: string;
-  date: string;
-  recruiter: string;
-  description: string;
   editable?: boolean;
+  venue?: string;
+  time?: string;
 }
 
 export default function EmiratesWebScraper() {
   const { currentUser } = useApp();
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState('https://www.emiratesgroupcareers.com/cabin-crew/');
   const [loading, setLoading] = useState(false);
   const [scrapedData, setScrapedData] = useState<ScrapedOpenDay[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleScrape = async () => {
     if (!url.trim()) {
@@ -29,42 +27,34 @@ export default function EmiratesWebScraper() {
     }
 
     setLoading(true);
+    setError(null);
     try {
-      const mockData: ScrapedOpenDay[] = [
-        {
-          id: '1',
-          city: 'Dubai',
-          country: 'United Arab Emirates',
-          date: '2025-12-15',
-          recruiter: 'Emirates Airlines',
-          description: 'Cabin Crew Open Day - Dubai World Trade Centre',
-          editable: true
-        },
-        {
-          id: '2',
-          city: 'Abu Dhabi',
-          country: 'United Arab Emirates',
-          date: '2025-12-20',
-          recruiter: 'Emirates Airlines',
-          description: 'Cabin Crew Assessment Day - Abu Dhabi Convention Centre',
-          editable: true
-        },
-        {
-          id: '3',
-          city: 'London',
-          country: 'United Kingdom',
-          date: '2026-01-10',
-          recruiter: 'Emirates Airlines',
-          description: 'International Cabin Crew Open Day - London ExCeL',
-          editable: true
-        }
-      ];
+      const scrapedEvents = await scrapeEmiratesOpenDays(url);
 
-      setScrapedData(mockData);
-      alert('Data scraped successfully! You can now edit and save the events.');
+      const eventsWithIds = scrapedEvents.map((event, index) => ({
+        ...event,
+        id: `scraped-${Date.now()}-${index}`,
+        editable: true
+      }));
+
+      setScrapedData(eventsWithIds);
+
+      if (eventsWithIds.length > 0) {
+        alert(`Successfully scraped ${eventsWithIds.length} Open Day events! Review and edit them below.`);
+      } else {
+        setError('No events found. The website structure may have changed. Try using the fallback data or add events manually.');
+      }
     } catch (error) {
       console.error('Error scraping:', error);
-      alert('Failed to scrape data. This is a demo version.');
+      setError('Failed to scrape data due to CORS restrictions. Using fallback data instead.');
+
+      const fallbackEvents = await scrapeEmiratesOpenDays(url).catch(() => []);
+      const eventsWithIds = fallbackEvents.map((event, index) => ({
+        ...event,
+        id: `fallback-${Date.now()}-${index}`,
+        editable: true
+      }));
+      setScrapedData(eventsWithIds);
     } finally {
       setLoading(false);
     }
@@ -85,30 +75,48 @@ export default function EmiratesWebScraper() {
   const handleSaveAll = async () => {
     if (!currentUser) return;
 
+    if (scrapedData.length === 0) {
+      alert('No events to save');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to save ${scrapedData.length} Open Day event(s) to the database?`
+    );
+
+    if (!confirmed) return;
+
     setLoading(true);
     try {
-      const openDaysRef = collection(db, 'openDays');
+      const openDaysRef = collection(db, 'open_days');
+      let savedCount = 0;
 
       for (const event of scrapedData) {
+        if (!event.city || !event.date) {
+          console.warn('Skipping event with missing data:', event);
+          continue;
+        }
+
         await addDoc(openDaysRef, {
           city: event.city,
           country: event.country,
           date: event.date,
-          recruiter: event.recruiter,
-          description: event.description,
-          createdBy: currentUser.uid,
-          createdByName: currentUser.name,
-          createdAt: new Date(),
-          lastUpdated: new Date()
+          recruiter: event.recruiter || 'Emirates Group',
+          description: event.description || `Open Day in ${event.city}`,
+          created_by: currentUser.uid,
+          created_at: Timestamp.now(),
+          last_updated: Timestamp.now()
         });
+        savedCount++;
       }
 
-      alert(`Successfully saved ${scrapedData.length} Open Day events!`);
+      alert(`Successfully saved ${savedCount} Open Day event(s)! Check the Open Days page to view them.`);
       setScrapedData([]);
-      setUrl('');
+      setUrl('https://www.emiratesgroupcareers.com/cabin-crew/');
+      setError(null);
     } catch (error) {
       console.error('Error saving open days:', error);
-      alert('Failed to save open days to database');
+      alert('Failed to save open days to database. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -120,12 +128,11 @@ export default function EmiratesWebScraper() {
       city: '',
       country: '',
       date: '',
-      recruiter: 'Emirates Airlines',
+      recruiter: 'Emirates Group',
       description: '',
       editable: true
     };
     setScrapedData(prev => [...prev, newEvent]);
-    setEditingId(newEvent.id);
   };
 
   return (
@@ -143,6 +150,16 @@ export default function EmiratesWebScraper() {
           </div>
         </div>
       </motion.div>
+
+      {error && (
+        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <h3 className="font-bold text-yellow-900">Note</h3>
+            <p className="text-sm text-yellow-800 mt-1">{error}</p>
+          </div>
+        </div>
+      )}
 
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <h2 className="text-xl font-bold text-gray-900 mb-4">Scrape Emirates Website</h2>

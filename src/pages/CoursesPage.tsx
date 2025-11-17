@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, Play, GraduationCap, ChevronDown, ChevronUp } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { getAllMainModules, MainModule, getSubmodulesByParent, Submodule } from '../services/mainModuleService';
-import { getCoursesByModule, getCoursesBySubmodule, Course } from '../services/courseService';
+import { getAllModules, Module } from '../services/moduleService';
+import { getCoursesByModule, Course } from '../services/courseService';
 import { useApp } from '../context/AppContext';
 
-interface ModuleWithContent extends MainModule {
+interface ModuleWithContent extends Module {
   courses: Course[];
-  submodules: (Submodule & { courses: Course[] })[];
 }
 
 export default function CoursesPage() {
@@ -28,12 +27,12 @@ export default function CoursesPage() {
 
   const fetchData = async () => {
     try {
-      console.log('CoursesPage: Fetching main modules with content...');
-      const modulesData = await getAllMainModules();
-      console.log('CoursesPage: Main modules fetched:', modulesData.length, modulesData);
+      console.log('CoursesPage: Fetching modules with content...');
+      const modulesData = await getAllModules();
+      console.log('CoursesPage: Modules fetched:', modulesData.length, modulesData);
 
       if (modulesData.length === 0) {
-        console.log('CoursesPage: No main modules found');
+        console.log('CoursesPage: No modules found');
         setModulesWithContent([]);
         setLoading(false);
         return;
@@ -41,31 +40,13 @@ export default function CoursesPage() {
 
       const modulesWithContentData = await Promise.all(
         modulesData.map(async (module) => {
-          console.log(`CoursesPage: Fetching content for module ${module.id}...`);
-          const [courses, submodules] = await Promise.all([
-            getCoursesByModule(module.id),
-            getSubmodulesByParent(module.id)
-          ]);
-
-          console.log(`CoursesPage: Module ${module.id} - courses: ${courses.length}, submodules: ${submodules.length}`);
-
-          const mainModuleCourses = courses.filter(course => !course.submodule_id);
-
-          const submodulesWithCourses = await Promise.all(
-            submodules.map(async (submodule) => {
-              const submoduleCourses = await getCoursesBySubmodule(submodule.id);
-              console.log(`CoursesPage: Submodule ${submodule.id} has ${submoduleCourses.length} courses`);
-              return {
-                ...submodule,
-                courses: submoduleCourses
-              };
-            })
-          );
+          console.log(`CoursesPage: Fetching courses for module ${module.id}...`);
+          const courses = await getCoursesByModule(module.id);
+          console.log(`CoursesPage: Module ${module.id} has ${courses.length} courses`);
 
           return {
             ...module,
-            courses: mainModuleCourses,
-            submodules: submodulesWithCourses
+            courses
           };
         })
       );
@@ -115,20 +96,21 @@ export default function CoursesPage() {
           <GraduationCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-800 mb-2">No Training Modules Found</h3>
           <p className="text-gray-600 mb-4">
-            No main modules have been created yet in the main_modules collection.
+            No modules have been created yet.
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left max-w-2xl mx-auto">
             <p className="text-sm text-blue-900 mb-2">
               <strong>For Administrators:</strong> To create training modules:
             </p>
             <ol className="text-sm text-blue-800 space-y-1 ml-4">
-              <li>1. Go to Coach Dashboard or Governor Control Nexus</li>
-              <li>2. Click "Create Module" to create a new Main Module</li>
-              <li>3. Add courses to your modules</li>
-              <li>4. They will appear here for students</li>
+              <li>1. Go to Coach Dashboard</li>
+              <li>2. Click "Create Module" button</li>
+              <li>3. Fill in the module details and create it</li>
+              <li>4. Add courses to your module</li>
+              <li>5. Your modules will appear here for students</li>
             </ol>
             <p className="text-xs text-blue-700 mt-3">
-              Note: Check browser console for debugging information about what was fetched from Firebase.
+              Note: Check browser console for debugging information.
             </p>
           </div>
         </div>
@@ -136,7 +118,7 @@ export default function CoursesPage() {
         <div className="space-y-6">
           {modulesWithContent.map((module) => {
             const isExpanded = expandedModules.has(module.id);
-            const totalCourses = module.courses.length + module.submodules.reduce((sum, sub) => sum + sub.courses.length, 0);
+            const totalCourses = module.courses.length;
 
             return (
               <motion.div
@@ -150,19 +132,19 @@ export default function CoursesPage() {
                   onClick={() => toggleModule(module.id)}
                 >
                   <div className="flex items-center gap-4 p-6">
-                    <img
-                      src={module.coverImage}
-                      alt={module.title}
-                      className="w-24 h-24 rounded-lg object-cover"
-                    />
+                    {module.cover_image && (
+                      <img
+                        src={module.cover_image}
+                        alt={module.name}
+                        className="w-24 h-24 rounded-lg object-cover"
+                      />
+                    )}
                     <div className="flex-1">
-                      <h3 className="text-2xl font-bold text-gray-900 mb-1">{module.title}</h3>
+                      <h3 className="text-2xl font-bold text-gray-900 mb-1">{module.name}</h3>
                       <p className="text-gray-600 text-sm mb-2">{module.description}</p>
                       <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg font-semibold">{module.category}</span>
                         <span>{totalCourses} course{totalCourses !== 1 ? 's' : ''}</span>
-                        {module.submodules.length > 0 && (
-                          <span>{module.submodules.length} submodule{module.submodules.length !== 1 ? 's' : ''}</span>
-                        )}
                       </div>
                     </div>
                     {isExpanded ? (
@@ -183,9 +165,8 @@ export default function CoursesPage() {
                       className="border-t border-gray-200"
                     >
                       <div className="p-6 space-y-6">
-                        {module.courses.length > 0 && (
+                        {module.courses.length > 0 ? (
                           <div>
-                            <h4 className="font-semibold text-gray-900 mb-3">Courses</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                               {module.courses.map((course) => (
                                 <div
@@ -219,57 +200,12 @@ export default function CoursesPage() {
                               ))}
                             </div>
                           </div>
-                        )}
-
-                        {module.submodules.map((submodule) => (
-                          <div key={submodule.id}>
-                            <div className="flex items-center gap-3 mb-3">
-                              <img
-                                src={submodule.coverImage}
-                                alt={submodule.title}
-                                className="w-16 h-16 rounded-lg object-cover"
-                              />
-                              <div>
-                                <h4 className="font-semibold text-gray-900">{submodule.title}</h4>
-                                <p className="text-xs text-gray-600">{submodule.description}</p>
-                              </div>
-                            </div>
-                            {submodule.courses.length > 0 && (
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 ml-20">
-                                {submodule.courses.map((course) => (
-                                  <div
-                                    key={course.id}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      navigate(`/course/${course.id}`);
-                                    }}
-                                    className="bg-gray-50 rounded-lg overflow-hidden hover:shadow-md transition cursor-pointer"
-                                  >
-                                    <div className="relative">
-                                      <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        className="w-full h-32 object-cover"
-                                      />
-                                      {course.video_url && (
-                                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                                          <Play className="w-8 h-8 text-white" />
-                                        </div>
-                                      )}
-                                    </div>
-                                    <div className="p-4">
-                                      <h5 className="font-semibold text-gray-900 text-sm mb-1">{course.title}</h5>
-                                      {course.subtitle && (
-                                        <p className="text-xs text-gray-500 mb-1">{course.subtitle}</p>
-                                      )}
-                                      <p className="text-gray-600 text-xs line-clamp-2">{course.description}</p>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            )}
+                        ) : (
+                          <div className="text-center py-8 text-gray-500">
+                            <BookOpen className="w-12 h-12 mx-auto mb-2 text-gray-400" />
+                            <p>No courses in this module yet</p>
                           </div>
-                        ))}
+                        )}
                       </div>
                     </motion.div>
                   )}

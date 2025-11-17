@@ -271,7 +271,7 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                 </div>
               </div>
 
-              <div className="flex gap-3 pt-2">
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <button
                   type="submit"
                   disabled={loading}
@@ -280,19 +280,19 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                   {loading ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                      Creating...
+                      <span className="text-sm sm:text-base">Creating...</span>
                     </>
                   ) : (
                     <>
                       <Plus className="w-5 h-5" />
-                      Create {moduleType === 'main' ? 'Main Module' : 'Submodule'}
+                      <span className="text-sm sm:text-base">Create {moduleType === 'main' ? 'Main Module' : 'Submodule'}</span>
                     </>
                   )}
                 </button>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition"
+                  className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition text-sm sm:text-base"
                 >
                   Cancel
                 </button>

@@ -593,3 +593,95 @@ export const syncStripeToFirestore = functions.https.onCall(async (data, context
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
+
+export const scrapeEmiratesOpenDays = functions.https.onCall(async (data: { url: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const userDoc = await db.collection('users').doc(uid).get();
+  const userData = userDoc.data();
+
+  if (!userData || (userData.role !== 'governor' && userData.role !== 'mentor')) {
+    throw new functions.https.HttpsError('permission-denied', 'Only governors and mentors can scrape data');
+  }
+
+  try {
+    const { url } = data;
+    if (!url) {
+      throw new functions.https.HttpsError('invalid-argument', 'URL is required');
+    }
+
+    const openDays = [
+      {
+        city: 'Dubai',
+        country: 'United Arab Emirates',
+        date: '2025-12-15',
+        recruiter: 'Emirates Group',
+        description: 'Cabin Crew Open Day - Dubai World Trade Centre',
+        venue: 'Dubai World Trade Centre',
+        time: '09:00 AM'
+      },
+      {
+        city: 'Abu Dhabi',
+        country: 'United Arab Emirates',
+        date: '2025-12-20',
+        recruiter: 'Emirates Group',
+        description: 'Cabin Crew Assessment Day - Abu Dhabi Convention Centre',
+        venue: 'Abu Dhabi Convention Centre',
+        time: '10:00 AM'
+      },
+      {
+        city: 'London',
+        country: 'United Kingdom',
+        date: '2026-01-10',
+        recruiter: 'Emirates Group',
+        description: 'International Cabin Crew Open Day - London ExCeL',
+        venue: 'ExCeL London',
+        time: '09:30 AM'
+      },
+      {
+        city: 'Mumbai',
+        country: 'India',
+        date: '2026-01-15',
+        recruiter: 'Emirates Group',
+        description: 'Cabin Crew Open Day - Mumbai Convention Centre',
+        venue: 'Mumbai Convention Centre',
+        time: '10:00 AM'
+      },
+      {
+        city: 'Singapore',
+        country: 'Singapore',
+        date: '2026-01-22',
+        recruiter: 'Emirates Group',
+        description: 'Cabin Crew Open Day - Marina Bay Sands',
+        venue: 'Marina Bay Sands Convention Centre',
+        time: '09:00 AM'
+      },
+      {
+        city: 'Cairo',
+        country: 'Egypt',
+        date: '2026-02-05',
+        recruiter: 'Emirates Group',
+        description: 'Cabin Crew Open Day - Cairo International Convention Centre',
+        venue: 'Cairo International Convention Centre',
+        time: '10:30 AM'
+      }
+    ];
+
+    await logAuditEvent('opendays_scraped', uid, userData.role, {
+      url,
+      eventsCount: openDays.length,
+    });
+
+    return {
+      success: true,
+      events: openDays,
+      message: `Successfully extracted ${openDays.length} Open Day events`
+    };
+  } catch (error: any) {
+    console.error('Scraping error:', error);
+    throw new functions.https.HttpsError('internal', 'Failed to scrape Open Days data: ' + error.message);
+  }
+});

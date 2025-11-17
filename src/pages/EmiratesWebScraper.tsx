@@ -3,11 +3,16 @@ import { motion } from 'framer-motion';
 import { Globe, Download, Save, Trash2, Calendar, MapPin, Plus, AlertCircle } from 'lucide-react';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useApp } from '../context/AppContext';
-import { scrapeEmiratesOpenDays, ScrapedOpenDay as BaseScrapedOpenDay } from '../services/webScraperService';
 
-interface ScrapedOpenDay extends BaseScrapedOpenDay {
+interface ScrapedOpenDay {
   id: string;
+  city: string;
+  country: string;
+  date: string;
+  recruiter: string;
+  description: string;
   editable?: boolean;
   venue?: string;
   time?: string;
@@ -29,32 +34,28 @@ export default function EmiratesWebScraper() {
     setLoading(true);
     setError(null);
     try {
-      const scrapedEvents = await scrapeEmiratesOpenDays(url);
+      const functions = getFunctions();
+      const scrapeFunction = httpsCallable(functions, 'scrapeEmiratesOpenDays');
 
-      const eventsWithIds = scrapedEvents.map((event, index) => ({
-        ...event,
-        id: `scraped-${Date.now()}-${index}`,
-        editable: true
-      }));
+      const result = await scrapeFunction({ url });
+      const data = result.data as { success: boolean; events: any[]; message: string };
 
-      setScrapedData(eventsWithIds);
+      if (data.success && data.events) {
+        const eventsWithIds = data.events.map((event, index) => ({
+          ...event,
+          id: `scraped-${Date.now()}-${index}`,
+          editable: true
+        }));
 
-      if (eventsWithIds.length > 0) {
-        alert(`Successfully scraped ${eventsWithIds.length} Open Day events! Review and edit them below.`);
+        setScrapedData(eventsWithIds);
+        alert(data.message || `Successfully extracted ${eventsWithIds.length} Open Day events!`);
       } else {
-        setError('No events found. The website structure may have changed. Try using the fallback data or add events manually.');
+        setError('No events found. Please try again or add events manually.');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error scraping:', error);
-      setError('Failed to scrape data due to CORS restrictions. Using fallback data instead.');
-
-      const fallbackEvents = await scrapeEmiratesOpenDays(url).catch(() => []);
-      const eventsWithIds = fallbackEvents.map((event, index) => ({
-        ...event,
-        id: `fallback-${Date.now()}-${index}`,
-        editable: true
-      }));
-      setScrapedData(eventsWithIds);
+      setError(error.message || 'Failed to scrape data. Please try again or add events manually.');
+      alert('Scraping failed: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }

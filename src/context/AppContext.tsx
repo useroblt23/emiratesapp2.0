@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
+import { useRef } from 'react';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { auth, db } from '../lib/firebase';
@@ -60,6 +61,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const firestoreUnsubscribeRef = useRef<(() => void) | null>(null);
   const [maintenanceMode, setMaintenanceMode] = useState(false);
   const [maintenanceMessage, setMaintenanceMessage] = useState('System under maintenance. Please check back soon.');
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -102,6 +104,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     console.log('Setting up Firebase auth listener');
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      // Clean up any existing Firestore listener
+      if (firestoreUnsubscribeRef.current) {
+        firestoreUnsubscribeRef.current();
+        firestoreUnsubscribeRef.current = null;
+      }
+
       if (firebaseUser) {
         console.log('User authenticated:', firebaseUser.uid);
 
@@ -138,54 +146,27 @@ export function AppProvider({ children }: { children: ReactNode }) {
               localStorage.setItem('currentUser', JSON.stringify(updatedUser));
             } else {
               console.warn('User document not found in Firestore. User may need to complete registration.');
-              const basicUser: User = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email || '',
-                name: firebaseUser.displayName || 'User',
-                role: 'student',
-                plan: 'free',
-                country: '',
-                bio: '',
-                expectations: '',
-                photoURL: firebaseUser.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
-                hasCompletedOnboarding: false,
-                hasSeenWelcomeBanner: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              };
-              setCurrentUser(basicUser);
-              localStorage.setItem('currentUser', JSON.stringify(basicUser));
+              // Force logout if user document doesn't exist
+              console.warn('User document missing, forcing logout');
+              auth.signOut();
+              setCurrentUser(null);
+              localStorage.removeItem('currentUser');
+              sessionStorage.clear();
             }
           },
           (error) => {
             console.error('Error listening to user document:', error);
-            if (error.code === 'permission-denied') {
-              console.warn('Permission denied for user document. This may happen if the user document does not exist yet.');
-              const basicUser: User = {
-                uid: firebaseUser.uid,
-                email: firebaseUser.email || '',
-                name: firebaseUser.displayName || 'User',
-                role: 'student',
-                plan: 'free',
-                country: '',
-                bio: '',
-                expectations: '',
-                photoURL: firebaseUser.photoURL || 'https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=200',
-                hasCompletedOnboarding: false,
-                hasSeenWelcomeBanner: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              };
-              setCurrentUser(basicUser);
-              localStorage.setItem('currentUser', JSON.stringify(basicUser));
-            }
+            // Force logout on any Firestore error to prevent auth loops
+            console.warn('Firestore error, forcing logout to prevent auth loop');
+            auth.signOut();
+            setCurrentUser(null);
+            localStorage.removeItem('currentUser');
+            sessionStorage.clear();
           }
         );
 
-        return () => {
-          console.log('Cleaning up Firestore listener');
-          unsubscribeFirestore();
-        };
+        // Store the unsubscribe function in the ref
+        firestoreUnsubscribeRef.current = unsubscribeFirestore;
       } else {
         console.log('User signed out');
         setCurrentUser(null);
@@ -195,6 +176,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     return () => {
       console.log('Cleaning up auth listener');
+      // Clean up Firestore listener if it exists
+      if (firestoreUnsubscribeRef.current) {
+        firestoreUnsubscribeRef.current();
+        firestoreUnsubscribeRef.current = null;
+      }
       unsubscribeAuth();
     };
   }, []);

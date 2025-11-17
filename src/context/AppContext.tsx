@@ -31,6 +31,7 @@ export interface User {
   updatedAt: string;
   banned?: boolean;
   muted?: boolean;
+  cvUrl?: string;
 }
 
 export interface Banner {
@@ -130,6 +131,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 updatedAt: userData.updatedAt || new Date().toISOString(),
                 banned: userData.banned,
                 muted: userData.muted,
+                cvUrl: userData.cvUrl,
               };
 
               setCurrentUser(updatedUser);

@@ -1,35 +1,65 @@
-import { useState } from 'react';
-import { Upload, FileText, X } from 'lucide-react';
-import { createCourse, CreateCourseData } from '../services/courseService';
+import { useState, useRef, useEffect } from 'react';
+import { Upload, FileText, X, Image } from 'lucide-react';
+import { createCourse, updateCourse, CreateCourseData, Course } from '../services/courseService';
 import { validatePDFFile } from '../services/storageService';
 
 interface CourseUploadFormProps {
   coachId: string;
   onSuccess: () => void;
   onCancel: () => void;
+  editingCourse?: Course;
 }
 
-export default function CourseUploadForm({ coachId, onSuccess, onCancel }: CourseUploadFormProps) {
+export default function CourseUploadForm({ coachId, onSuccess, onCancel, editingCourse }: CourseUploadFormProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState('');
   const [pdfFile, setPdfFile] = useState<File | null>(null);
-  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [thumbnailBase64, setThumbnailBase64] = useState('');
+  const thumbnailInputRef = useRef<HTMLInputElement>(null);
 
-  const [videoUrl, setVideoUrl] = useState('');
+  const [videoUrl, setVideoUrl] = useState(editingCourse?.video_url || '');
 
   const [formData, setFormData] = useState<CreateCourseData>({
-    title: '',
-    description: '',
-    instructor: '',
-    thumbnail: '',
-    duration: '',
-    level: 'beginner',
-    plan: 'free',
-    category: 'grooming',
-    lessons: 1,
-    allow_download: false,
-    content_type: 'pdf',
+    title: editingCourse?.title || '',
+    description: editingCourse?.description || '',
+    instructor: editingCourse?.instructor || '',
+    thumbnail: editingCourse?.thumbnail || '',
+    duration: editingCourse?.duration || '',
+    level: editingCourse?.level || 'beginner',
+    plan: editingCourse?.plan || 'free',
+    category: editingCourse?.category || 'grooming',
+    lessons: editingCourse?.lessons || 1,
+    allow_download: editingCourse?.allow_download || false,
+    content_type: editingCourse?.content_type || 'pdf',
   });
+
+  useEffect(() => {
+    if (editingCourse?.thumbnail) {
+      setThumbnailBase64(editingCourse.thumbnail);
+    }
+  }, [editingCourse]);
+
+  const handleThumbnailUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload a valid image file (PNG, JPG, GIF)');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      setError('Image size should be less than 2MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setThumbnailBase64(reader.result as string);
+      setError('');
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handlePDFUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -49,12 +79,12 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     e.preventDefault();
     setError('');
 
-    if (!thumbnailUrl.trim()) {
-      setError('Please enter a thumbnail URL');
+    if (!thumbnailBase64.trim()) {
+      setError('Please upload a thumbnail image');
       return;
     }
 
-    if (formData.content_type === 'pdf' && !pdfFile) {
+    if (formData.content_type === 'pdf' && !pdfFile && !editingCourse?.pdf_url) {
       setError('Please select a PDF file to upload');
       return;
     }
@@ -67,22 +97,37 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
     setIsUploading(true);
 
     try {
-      console.log('Starting course creation...');
-      await createCourse(
-        {
-          ...formData,
-          thumbnail: thumbnailUrl,
-          pdfFile: formData.content_type === 'pdf' ? pdfFile : undefined,
-          video_url: formData.content_type === 'video' ? videoUrl : undefined,
-        },
-        coachId
-      );
+      if (editingCourse) {
+        console.log('Updating course...');
+        await updateCourse(
+          editingCourse.id,
+          {
+            ...formData,
+            thumbnail: thumbnailBase64,
+            pdfFile: pdfFile || undefined,
+            video_url: formData.content_type === 'video' ? videoUrl : undefined,
+          },
+          editingCourse.pdf_path
+        );
+        console.log('Course updated successfully');
+      } else {
+        console.log('Starting course creation...');
+        await createCourse(
+          {
+            ...formData,
+            thumbnail: thumbnailBase64,
+            pdfFile: formData.content_type === 'pdf' ? pdfFile : undefined,
+            video_url: formData.content_type === 'video' ? videoUrl : undefined,
+          },
+          coachId
+        );
+        console.log('Course created successfully');
+      }
 
-      console.log('Course created successfully');
       onSuccess();
     } catch (err: any) {
       console.error('Upload error:', err);
-      setError(err.message || 'Failed to upload course. Please try again.');
+      setError(err.message || `Failed to ${editingCourse ? 'update' : 'upload'} course. Please try again.`);
     } finally {
       setIsUploading(false);
     }
@@ -91,8 +136,8 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white p-6 flex items-center justify-between rounded-t-2xl">
-          <h2 className="text-2xl font-bold">Upload New Course</h2>
+        <div className="sticky top-0 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white p-6 flex items-center justify-between rounded-t-2xl">
+          <h2 className="text-2xl font-bold">{editingCourse ? 'Edit Course' : 'Upload New Course'}</h2>
           <button
             onClick={onCancel}
             className="p-2 hover:bg-white/10 rounded-lg transition"
@@ -132,24 +177,29 @@ export default function CourseUploadForm({ coachId, onSuccess, onCancel }: Cours
 
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">
-              Thumbnail Image URL *
+              Cover Image *
             </label>
             <input
-              type="url"
-              value={thumbnailUrl}
-              onChange={(e) => setThumbnailUrl(e.target.value)}
-              required
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
-              placeholder="https://example.com/image.jpg"
+              ref={thumbnailInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleThumbnailUpload}
+              className="hidden"
             />
-            <p className="text-xs text-gray-500 mt-2">
-              Enter a URL for the course thumbnail image (e.g., from Pexels, Unsplash, or your own hosting)
-            </p>
-            {thumbnailUrl && (
+            <button
+              type="button"
+              onClick={() => thumbnailInputRef.current?.click()}
+              className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#D71920] transition cursor-pointer bg-gray-50 hover:bg-gray-100"
+            >
+              <Image className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+              <p className="text-sm text-gray-600 font-semibold">Click to upload cover image</p>
+              <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF (Max 2MB)</p>
+            </button>
+            {thumbnailBase64 && (
               <div className="mt-3 border-2 border-gray-200 rounded-xl overflow-hidden">
                 <img
-                  src={thumbnailUrl}
-                  alt="Thumbnail preview"
+                  src={thumbnailBase64}
+                  alt="Cover preview"
                   className="w-full h-40 object-cover"
                   onError={(e) => {
                     e.currentTarget.src = 'https://images.pexels.com/photos/346885/pexels-photo-346885.jpeg?auto=compress&cs=tinysrgb&w=400';

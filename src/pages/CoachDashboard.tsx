@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { Upload, BookOpen, X, Plus } from 'lucide-react';
+import { Upload, BookOpen, X, Plus, Edit } from 'lucide-react';
 import CourseUploadForm from '../components/CourseUploadForm';
 import { getCoursesByCoach, Course } from '../services/courseService';
 
@@ -11,6 +11,7 @@ export default function CoachDashboard() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [showUploadForm, setShowUploadForm] = useState(false);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   useEffect(() => {
     if (!currentUser || (currentUser.role !== 'mentor' && currentUser.role !== 'governor')) {
@@ -38,7 +39,13 @@ export default function CoachDashboard() {
 
   const handleUploadSuccess = () => {
     setShowUploadForm(false);
+    setEditingCourse(null);
     loadCourses();
+  };
+
+  const handleEditCourse = (e: React.MouseEvent, course: Course) => {
+    e.stopPropagation();
+    setEditingCourse(course);
   };
 
   if (!currentUser || (currentUser.role !== 'mentor' && currentUser.role !== 'governor')) {
@@ -132,6 +139,13 @@ export default function CoachDashboard() {
                     </span>
                     <span>{course.duration}</span>
                   </div>
+                  <button
+                    onClick={(e) => handleEditCourse(e, course)}
+                    className="mt-4 w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#D71920] text-white rounded-lg font-semibold hover:bg-[#B91518] transition"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Edit Course
+                  </button>
                 </div>
               </div>
             ))}
@@ -139,11 +153,15 @@ export default function CoachDashboard() {
         </div>
       )}
 
-      {showUploadForm && (
+      {(showUploadForm || editingCourse) && (
         <CourseUploadForm
           coachId={currentUser.uid}
+          editingCourse={editingCourse || undefined}
           onSuccess={handleUploadSuccess}
-          onCancel={() => setShowUploadForm(false)}
+          onCancel={() => {
+            setShowUploadForm(false);
+            setEditingCourse(null);
+          }}
         />
       )}
     </div>

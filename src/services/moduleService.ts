@@ -48,18 +48,26 @@ export interface UserModuleProgress {
 }
 
 export const createModule = async (moduleData: Omit<Module, 'id' | 'created_at' | 'updated_at'>): Promise<string> => {
-  const moduleRef = doc(collection(db, 'modules'));
-  const now = new Date().toISOString();
+  try {
+    console.log('Creating module in Firestore...');
+    const moduleRef = doc(collection(db, 'modules'));
+    const now = new Date().toISOString();
 
-  const newModule: Module = {
-    id: moduleRef.id,
-    ...moduleData,
-    created_at: now,
-    updated_at: now
-  };
+    const newModule: Module = {
+      id: moduleRef.id,
+      ...moduleData,
+      created_at: now,
+      updated_at: now
+    };
 
-  await setDoc(moduleRef, newModule);
-  return moduleRef.id;
+    console.log('Module data prepared:', { id: newModule.id, name: newModule.name });
+    await setDoc(moduleRef, newModule);
+    console.log('Module saved to Firestore successfully');
+    return moduleRef.id;
+  } catch (error) {
+    console.error('Error in createModule:', error);
+    throw error;
+  }
 };
 
 export const updateModule = async (moduleId: string, updates: Partial<Module>): Promise<void> => {

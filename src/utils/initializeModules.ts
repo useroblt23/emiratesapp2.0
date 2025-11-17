@@ -325,15 +325,26 @@ export const initializeDefaultModules = async (): Promise<void> => {
   ];
 
   console.log('Initializing default modules...');
+  console.log('Total modules to create:', defaultModules.length);
+
+  let successCount = 0;
+  let errorCount = 0;
 
   for (const module of defaultModules) {
     try {
-      await createModule(module);
-      console.log(`Created module: ${module.name}`);
+      console.log(`Creating module: ${module.name}...`);
+      const moduleId = await createModule(module);
+      console.log(`✅ Successfully created module: ${module.name} (ID: ${moduleId})`);
+      successCount++;
     } catch (error) {
-      console.error(`Error creating module ${module.name}:`, error);
+      console.error(`❌ Error creating module ${module.name}:`, error);
+      console.error('Module data:', JSON.stringify(module, null, 2));
+      errorCount++;
     }
   }
 
-  console.log('Default modules initialization complete!');
+  console.log(`\n=== Module Initialization Complete ===`);
+  console.log(`✅ Success: ${successCount} modules`);
+  console.log(`❌ Errors: ${errorCount} modules`);
+  console.log(`=====================================\n`);
 };

@@ -15,23 +15,44 @@ export default function DataInitializer() {
   const handleInitializeAll = async () => {
     setLoading(true);
     setStatus({});
+
+    console.log('===== STARTING DATA INITIALIZATION =====');
+
     try {
+      console.log('Step 1: Initializing courses...');
       await initializeDefaultCourses();
+      console.log('✅ Courses initialized successfully');
+
+      console.log('Step 2: Initializing modules...');
       await initializeDefaultModules();
+      console.log('✅ Modules initialized successfully');
+
       setStatus({
         courses: 'success',
         modules: 'success',
         message: 'Database initialized with sample courses and modules!'
       });
     } catch (error: any) {
-      console.error('Error:', error);
+      console.error('❌ INITIALIZATION ERROR:', error);
+      console.error('Error name:', error.name);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      console.error('Full error:', JSON.stringify(error, null, 2));
+
+      let errorMessage = error.message || 'Failed to initialize data';
+
+      if (error.code === 'permission-denied') {
+        errorMessage = 'Permission denied. Make sure you are logged in as Governor and Firestore rules are deployed.';
+      }
+
       setStatus({
         courses: 'error',
         modules: 'error',
-        message: error.message || 'Failed to initialize data'
+        message: errorMessage
       });
     } finally {
       setLoading(false);
+      console.log('===== INITIALIZATION COMPLETE =====');
     }
   };
 

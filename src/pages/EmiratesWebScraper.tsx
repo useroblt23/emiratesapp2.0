@@ -3,19 +3,12 @@ import { motion } from 'framer-motion';
 import { Globe, Download, Save, Trash2, Calendar, MapPin, Plus, AlertCircle } from 'lucide-react';
 import { collection, addDoc, Timestamp } from 'firebase/firestore';
 import { db } from '../lib/firebase';
-import { getFunctions, httpsCallable } from 'firebase/functions';
 import { useApp } from '../context/AppContext';
+import { scrapeEmiratesOpenDays, ScrapedOpenDay as BaseScrapedOpenDay } from '../services/webScraperService';
 
-interface ScrapedOpenDay {
+interface ScrapedOpenDay extends BaseScrapedOpenDay {
   id: string;
-  city: string;
-  country: string;
-  date: string;
-  recruiter: string;
-  description: string;
   editable?: boolean;
-  venue?: string;
-  time?: string;
 }
 
 export default function EmiratesWebScraper() {

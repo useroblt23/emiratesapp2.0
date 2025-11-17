@@ -27,18 +27,17 @@ export default function CoursesPage() {
   const fetchCourses = async () => {
     try {
       const allCourses = await getAllCourses();
-      const visibleCourses = allCourses.filter(course => course.visible !== false);
 
       if (currentUser) {
         const coursesWithEnrollment = await Promise.all(
-          visibleCourses.map(async (course) => {
+          allCourses.map(async (course) => {
             const isEnrolled = await isEnrolledInCourse(currentUser.uid, course.id);
             return { ...course, isEnrolled };
           })
         );
         setCourses(coursesWithEnrollment);
       } else {
-        setCourses(visibleCourses.map(course => ({ ...course, isEnrolled: false })));
+        setCourses(allCourses.map(course => ({ ...course, isEnrolled: false })));
       }
     } catch (error) {
       console.error('Error fetching courses:', error);

@@ -3,8 +3,6 @@ import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { useState, useRef, useEffect } from 'react';
 import { analyzeCVForEmirates, getCabinCrewGuidance, optimizeCVForATS } from '../utils/aiService';
-import { checkFeatureAccess } from '../utils/featureAccess';
-import FeatureLock from '../components/FeatureLock';
 import CVAnalyzer from '../components/CVAnalyzer';
 import { parseDocument } from '../utils/documentParser';
 
@@ -16,19 +14,6 @@ interface ChatMessage {
 
 export default function AITrainerPage() {
   const { currentUser } = useApp();
-  const access = checkFeatureAccess(currentUser, 'ai-trainer');
-
-  if (!access.allowed) {
-    return (
-      <FeatureLock
-        requiredPlan={access.requiresPlan || 'vip'}
-        featureName="AI Trainer"
-        description={access.message || 'Upgrade to access the AI Trainer'}
-      />
-    );
-  }
-
-  const isPro = currentUser?.plan === 'pro' || currentUser?.plan === 'vip';
   const [activeTab, setActiveTab] = useState<'cv' | 'chat'>('cv');
 
   const [cvText, setCvText] = useState('');
@@ -176,32 +161,6 @@ export default function AITrainerPage() {
     "What are the most important grooming standards?",
     "How can I improve my English for the interview?",
   ];
-
-  if (!isPro) {
-    return (
-      <div className="p-4 md:p-8 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 text-center"
-        >
-          <div className="w-20 h-20 bg-gradient-to-br from-[#D71921] to-[#B91518] rounded-full flex items-center justify-center mx-auto mb-6">
-            <Brain className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-[#000000] mb-4">AI Trainer</h1>
-          <p className="text-lg text-gray-700 mb-6">
-            This feature is exclusive to Pro and VIP members. Upgrade to unlock your AI Trainer and get personalized CV feedback and interview coaching.
-          </p>
-          <button
-            onClick={() => window.location.href = '/upgrade'}
-            className="px-8 py-3 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
-          >
-            Upgrade Now
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
 
   return (
     <div className="p-4 md:p-8 max-w-6xl mx-auto">

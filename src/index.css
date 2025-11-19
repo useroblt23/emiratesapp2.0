@@ -82,6 +82,19 @@
                 0 1px 2px rgba(0, 0, 0, 0.04);
   }
 
+  /* Override Tailwind's shadow-lg for white backgrounds - make it subtle */
+  .bg-white.shadow-lg,
+  .shadow-lg.bg-white {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
+                0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  }
+
+  /* Subtle shadow for cards on white background */
+  .shadow-subtle {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
+                0 1px 2px rgba(0, 0, 0, 0.03);
+  }
+
   /* Strong Crystal (Dropdowns, Modals) - subtle like screenshot */
   .liquid-crystal-strong {
     backdrop-filter: blur(20px) saturate(180%);
@@ -423,5 +436,36 @@
   .status-badge-closed {
     background: #F5F5F5;
     color: #616161;
+  }
+
+  /* ======================================
+     📱 RESPONSIVE MODAL & POPUP FIXES
+     ====================================== */
+
+  /* Ensure modals and popups don't overlap with header */
+  .fixed[class*="z-"] {
+    max-height: calc(100vh - 80px);
+  }
+
+  /* Safe area for chat popup */
+  @media (max-height: 700px) {
+    .fixed.bottom-4.right-4 {
+      bottom: 8px;
+      right: 8px;
+    }
+  }
+
+  /* Ensure shadow-2xl is also subtle on white */
+  .bg-white.shadow-2xl,
+  .shadow-2xl.bg-white {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08),
+                0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  }
+
+  /* Ensure shadow-xl is also subtle on white */
+  .bg-white.shadow-xl,
+  .shadow-xl.bg-white {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06),
+                0 1px 2px rgba(0, 0, 0, 0.03) !important;
   }
 }

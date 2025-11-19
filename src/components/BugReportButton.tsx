@@ -81,7 +81,7 @@ export default function BugReportButton() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col"
+                className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="sticky top-0 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white p-4 sm:p-6 rounded-t-2xl flex items-center justify-between">

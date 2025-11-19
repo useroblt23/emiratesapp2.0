@@ -193,11 +193,12 @@ export default function SupportChatPopup({ isOpen, onClose, ticket: existingTick
               opacity: 1,
               scale: 1,
               y: 0,
-              height: isMinimized ? '64px' : '600px'
+              height: isMinimized ? '64px' : 'auto',
+              maxHeight: isMinimized ? '64px' : 'calc(100vh - 120px)'
             }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-4 right-4 w-96 bg-white rounded-2xl shadow-xl border border-gray-200 z-50 flex flex-col overflow-hidden"
+            className="fixed bottom-4 right-4 w-96 max-w-[calc(100vw-2rem)] bg-white rounded-2xl shadow-xl border border-gray-200 z-50 flex flex-col overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="chat-header flex items-center justify-between">

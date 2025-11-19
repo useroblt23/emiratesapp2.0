@@ -173,6 +173,9 @@ export default function VideoCoursePage() {
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] p-6 text-white">
             <h1 className="text-3xl font-bold mb-2">Open Day Training Module</h1>
+            <p className="text-red-100 mb-4 text-sm">
+              Complete both videos → Pass quiz (70%+) → Unlock other modules
+            </p>
             <div className="flex items-center gap-4">
               <div className="flex-1 bg-white/20 rounded-full h-3 overflow-hidden">
                 <div
@@ -181,6 +184,32 @@ export default function VideoCoursePage() {
                 />
               </div>
               <span className="font-bold text-xl">{progress.overallProgress}%</span>
+            </div>
+            <div className="mt-3 flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                {progress.video1.completed ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <div className="w-4 h-4 border-2 border-white/50 rounded-full" />
+                )}
+                <span>Video 1</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {progress.video2.completed ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <div className="w-4 h-4 border-2 border-white/50 rounded-full" />
+                )}
+                <span>Video 2</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {progress.quizCompleted ? (
+                  <CheckCircle className="w-4 h-4" />
+                ) : (
+                  <div className="w-4 h-4 border-2 border-white/50 rounded-full" />
+                )}
+                <span>Quiz</span>
+              </div>
             </div>
           </div>
 

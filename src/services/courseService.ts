@@ -139,6 +139,7 @@ export interface Course {
   suppressed?: boolean;
   suppressed_at?: string;
   module_id?: string;
+  main_module_id?: string;
   submodule_id?: string;
   order_in_module?: number;
   visible?: boolean;

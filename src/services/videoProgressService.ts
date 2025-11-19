@@ -132,10 +132,18 @@ export const markVideoComplete = async (
     };
   }
 
+  if (video.completed) {
+    return {
+      success: false,
+      message: `Video ${videoNumber} is already marked as complete!`
+    };
+  }
+
   const videoKey = videoNumber === 1 ? 'video1' : 'video2';
   const updates: any = {
     [`${videoKey}.completed`]: true,
-    [`${videoKey}.completedAt`]: new Date().toISOString()
+    [`${videoKey}.completedAt`]: new Date().toISOString(),
+    [`${videoKey}.watchedPercentage`]: 100
   };
 
   if (videoNumber === 1) {
@@ -143,11 +151,12 @@ export const markVideoComplete = async (
     updates.overallProgress = 50;
   } else if (videoNumber === 2) {
     updates.canTakeQuiz = true;
-    const video1Progress = progress.video1.completed ? 50 : 0;
-    updates.overallProgress = video1Progress + 50;
+    updates.overallProgress = 100;
   }
 
   await updateDoc(progressRef, updates);
+
+  await updateModuleEnrollmentProgress(userId, moduleId, updates.overallProgress);
 
   return { success: true, message: `Video ${videoNumber} marked as complete!` };
 };
@@ -243,4 +252,34 @@ export const getAverageProgress = async (userId: string): Promise<number> => {
   );
 
   return Math.round(totalProgress / progressList.length);
+};
+
+const updateModuleEnrollmentProgress = async (
+  userId: string,
+  moduleId: string,
+  progressPercentage: number
+): Promise<void> => {
+  try {
+    const enrollmentRef = doc(db, 'enrollments', `${userId}_${moduleId}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+
+    if (enrollmentSnap.exists()) {
+      const updates: any = {
+        progress_percentage: progressPercentage,
+        last_accessed: new Date().toISOString()
+      };
+
+      if (progressPercentage >= 100) {
+        updates.completed = true;
+        if (!enrollmentSnap.data().completed) {
+          updates.completed_at = new Date().toISOString();
+        }
+      }
+
+      await updateDoc(enrollmentRef, updates);
+      console.log(`Updated enrollment progress: ${progressPercentage}%`);
+    }
+  } catch (error) {
+    console.error('Error updating module enrollment progress:', error);
+  }
 };

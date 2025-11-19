@@ -636,9 +636,9 @@ async function getRateLimits(userId: string): Promise<PointsRateLimits> {
 }
 
 async function updateRateLimits(userId: string, limits: PointsRateLimits): Promise<void> {
-  await db.collection('users').doc(userId).update({
+  await db.collection('users').doc(userId).set({
     pointsRateLimits: limits,
-  });
+  }, { merge: true });
 }
 
 async function awardPoints(userId: string, points: number, reason: string, metadata: any): Promise<void> {
@@ -648,10 +648,10 @@ async function awardPoints(userId: string, points: number, reason: string, metad
     const userDoc = await transaction.get(userRef);
     const currentPoints = userDoc.data()?.points || 0;
 
-    transaction.update(userRef, {
+    transaction.set(userRef, {
       points: currentPoints + points,
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-    });
+    }, { merge: true });
   });
 
   await db.collection('point_events').add({

@@ -184,7 +184,7 @@ export default function MessageComposer({
         <button
           onClick={handleSend}
           disabled={(!message.trim() && !attachment) || sending}
-          className="p-3 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:from-[#B01419] hover:to-[#9B1116] rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-xl"
+          className="p-3 bg-blue-600 hover:bg-blue-700 rounded-2xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-xl backdrop-blur-xl"
         >
           {sending ? (
             <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />

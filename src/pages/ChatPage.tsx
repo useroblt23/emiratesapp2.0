@@ -154,9 +154,10 @@ export default function ChatPage() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-pulse">
-              🎨 NEW DESIGN - Messages
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+              Messages
             </h1>
+            <p className="text-sm text-gray-500 font-mono mb-1">Last Updated: {new Date().toLocaleTimeString()}</p>
             <p className="text-gray-600">
               Connect with mentors, students, and the community
             </p>

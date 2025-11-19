@@ -198,7 +198,7 @@ export default function OpenDaySimulatorPage() {
           animate={{ opacity: 1, y: 0 }}
           className="max-w-4xl mx-auto"
         >
-          <div className="bg-white rounded-2xl p-8 md:p-12 border border-gray-200" style={{ boxShadow: '0 1px 3px rgba(0, 0, 0, 0.06)' }}>
+          <div className="glass-openday p-8 md:p-12">
             <div className="text-center mb-8">
               <div className="w-20 h-20 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-full flex items-center justify-center mx-auto mb-6">
                 <Plane className="w-10 h-10 text-white" />
@@ -211,7 +211,7 @@ export default function OpenDaySimulatorPage() {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-[#FFF5ED] to-[#FFF8F3] rounded-xl p-6 mb-8 border border-gray-100">
+            <div className="glass-frosted p-6 mb-8">
               <h2 className="text-xl font-bold text-gray-900 mb-4">What to Expect:</h2>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">

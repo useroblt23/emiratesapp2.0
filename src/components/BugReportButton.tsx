@@ -84,14 +84,16 @@ export default function BugReportButton() {
                 className="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col"
                 onClick={(e) => e.stopPropagation()}
               >
-              <div className="sticky top-0 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white p-4 sm:p-6 rounded-t-2xl flex items-center justify-between">
+              <div className="sticky top-0 chat-header flex items-center justify-between rounded-t-2xl">
                 <div className="flex items-center gap-2 sm:gap-3">
-                  <Bug className="w-5 h-5 sm:w-6 sm:h-6" />
-                  <h2 className="text-xl sm:text-2xl font-bold">Report a Bug</h2>
+                  <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Bug className="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" />
+                  </div>
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Report a Bug</h2>
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-2 hover:bg-white/20 rounded-lg transition"
+                  className="p-2 hover:bg-gray-100 rounded-lg transition text-gray-600"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -107,7 +109,7 @@ export default function BugReportButton() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Brief description of the issue"
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition"
+                    className="w-full chat-input-field"
                     required
                   />
                 </div>
@@ -119,7 +121,7 @@ export default function BugReportButton() {
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition"
+                    className="w-full chat-input-field"
                   >
                     {categories.map(cat => (
                       <option key={cat.value} value={cat.value}>{cat.label}</option>
@@ -161,7 +163,7 @@ export default function BugReportButton() {
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Please describe the bug in detail. Include steps to reproduce if possible..."
                     rows={6}
-                    className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71921] focus:outline-none transition resize-none"
+                    className="w-full chat-input-field resize-none"
                     required
                   />
                 </div>
@@ -170,7 +172,7 @@ export default function BugReportButton() {
                   <button
                     type="submit"
                     disabled={loading || !title.trim() || !description.trim()}
-                    className="flex-1 bg-gradient-to-r from-[#D71921] to-[#B91518] text-white py-3 rounded-xl font-bold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {loading ? (
                       <>
@@ -187,7 +189,7 @@ export default function BugReportButton() {
                   <button
                     type="button"
                     onClick={() => setIsOpen(false)}
-                    className="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-bold hover:bg-gray-50 transition text-sm sm:text-base"
+                    className="px-6 py-3 chat-input-field font-semibold text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
                   >
                     Cancel
                   </button>

@@ -9,7 +9,7 @@ import { markLessonWatched } from '../services/rewardsService';
 import { trackCourseProgress } from '../services/enrollmentService';
 import { getExamByCourseId, getUserExamResult, Exam, ExamResult } from '../services/examService';
 import FeatureAccessGuard from '../components/FeatureAccessGuard';
-import ExamInterface from '../components/ExamInterface';
+import CourseExamInterface from '../components/CourseExamInterface';
 import ExamResultModal from '../components/ExamResultModal';
 import { AnimatePresence } from 'framer-motion';
 
@@ -25,6 +25,7 @@ function CourseViewerPageContent() {
   const [showExam, setShowExam] = useState(false);
   const [showResultModal, setShowResultModal] = useState(false);
   const [hasPassed, setHasPassed] = useState(false);
+  const [isRetake, setIsRetake] = useState(false);
   const [videoWatched, setVideoWatched] = useState(false);
   const [watchProgress, setWatchProgress] = useState(0);
   const [videoStartTime] = useState(Date.now());
@@ -335,6 +336,7 @@ function CourseViewerPageContent() {
   };
 
   const handleStartExam = () => {
+    setIsRetake(hasPassed);
     setShowExam(true);
   };
 
@@ -357,6 +359,7 @@ function CourseViewerPageContent() {
             Back to Courses
           </button>
 
+          {!showExam && (
           <div className="glass-video overflow-hidden mb-6">
             <div className="aspect-video w-full bg-black relative">
               {course.video_url ? (
@@ -382,7 +385,9 @@ function CourseViewerPageContent() {
               </div>
             )}
           </div>
+          )}
 
+          {!showExam && (
           <div className="glass-card p-6 mb-6">
             <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
             <p className="text-gray-600 mb-4">{course.description}</p>
@@ -416,12 +421,16 @@ function CourseViewerPageContent() {
                   >
                     ✓ Mark Complete
                   </button>
-                  {exam && !hasPassed && (
+                  {exam && (
                     <button
                       onClick={handleStartExam}
-                      className="flex-1 px-4 py-2 bg-gradient-to-r from-[#D71921] to-[#B91518] hover:shadow-lg text-white rounded-lg font-semibold transition text-sm"
+                      className={`flex-1 px-4 py-2 ${
+                        hasPassed
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                          : 'bg-gradient-to-r from-[#D71921] to-[#B91518]'
+                      } hover:shadow-lg text-white rounded-lg font-semibold transition text-sm`}
                     >
-                      Take Exam
+                      {hasPassed ? 'Retake Exam' : 'Take Exam'}
                     </button>
                   )}
                 </div>
@@ -434,8 +443,9 @@ function CourseViewerPageContent() {
               )}
             </div>
           </div>
+          )}
 
-          {exam && !hasPassed && watchProgress < 80 && (
+          {exam && !hasPassed && watchProgress < 80 && !showExam && (
             <div
               className="bg-gradient-to-br from-[#EADBC8] to-[#F5E6D3] rounded-2xl shadow-lg p-8 text-center"
               style={{
@@ -456,7 +466,7 @@ function CourseViewerPageContent() {
             </div>
           )}
 
-          {hasPassed && (
+          {hasPassed && !showExam && (
             <div className="bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-300 rounded-2xl shadow-lg p-8 text-center">
               <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-4" />
               <h2 className="text-2xl font-bold text-green-800 mb-2">Course Completed!</h2>
@@ -466,16 +476,16 @@ function CourseViewerPageContent() {
             </div>
           )}
 
-          <AnimatePresence>
-            {showExam && exam && currentUser && (
-              <ExamInterface
+          {showExam && exam && currentUser && (
+            <div className="mt-8">
+              <CourseExamInterface
                 exam={exam}
                 userId={currentUser.uid}
-                onClose={() => setShowExam(false)}
                 onComplete={handleExamComplete}
+                isRetake={isRetake}
               />
-            )}
-          </AnimatePresence>
+            </div>
+          )}
 
           <AnimatePresence>
             {showResultModal && examResult && exam && (

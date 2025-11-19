@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, FolderPlus, Upload, BookOpen, Play, Folder } from 'lucide-react';
+import { ArrowLeft, Plus, FolderPlus, Upload, BookOpen, Play, Folder, CheckCircle } from 'lucide-react';
 import { getMainModule, getSubmodulesByParent, MainModule, Submodule } from '../services/mainModuleService';
 import { getCoursesByModule, Course } from '../services/courseService';
 import { motion } from 'framer-motion';
@@ -8,7 +8,7 @@ import CreateModuleForm from '../components/CreateModuleForm';
 import NewCourseForm from '../components/NewCourseForm';
 import { useApp } from '../context/AppContext';
 import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, query, collection, where, getDocs } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import ModuleExamTrigger from '../components/ModuleExamTrigger';
 
@@ -19,6 +19,7 @@ export default function MainModuleViewerPage() {
   const [mainModule, setMainModule] = useState<MainModule | null>(null);
   const [submodules, setSubmodules] = useState<Submodule[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [courseCompletionStatus, setCourseCompletionStatus] = useState<Record<string, { completed: boolean; examPassed: boolean }>>({});
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAddCourse, setShowAddCourse] = useState(false);
@@ -77,6 +78,10 @@ export default function MainModuleViewerPage() {
           const validCourses = coursesData.filter(c => c !== null) as Course[];
           console.log('MainModuleViewer: Valid courses:', validCourses);
           setCourses(validCourses);
+
+          if (currentUser && validCourses.length > 0) {
+            await loadCourseCompletionStatus(validCourses.map(c => c.id));
+          }
         } else {
           console.log('MainModuleViewer: No course IDs in module');
           setCourses([]);
@@ -87,6 +92,37 @@ export default function MainModuleViewerPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const loadCourseCompletionStatus = async (courseIds: string[]) => {
+    if (!currentUser) return;
+
+    const statusMap: Record<string, { completed: boolean; examPassed: boolean }> = {};
+
+    for (const courseId of courseIds) {
+      const progressRef = doc(db, 'course_progress', `${currentUser.uid}_${courseId}`);
+      const progressSnap = await getDoc(progressRef);
+      const completed = progressSnap.exists() && progressSnap.data().completed === true;
+
+      const examsRef = collection(db, 'exams');
+      const examQuery = query(examsRef, where('courseId', '==', courseId));
+      const examSnapshot = await getDocs(examQuery);
+
+      let examPassed = false;
+      if (!examSnapshot.empty) {
+        const exam = examSnapshot.docs[0];
+        const examId = exam.id;
+        const resultRef = doc(db, 'userExams', `${examId}_${currentUser.uid}_latest`);
+        const resultSnap = await getDoc(resultRef);
+        examPassed = resultSnap.exists() && resultSnap.data().passed === true;
+      } else {
+        examPassed = true;
+      }
+
+      statusMap[courseId] = { completed, examPassed };
+    }
+
+    setCourseCompletionStatus(statusMap);
   };
 
   if (loading) {
@@ -175,17 +211,25 @@ export default function MainModuleViewerPage() {
               <p className="text-gray-600">Direct courses in this module</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => (
-                <motion.div
-                  key={course.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
-                  onClick={() => {
-                    console.log('MainModuleViewer: Navigating to course:', course.id, 'with moduleId:', moduleId);
-                    navigate(`/course/${course.id}?moduleId=${moduleId}&type=main`);
-                  }}
-                >
+              {courses.map((course) => {
+                const status = courseCompletionStatus[course.id];
+                const isCompleted = status?.completed && status?.examPassed;
+
+                return (
+                  <motion.div
+                    key={course.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`glass-course overflow-hidden transition cursor-pointer border-2 ${
+                      isCompleted
+                        ? 'bg-green-50/40 border-green-500/50 hover:border-green-500'
+                        : 'border-transparent hover:border-[#D71920]'
+                    }`}
+                    onClick={() => {
+                      console.log('MainModuleViewer: Navigating to course:', course.id, 'with moduleId:', moduleId);
+                      navigate(`/course/${course.id}?moduleId=${moduleId}&type=main`);
+                    }}
+                  >
                   <div className="relative">
                     {course.thumbnail ? (
                       <img
@@ -198,9 +242,14 @@ export default function MainModuleViewerPage() {
                         <BookOpen className="w-16 h-16 text-gray-400" />
                       </div>
                     )}
-                    {course.video_url && (
+                    {course.video_url && !isCompleted && (
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <Play className="w-12 h-12 text-white" />
+                      </div>
+                    )}
+                    {isCompleted && (
+                      <div className="absolute top-3 right-3 bg-green-500 rounded-full p-2 shadow-lg">
+                        <CheckCircle className="w-6 h-6 text-white" />
                       </div>
                     )}
                   </div>
@@ -216,7 +265,8 @@ export default function MainModuleViewerPage() {
                     </div>
                   </div>
                 </motion.div>
-              ))}
+              );
+              })}
             </div>
           </div>
         )}

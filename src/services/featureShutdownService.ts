@@ -111,7 +111,10 @@ export async function getAllFeatureShutdowns(): Promise<FeatureShutdownData> {
     });
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      return {};
+    }
     console.error('Error getting all feature shutdowns:', error);
     return {};
   }
@@ -144,8 +147,13 @@ export function subscribeToFeatureShutdowns(
 
       callback(result);
     },
-    (error) => {
+    (error: any) => {
+      if (error?.code === 'permission-denied') {
+        callback({});
+        return;
+      }
       console.error('Error subscribing to feature shutdowns:', error);
+      callback({});
     }
   );
 

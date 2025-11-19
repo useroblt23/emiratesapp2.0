@@ -72,12 +72,30 @@ export const getEnrolledCourses = async (userId: string): Promise<Course[]> => {
 };
 
 export const updateCourseProgress = async (userId: string, courseId: string, progress: number): Promise<void> => {
-  const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
-  await updateDoc(enrollmentRef, {
-    progress,
-    completed: progress >= 100,
-    updated_at: new Date().toISOString()
-  });
+  try {
+    const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+    const enrollmentSnap = await getDoc(enrollmentRef);
+
+    if (enrollmentSnap.exists()) {
+      await updateDoc(enrollmentRef, {
+        progress,
+        completed: progress >= 100,
+        updated_at: new Date().toISOString()
+      });
+    } else {
+      await setDoc(enrollmentRef, {
+        user_id: userId,
+        course_id: courseId,
+        progress,
+        completed: progress >= 100,
+        enrolled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+    }
+  } catch (error) {
+    console.error('Error updating course progress:', error);
+    throw error;
+  }
 };
 
 export const isCourseUnlocked = async (userId: string, course: Course): Promise<boolean> => {

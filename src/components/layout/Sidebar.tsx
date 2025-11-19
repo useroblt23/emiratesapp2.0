@@ -232,12 +232,12 @@ export default function Sidebar() {
                 }}
                 className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative group ${
                   isActive
-                    ? 'glass-primary text-gray-900 shadow-lg'
+                    ? 'glass-primary text-gray-900'
                     : highlight
                     ? 'glass-primary text-gray-900 font-bold'
                     : isLocked
                     ? 'text-gray-400 glass-ultra-thin opacity-60'
-                    : 'text-gray-700 glass-button-secondary hover:shadow-md'
+                    : 'text-gray-700 glass-button-secondary'
                 } ${isCollapsed ? 'justify-center' : ''}`}
                 style={{
                   transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'

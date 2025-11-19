@@ -66,8 +66,8 @@
     background: rgba(255, 255, 255, 0.75);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 20px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08),
-                0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04),
+                0 1px 2px rgba(0, 0, 0, 0.02);
     overflow: hidden;
   }
 
@@ -78,21 +78,21 @@
     background: rgba(255, 255, 255, 0.6);
     border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06),
-                0 1px 2px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03),
+                0 1px 1px rgba(0, 0, 0, 0.02);
   }
 
   /* Override Tailwind's shadow-lg for white backgrounds - make it subtle */
   .bg-white.shadow-lg,
   .shadow-lg.bg-white {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
-                0 1px 2px rgba(0, 0, 0, 0.03) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+                0 1px 1px rgba(0, 0, 0, 0.02) !important;
   }
 
   /* Subtle shadow for cards on white background */
   .shadow-subtle {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06),
-                0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+                0 1px 1px rgba(0, 0, 0, 0.02);
   }
 
   /* Strong Crystal (Dropdowns, Modals) - subtle like screenshot */
@@ -102,8 +102,8 @@
     background: rgba(255, 255, 255, 0.85);
     border: 1px solid rgba(0, 0, 0, 0.08);
     border-radius: 16px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08),
-                0 1px 3px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04),
+                0 1px 2px rgba(0, 0, 0, 0.02);
   }
 
   /* ======================================
@@ -170,13 +170,13 @@
     -webkit-backdrop-filter: blur(10px) saturate(120%);
     border: 1px solid rgba(0, 0, 0, 0.08);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.8);
   }
 
   .glass-button-secondary:hover {
     background: rgba(255, 255, 255, 0.8);
     border-color: rgba(0, 0, 0, 0.12);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transform: translateY(-1px);
   }
 
@@ -185,7 +185,7 @@
     backdrop-filter: blur(12px) saturate(150%);
     -webkit-backdrop-filter: blur(12px) saturate(150%);
     border: 1px solid rgba(215, 25, 32, 0.2);
-    box-shadow: 0 2px 8px rgba(215, 25, 32, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    box-shadow: 0 1px 3px rgba(215, 25, 32, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
   .glass-ultra-thin {
@@ -193,7 +193,7 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 1px solid rgba(0, 0, 0, 0.05);
-    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02);
   }
 
   /* Parallax hover effect */
@@ -525,15 +525,45 @@
   /* Ensure shadow-2xl is also subtle on white */
   .bg-white.shadow-2xl,
   .shadow-2xl.bg-white {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08),
-                0 1px 3px rgba(0, 0, 0, 0.04) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05),
+                0 1px 2px rgba(0, 0, 0, 0.03) !important;
   }
 
   /* Ensure shadow-xl is also subtle on white */
   .bg-white.shadow-xl,
   .shadow-xl.bg-white {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06),
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+                0 1px 1px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  /* Override default Tailwind shadows to be more subtle */
+  .shadow-sm {
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .shadow {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03),
+                0 1px 1px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .shadow-md {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04),
+                0 1px 1px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .shadow-lg {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04),
+                0 1px 2px rgba(0, 0, 0, 0.02) !important;
+  }
+
+  .shadow-xl {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04),
                 0 1px 2px rgba(0, 0, 0, 0.03) !important;
+  }
+
+  .shadow-2xl {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05),
+                0 1px 3px rgba(0, 0, 0, 0.03) !important;
   }
 
   /* ======================================
@@ -580,5 +610,60 @@
     display: none;
     width: 0;
     height: 0;
+  }
+
+  /* Content spacing utilities for better layouts */
+  .content-grid {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    .content-grid {
+      gap: 2rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .content-grid {
+      gap: 2.5rem;
+    }
+  }
+
+  /* Card spacing utilities */
+  .card-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: 1fr;
+  }
+
+  @media (min-width: 640px) {
+    .card-grid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .card-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+  }
+
+  /* Better card appearance */
+  .card {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px) saturate(120%);
+    -webkit-backdrop-filter: blur(12px) saturate(120%);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .card:hover {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
   }
 }

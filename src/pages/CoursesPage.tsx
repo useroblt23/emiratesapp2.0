@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { BookOpen, ChevronDown, ChevronRight, Folder, Layers, Eye, EyeOff } from 'lucide-react';
+import { BookOpen, ChevronDown, ChevronRight, Folder, Layers, Eye, EyeOff, CheckCircle, Lock } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
+import { enrollInModule, isEnrolledInModule } from '../services/enrollmentService';
 
 interface Submodule {
   id: string;
@@ -17,6 +18,7 @@ interface Submodule {
   created_at: string;
   updated_at: string;
   expanded: boolean;
+  enrolled?: boolean;
 }
 
 interface MainModule {
@@ -30,6 +32,7 @@ interface MainModule {
   updated_at: string;
   submodules: Submodule[];
   expanded: boolean;
+  enrolled?: boolean;
 }
 
 export default function CoursesPage() {
@@ -57,6 +60,8 @@ export default function CoursesPage() {
         mainModulesSnap.docs.map(async (doc) => {
           const mainModuleData = doc.data();
 
+          const isEnrolled = currentUser ? await isEnrolledInModule(currentUser.uid, doc.id) : false;
+
           const submodulesRef = collection(db, 'submodules');
           const submodulesQuery = query(
             submodulesRef,
@@ -64,11 +69,19 @@ export default function CoursesPage() {
           );
           const submodulesSnap = await getDocs(submodulesQuery);
 
-          const submodulesData: Submodule[] = submodulesSnap.docs.map((subDoc) => ({
-            id: subDoc.id,
-            ...subDoc.data(),
-            expanded: false
-          } as Submodule)).sort((a, b) => a.order - b.order);
+          const submodulesData: Submodule[] = await Promise.all(
+            submodulesSnap.docs.map(async (subDoc) => {
+              const isSubEnrolled = currentUser ? await isEnrolledInModule(currentUser.uid, subDoc.id) : false;
+              return {
+                id: subDoc.id,
+                ...subDoc.data(),
+                expanded: false,
+                enrolled: isSubEnrolled
+              } as Submodule;
+            })
+          );
+
+          submodulesData.sort((a, b) => a.order - b.order);
 
           return {
             id: doc.id,
@@ -80,7 +93,8 @@ export default function CoursesPage() {
             created_at: mainModuleData.created_at || '',
             updated_at: mainModuleData.updated_at || '',
             submodules: submodulesData,
-            expanded: false
+            expanded: false,
+            enrolled: isEnrolled
           };
         })
       );
@@ -117,12 +131,32 @@ export default function CoursesPage() {
     );
   };
 
-  const handleMainModuleClick = (moduleId: string) => {
-    navigate(`/main-modules/${moduleId}`);
+  const handleEnrollModule = async (moduleId: string, moduleType: 'main_module' | 'submodule') => {
+    if (!currentUser) {
+      navigate('/login');
+      return;
+    }
+
+    try {
+      await enrollInModule(currentUser.uid, moduleId, moduleType);
+      await loadMainModules();
+      navigate(`/${moduleType === 'main_module' ? 'main-modules' : 'submodules'}/${moduleId}`);
+    } catch (error) {
+      console.error('Error enrolling:', error);
+      alert('Failed to enroll. Please try again.');
+    }
   };
 
-  const handleSubmoduleClick = (submoduleId: string) => {
-    navigate(`/submodules/${submoduleId}`);
+  const handleMainModuleClick = (moduleId: string, isEnrolled: boolean) => {
+    if (isEnrolled) {
+      navigate(`/main-modules/${moduleId}`);
+    }
+  };
+
+  const handleSubmoduleClick = (submoduleId: string, isEnrolled: boolean) => {
+    if (isEnrolled) {
+      navigate(`/submodules/${submoduleId}`);
+    }
   };
 
   if (loading) {
@@ -204,12 +238,22 @@ export default function CoursesPage() {
 
                       <p className="text-gray-700 mb-4 leading-relaxed">{mainModule.description}</p>
 
-                      <button
-                        onClick={() => handleMainModuleClick(mainModule.id)}
-                        className="px-6 py-2.5 bg-[#D71920] hover:bg-[#B91518] text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg"
-                      >
-                        View Module Details
-                      </button>
+                      {mainModule.enrolled ? (
+                        <button
+                          onClick={() => handleMainModuleClick(mainModule.id, true)}
+                          className="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg flex items-center gap-2"
+                        >
+                          <CheckCircle className="w-5 h-5" />
+                          Continue Learning
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => handleEnrollModule(mainModule.id, 'main_module')}
+                          className="px-6 py-2.5 bg-[#D71920] hover:bg-[#B91518] text-white rounded-xl font-semibold transition shadow-md hover:shadow-lg"
+                        >
+                          Enroll Now
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -262,12 +306,25 @@ export default function CoursesPage() {
 
                                     <p className="text-sm text-gray-600 mb-3 line-clamp-2">{submodule.description}</p>
 
-                                    <button
-                                      onClick={() => handleSubmoduleClick(submodule.id)}
-                                      className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-semibold transition"
-                                    >
-                                      View Submodule
-                                    </button>
+                                    {submodule.enrolled ? (
+                                      <button
+                                        onClick={() => handleSubmoduleClick(submodule.id, true)}
+                                        className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                                      >
+                                        <CheckCircle className="w-4 h-4" />
+                                        Continue
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleEnrollModule(submodule.id, 'submodule');
+                                        }}
+                                        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg font-semibold transition"
+                                      >
+                                        Enroll
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                               </div>

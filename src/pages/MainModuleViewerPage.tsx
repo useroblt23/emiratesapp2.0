@@ -7,6 +7,7 @@ import { motion } from 'framer-motion';
 import CreateModuleForm from '../components/CreateModuleForm';
 import NewCourseForm from '../components/NewCourseForm';
 import { useApp } from '../context/AppContext';
+import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
 
 export default function MainModuleViewerPage() {
   const { moduleId } = useParams<{ moduleId: string }>();
@@ -35,6 +36,15 @@ export default function MainModuleViewerPage() {
       setMainModule(module);
 
       if (module) {
+        if (currentUser && !isAdmin) {
+          const enrolled = await isEnrolledInModule(currentUser.uid, moduleId);
+          if (!enrolled) {
+            navigate('/courses');
+            return;
+          }
+          await updateLastAccessed(currentUser.uid, moduleId);
+        }
+
         const subs = await getSubmodulesByParent(moduleId);
         setSubmodules(subs);
 

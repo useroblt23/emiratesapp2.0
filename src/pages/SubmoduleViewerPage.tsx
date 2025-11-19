@@ -6,6 +6,7 @@ import { getCoursesBySubmodule, Course } from '../services/courseService';
 import { motion } from 'framer-motion';
 import NewCourseForm from '../components/NewCourseForm';
 import { useApp } from '../context/AppContext';
+import { updateLastAccessed, isEnrolledInModule } from '../services/enrollmentService';
 
 export default function SubmoduleViewerPage() {
   const { submoduleId } = useParams<{ submoduleId: string }>();
@@ -32,6 +33,15 @@ export default function SubmoduleViewerPage() {
       setSubmodule(sub);
 
       if (sub) {
+        if (currentUser && !isAdmin) {
+          const enrolled = await isEnrolledInModule(currentUser.uid, submoduleId);
+          if (!enrolled) {
+            navigate('/courses');
+            return;
+          }
+          await updateLastAccessed(currentUser.uid, submoduleId);
+        }
+
         const coursesData = await getCoursesBySubmodule(submoduleId);
         setCourses(coursesData);
       }

@@ -190,7 +190,7 @@ export default function ChatPage() {
             </div>
             <button
               onClick={() => setShowConversationList(!showConversationList)}
-              className="p-2 bg-[#D71921] hover:bg-[#B01419] rounded-lg transition-colors"
+              className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
               title="New conversation"
             >
               <Plus className="w-5 h-5 text-white" />
@@ -200,7 +200,7 @@ export default function ChatPage() {
           <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50">
             {loading ? (
               <div className="flex items-center justify-center h-full">
-                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-[#D71921]"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-blue-600"></div>
               </div>
             ) : messages.length === 0 ? (
               <div className="flex items-center justify-center h-full text-gray-400">

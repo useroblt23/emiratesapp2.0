@@ -124,7 +124,7 @@ export default function Sidebar() {
     studentLinks;
 
   return (
-    <aside className="w-full md:w-64 glass-sidebar border-b md:border-b-0 md:border-r border-white/20 md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
+    <aside className="w-full md:w-64 liquid-sidebar border-b md:border-b-0 md:border-r border-white/20 md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
       <div className="p-3 md:p-4">
         {currentUser.role === 'governor' && (
           <div className="mb-3 md:mb-4 p-2 md:p-3 glass-primary text-white rounded-2xl shadow-xl">

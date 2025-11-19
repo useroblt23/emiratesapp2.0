@@ -15,7 +15,7 @@ export default function Layout({ children }: LayoutProps) {
   const { banners } = useApp();
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] to-white">
+    <div className="min-h-screen relative">
       <Navbar />
       <SystemAnnouncementBanner />
 
@@ -26,7 +26,7 @@ export default function Layout({ children }: LayoutProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className={`${banner.color} text-white px-4 py-3 shadow-md`}
+            className="liquid-card-overlay text-white px-4 py-3 mx-4 my-2 rounded-2xl"
           >
             <div className="max-w-7xl mx-auto flex items-center gap-3">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -39,7 +39,7 @@ export default function Layout({ children }: LayoutProps) {
         ))}
       </AnimatePresence>
 
-      <div className="flex flex-col md:flex-row">
+      <div className="flex flex-col md:flex-row relative z-10">
         <Sidebar />
         <main className="flex-1 p-4 md:p-6 w-full overflow-x-hidden">
           <div className="max-w-7xl mx-auto">

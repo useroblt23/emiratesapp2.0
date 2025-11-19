@@ -78,92 +78,92 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] via-white to-[#E8E8E8] flex items-center justify-center p-4">
+    <div className="min-h-screen min-h-screen flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-6 md:p-8">
+        <div className="liquid-crystal-panel p-6 md:p-8">
           <div className="flex justify-center mb-6">
             <img
-              src="/logo.png"
+              src="/Crews (2).png"
               alt="The Crew Academy"
               className="h-16 w-auto"
             />
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-bold text-center text-[#000000] mb-2">
+          <h1 className="text-2xl md:text-3xl font-bold text-center liquid-text-primary mb-2">
             Join The Crew Academy
           </h1>
-          <p className="text-center text-sm md:text-base text-gray-600 mb-6 md:mb-8">
+          <p className="text-center text-sm md:text-base liquid-text-secondary mb-6 md:mb-8">
             Start your Emirates cabin crew journey
           </p>
 
           <form onSubmit={handleRegister} className="space-y-4 md:space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Full Name *
               </label>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="John Smith"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Email Address *
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="your.email@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Password *
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   minLength={6}
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="Minimum 6 characters"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Country *
               </label>
               <div className="relative">
-                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none z-10" />
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70 pointer-events-none z-10" />
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition appearance-none bg-white"
+                  className="w-full pl-12 pr-4 py-3 liquid-input appearance-none bg-white"
                 >
                   <option value="">Select your country</option>
                   {countries.map((c) => (
@@ -176,7 +176,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Brief Description About Yourself
               </label>
               <div className="relative">
@@ -184,14 +184,14 @@ export default function RegisterPage() {
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
+                  className="w-full px-4 py-3 liquid-input resize-none"
                   placeholder="Tell us a bit about yourself..."
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 What I Expect From This Academy
               </label>
               <div className="relative">
@@ -199,7 +199,7 @@ export default function RegisterPage() {
                   value={expectations}
                   onChange={(e) => setExpectations(e.target.value)}
                   rows={3}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition resize-none"
+                  className="w-full px-4 py-3 liquid-input resize-none"
                   placeholder="What are your goals and expectations?"
                 />
               </div>
@@ -218,18 +218,18 @@ export default function RegisterPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FF3B3F]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full liquid-button-primary text-white py-3.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Creating Account...' : 'Create Account'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="liquid-text-secondary text-sm">
               Already have an account?{' '}
               <Link
                 to="/login"
-                className="text-[#FF3B3F] font-bold hover:underline"
+                className="text-white font-bold hover:underline"
               >
                 Sign In
               </Link>

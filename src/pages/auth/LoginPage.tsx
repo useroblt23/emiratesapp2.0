@@ -88,58 +88,58 @@ export default function LoginPage() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#F5F5F5] via-white to-[#E8E8E8] flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full"
       >
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="liquid-crystal-panel p-8">
           <div className="flex justify-center mb-6">
             <img
-              src="/logo.png"
+              src="/Crews (2).png"
               alt="The Crew Academy"
               className="h-24 w-auto"
             />
           </div>
 
-          <h1 className="text-3xl font-bold text-center text-[#000000] mb-2">
+          <h1 className="text-3xl font-bold text-center liquid-text-primary mb-2">
             Welcome Back
           </h1>
-          <p className="text-center text-gray-600 mb-8">
+          <p className="text-center liquid-text-secondary mb-8">
             Sign in to The Crew Academy
           </p>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="your.email@example.com"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold text-[#000000] mb-2">
+              <label className="block text-sm font-bold liquid-text-primary mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
                 <input
                   type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#FF3B3F] focus:ring-2 focus:ring-[#FF3B3F]/20 transition"
+                  className="w-full pl-12 pr-4 py-3 liquid-input"
                   placeholder="Enter your password"
                 />
               </div>
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm"
+                className="liquid-card-overlay bg-red-500/20 border-red-400/40 text-white px-4 py-3 text-sm"
               >
                 {error}
               </motion.div>
@@ -158,18 +158,18 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-[#FF3B3F]/30 transform hover:-translate-y-0.5 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full liquid-button-primary text-white py-3.5 font-bold disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-gray-600 text-sm">
+            <p className="liquid-text-secondary text-sm">
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-[#FF3B3F] font-bold hover:underline"
+                className="text-white font-bold hover:underline"
               >
                 Register
               </Link>

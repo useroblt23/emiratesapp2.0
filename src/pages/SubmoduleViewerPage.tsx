@@ -35,12 +35,9 @@ export default function SubmoduleViewerPage() {
       setSubmodule(sub);
 
       if (sub) {
-        if (currentUser && !isAdmin) {
-          const enrolled = await isEnrolledInModule(currentUser.uid, submoduleId);
-          if (!enrolled) {
-            navigate('/courses');
-            return;
-          }
+        console.log('SubmoduleViewer: Skipping enrollment check - allowing all users to view submodules');
+
+        if (currentUser && submoduleId) {
           await updateLastAccessed(currentUser.uid, submoduleId);
         }
 

@@ -34,16 +34,16 @@ export default function MainModuleViewerPage() {
     if (!moduleId) return;
 
     try {
+      console.log('MainModuleViewer: Loading module:', moduleId);
+      console.log('MainModuleViewer: Current user:', currentUser?.email, 'isAdmin:', isAdmin);
+
       const module = await getMainModule(moduleId);
       setMainModule(module);
 
       if (module) {
-        if (currentUser && !isAdmin) {
-          const enrolled = await isEnrolledInModule(currentUser.uid, moduleId);
-          if (!enrolled) {
-            navigate('/courses');
-            return;
-          }
+        console.log('MainModuleViewer: Skipping enrollment check - allowing all users to view modules');
+
+        if (currentUser && moduleId) {
           await updateLastAccessed(currentUser.uid, moduleId);
         }
 
@@ -171,7 +171,10 @@ export default function MainModuleViewerPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
-                  onClick={() => navigate(`/course/${course.id}`)}
+                  onClick={() => {
+                    console.log('MainModuleViewer: Navigating to course:', course.id, course);
+                    navigate(`/course/${course.id}`);
+                  }}
                 >
                   <div className="relative">
                     {course.thumbnail ? (

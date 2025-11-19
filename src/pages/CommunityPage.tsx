@@ -133,55 +133,48 @@ export default function CommunityPage() {
   const selectedConversation = conversations.find(c => c.id === selectedConversationId);
 
   return (
-    <div className="h-screen flex flex-col p-4">
+    <div className="h-screen flex flex-col p-3">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-3 flex-shrink-0"
+        className="mb-2 flex-shrink-0"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-2xl flex items-center justify-center shadow-lg">
-            <MessageCircle className="w-5 h-5 text-white" />
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center shadow-lg">
+            <MessageCircle className="w-4 h-4 text-white" />
           </div>
-          <div>
-            <h1 className="text-xl md:text-2xl font-black text-gray-900">
-              Community Chat
-            </h1>
-            <p className="text-xs text-gray-500 font-medium">
-              Connect with students and mentors worldwide
-            </p>
-          </div>
+          <h1 className="text-lg font-black text-gray-900">Community Chat</h1>
         </div>
       </motion.div>
 
       <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col min-h-0">
-        <div className="border-b border-gray-200 bg-gray-50 p-3 flex-shrink-0">
-          <div className="mb-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Hash className="w-4 h-4 text-gray-500" />
-              <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Group Chats</h3>
+        <div className="border-b border-gray-200 bg-gray-50 p-2 flex-shrink-0" style={{ maxHeight: '120px' }}>
+          <div className="mb-1.5">
+            <div className="flex items-center gap-2 mb-1">
+              <Hash className="w-3 h-3 text-gray-500" />
+              <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Groups</h3>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+            <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
               {groupChats.map((conversation) => (
                 <button
                   key={conversation.id}
                   onClick={() => setSelectedConversationId(conversation.id)}
-                  className={`flex items-center gap-3 px-5 py-3 rounded-xl border-2 flex-shrink-0 transition-all ${
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border flex-shrink-0 transition-all ${
                     selectedConversationId === conversation.id
-                      ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] border-[#D71921] text-white shadow-lg'
-                      : 'bg-white border-gray-200 text-gray-700 hover:border-[#D71921] hover:shadow-md'
+                      ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] border-[#D71921] text-white shadow-md'
+                      : 'bg-white border-gray-200 text-gray-700 hover:border-[#D71921] hover:shadow-sm'
                   }`}
                 >
-                  <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                  <div className={`w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 text-sm ${
                     conversation.id === 'publicRoom'
-                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-xl'
+                      ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white'
                       : selectedConversationId === conversation.id
                         ? 'bg-white/20'
                         : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
                   }`}>
-                    {conversation.id === 'publicRoom' ? '🌍' : <Users className={`w-5 h-5 ${selectedConversationId === conversation.id ? 'text-white' : 'text-white'}`} />}
+                    {conversation.id === 'publicRoom' ? '🌍' : <Users className={`w-3 h-3 ${selectedConversationId === conversation.id ? 'text-white' : 'text-white'}`} />}
                   </div>
-                  <span className="font-bold text-base whitespace-nowrap">{conversation.title}</span>
+                  <span className="font-bold text-xs whitespace-nowrap">{conversation.title}</span>
                 </button>
               ))}
             </div>
@@ -189,29 +182,29 @@ export default function CommunityPage() {
 
           {privateChats.length > 0 && (
             <div>
-              <div className="flex items-center gap-2 mb-2">
-                <MessageCircle className="w-4 h-4 text-gray-500" />
-                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Private Chats</h3>
+              <div className="flex items-center gap-2 mb-1">
+                <MessageCircle className="w-3 h-3 text-gray-500" />
+                <h3 className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">Private</h3>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+              <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                 {privateChats.map((conversation) => (
                   <button
                     key={conversation.id}
                     onClick={() => setSelectedConversationId(conversation.id)}
-                    className={`flex items-center gap-3 px-5 py-3 rounded-xl border-2 flex-shrink-0 transition-all ${
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border flex-shrink-0 transition-all ${
                       selectedConversationId === conversation.id
-                        ? 'bg-gradient-to-r from-gray-700 to-gray-900 border-gray-700 text-white shadow-lg'
-                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-md'
+                        ? 'bg-gradient-to-r from-gray-700 to-gray-900 border-gray-700 text-white shadow-md'
+                        : 'bg-white border-gray-200 text-gray-700 hover:border-gray-400 hover:shadow-sm'
                     }`}
                   >
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center font-bold text-lg flex-shrink-0 ${
+                    <div className={`w-6 h-6 rounded-lg flex items-center justify-center font-bold text-xs flex-shrink-0 ${
                       selectedConversationId === conversation.id
                         ? 'bg-white/20 text-white'
                         : 'bg-gradient-to-br from-gray-600 to-gray-800 text-white'
                     }`}>
                       {conversation.title.charAt(0).toUpperCase()}
                     </div>
-                    <span className="font-bold text-base whitespace-nowrap">{conversation.title}</span>
+                    <span className="font-bold text-xs whitespace-nowrap">{conversation.title}</span>
                   </button>
                 ))}
               </div>
@@ -221,7 +214,7 @@ export default function CommunityPage() {
 
         {selectedConversationId ? (
           <>
-            <div className="px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex-shrink-0">
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
                   <span className="text-3xl">
@@ -265,7 +258,7 @@ export default function CommunityPage() {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 bg-gradient-to-b from-gray-50/50 to-white">
+            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4 bg-gradient-to-b from-gray-50/50 to-white">
               {loading ? (
                 <div className="flex items-center justify-center h-full">
                   <div className="relative">
@@ -305,7 +298,7 @@ export default function CommunityPage() {
               )}
             </div>
 
-            <div className="border-t border-gray-200 bg-white flex-shrink-0 p-3">
+            <div className="border-t border-gray-200 bg-white flex-shrink-0 p-6">
               <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
             </div>
           </>

@@ -191,7 +191,7 @@ export default function CoursesPage() {
                 key={mainModule.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-transparent hover:border-[#D71920] transition"
+                className="glass-course border-transparent hover:border-[#D71920] transition"
               >
                 <div className="p-6">
                   <div className="flex items-start gap-6">
@@ -279,7 +279,7 @@ export default function CoursesPage() {
                               key={submodule.id}
                               initial={{ opacity: 0, scale: 0.95 }}
                               animate={{ opacity: 1, scale: 1 }}
-                              className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-xl transition border-2 border-transparent hover:border-blue-500"
+                              className="glass-light overflow-hidden transition border border-transparent hover:border-blue-500"
                             >
                               <div className="p-4">
                                 <div className="flex items-start gap-3">

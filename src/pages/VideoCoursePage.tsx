@@ -170,7 +170,7 @@ export default function VideoCoursePage() {
           Back to Courses
         </button>
 
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="glass-video overflow-hidden">
           <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] p-6 text-white">
             <h1 className="text-3xl font-bold mb-2">Open Day Training Module</h1>
             <p className="text-red-100 mb-4 text-sm">

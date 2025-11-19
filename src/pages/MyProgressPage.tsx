@@ -173,7 +173,7 @@ export default function MyProgressPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white rounded-2xl p-6 shadow-lg"
+            className="glass-widget p-6"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-100 rounded-lg">
@@ -193,7 +193,7 @@ export default function MyProgressPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white rounded-2xl p-6 shadow-lg"
+            className="glass-widget p-6"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-green-100 rounded-lg">
@@ -213,7 +213,7 @@ export default function MyProgressPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white rounded-2xl p-6 shadow-lg"
+            className="glass-widget p-6"
           >
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-orange-100 rounded-lg">
@@ -270,7 +270,7 @@ export default function MyProgressPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 * index }}
               onClick={() => handleModuleClick(module.id, module.type)}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
+              className="glass-course overflow-hidden transition cursor-pointer border border-transparent hover:border-[#D71920]"
             >
               <div className="relative">
                 {module.coverImage ? (

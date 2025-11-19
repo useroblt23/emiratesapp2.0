@@ -129,7 +129,7 @@ export default function OpenDaysPage() {
         </div>
 
         {openDays.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-lg">
+          <div className="text-center py-16 glass-card">
             <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Open Days Scheduled</h3>
             <p className="text-gray-600">
@@ -143,7 +143,7 @@ export default function OpenDaysPage() {
                 key={openDay.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg p-6 hover:shadow-xl transition border-l-4 border-[#D71920]"
+                className="glass-openday p-6 transition border-l-4 border-[#D71920]"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -200,7 +200,7 @@ export default function OpenDaysPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
+              className="glass-modal w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">

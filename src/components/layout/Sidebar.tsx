@@ -46,40 +46,35 @@ export default function Sidebar() {
         icon: Brain,
         label: 'AI Trainer',
         locked: !aiTrainerAccess.allowed,
-        feature: 'ai-trainer' as Feature,
-        badge: aiTrainerAccess.allowed && currentUser.plan === 'vip' ? 'VIP' : undefined
+        feature: 'ai-trainer' as Feature
       },
       {
         path: '/open-day',
         icon: Plane,
         label: 'Open Day Sim',
         locked: !simulatorAccess.allowed,
-        feature: 'simulator' as Feature,
-        badge: simulatorAccess.allowed && currentUser.plan === 'vip' ? 'VIP' : undefined
+        feature: 'simulator' as Feature
       },
       {
         path: '/chat',
         icon: MessageCircle,
         label: 'Chat',
         locked: !chatAccess.allowed,
-        feature: 'chat' as Feature,
-        badge: chatAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+        feature: 'chat' as Feature
       },
       {
         path: '/recruiters',
         icon: Briefcase,
         label: 'Recruiters',
         locked: !recruitersAccess.allowed,
-        feature: 'recruiters' as Feature,
-        badge: recruitersAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+        feature: 'recruiters' as Feature
       },
       {
         path: '/open-days',
         icon: Calendar,
         label: 'Open Days',
         locked: !openDaysAccess.allowed,
-        feature: 'opendays' as Feature,
-        badge: openDaysAccess.allowed && currentUser.plan !== 'free' ? 'PRO' : undefined
+        feature: 'opendays' as Feature
       },
       { path: '/leaderboard', icon: Trophy, label: 'Leaderboard', feature: null },
       { path: '/profile', icon: UserCircle, label: 'Profile', feature: null },

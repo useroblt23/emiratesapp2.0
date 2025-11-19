@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
-import PlanBadge from '../PlanBadge';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 
@@ -44,10 +43,6 @@ export default function Navbar() {
           </Link>
 
           <div className="flex items-center gap-2 md:gap-4">
-            <div className="hidden md:block">
-              <PlanBadge plan={currentUser.plan} size="sm" />
-            </div>
-
             <button
               onClick={() => navigate('/notifications')}
               className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"

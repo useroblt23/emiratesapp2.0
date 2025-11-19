@@ -593,3 +593,461 @@ export const syncStripeToFirestore = functions.https.onCall(async (data, context
     throw new functions.https.HttpsError('internal', error.message);
   }
 });
+
+///////////////////////////////////////////////////////////////////////////
+// SOCIAL COMMUNITY CLOUD FUNCTIONS
+///////////////////////////////////////////////////////////////////////////
+
+interface PointsRateLimits {
+  messageSent: { count: number; lastReset: number };
+  attachmentUpload: { count: number; lastReset: number };
+}
+
+const POINTS_RULES = {
+  MESSAGE_SENT: 2,
+  MESSAGE_SENT_DAILY_CAP: 20,
+  MESSAGE_LIKED: 3,
+  EMOJI_REACTION: 2,
+  ATTACHMENT_UPLOAD: 4,
+  ATTACHMENT_UPLOAD_DAILY_CAP: 5,
+};
+
+async function getRateLimits(userId: string): Promise<PointsRateLimits> {
+  const userDoc = await db.collection('users').doc(userId).get();
+  const userData = userDoc.data();
+
+  const now = Date.now();
+  const oneDayAgo = now - 86400000;
+
+  const limits = userData?.pointsRateLimits || {
+    messageSent: { count: 0, lastReset: now },
+    attachmentUpload: { count: 0, lastReset: now },
+  };
+
+  if (limits.messageSent.lastReset < oneDayAgo) {
+    limits.messageSent = { count: 0, lastReset: now };
+  }
+
+  if (limits.attachmentUpload.lastReset < oneDayAgo) {
+    limits.attachmentUpload = { count: 0, lastReset: now };
+  }
+
+  return limits;
+}
+
+async function updateRateLimits(userId: string, limits: PointsRateLimits): Promise<void> {
+  await db.collection('users').doc(userId).update({
+    pointsRateLimits: limits,
+  });
+}
+
+async function awardPoints(userId: string, points: number, reason: string, metadata: any): Promise<void> {
+  const userRef = db.collection('users').doc(userId);
+
+  await db.runTransaction(async (transaction) => {
+    const userDoc = await transaction.get(userRef);
+    const currentPoints = userDoc.data()?.points || 0;
+
+    transaction.update(userRef, {
+      points: currentPoints + points,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+  });
+
+  await db.collection('point_events').add({
+    user_id: userId,
+    points,
+    reason,
+    metadata,
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+  });
+}
+
+export const awardMessageSent = functions.https.onCall(async (data: { conversationId: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const { conversationId } = data;
+
+  try {
+    const limits = await getRateLimits(uid);
+
+    if (limits.messageSent.count >= POINTS_RULES.MESSAGE_SENT_DAILY_CAP) {
+      return {
+        success: false,
+        message: 'Daily message points cap reached',
+        points: 0,
+      };
+    }
+
+    limits.messageSent.count += 1;
+    await updateRateLimits(uid, limits);
+
+    await awardPoints(uid, POINTS_RULES.MESSAGE_SENT, 'message_sent', { conversationId });
+
+    return {
+      success: true,
+      message: 'Points awarded for message',
+      points: POINTS_RULES.MESSAGE_SENT,
+      remaining: POINTS_RULES.MESSAGE_SENT_DAILY_CAP - limits.messageSent.count,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const awardMessageLike = functions.https.onCall(async (data: { messageId: string; conversationId: string; recipientId: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { messageId, conversationId, recipientId } = data;
+
+  try {
+    await awardPoints(recipientId, POINTS_RULES.MESSAGE_LIKED, 'message_liked', {
+      messageId,
+      conversationId,
+      likedBy: context.auth.uid,
+    });
+
+    return {
+      success: true,
+      message: 'Points awarded for like',
+      points: POINTS_RULES.MESSAGE_LIKED,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const awardEmojiReaction = functions.https.onCall(async (data: { messageId: string; conversationId: string; recipientId: string; emoji: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { messageId, conversationId, recipientId, emoji } = data;
+
+  try {
+    await awardPoints(recipientId, POINTS_RULES.EMOJI_REACTION, 'emoji_reaction', {
+      messageId,
+      conversationId,
+      emoji,
+      reactedBy: context.auth.uid,
+    });
+
+    return {
+      success: true,
+      message: 'Points awarded for reaction',
+      points: POINTS_RULES.EMOJI_REACTION,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const awardAttachmentUpload = functions.https.onCall(async (data: { conversationId: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const { conversationId } = data;
+
+  try {
+    const limits = await getRateLimits(uid);
+
+    if (limits.attachmentUpload.count >= POINTS_RULES.ATTACHMENT_UPLOAD_DAILY_CAP) {
+      return {
+        success: false,
+        message: 'Daily attachment points cap reached',
+        points: 0,
+      };
+    }
+
+    limits.attachmentUpload.count += 1;
+    await updateRateLimits(uid, limits);
+
+    await awardPoints(uid, POINTS_RULES.ATTACHMENT_UPLOAD, 'attachment_upload', { conversationId });
+
+    return {
+      success: true,
+      message: 'Points awarded for attachment',
+      points: POINTS_RULES.ATTACHMENT_UPLOAD,
+      remaining: POINTS_RULES.ATTACHMENT_UPLOAD_DAILY_CAP - limits.attachmentUpload.count,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const reportMessage = functions.https.onCall(async (data: { messageId: string; conversationId: string; reason: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const { messageId, conversationId, reason } = data;
+
+  try {
+    const reportRef = await db.collection('messageReports').add({
+      reporterId: uid,
+      messageRef: `conversations/${conversationId}/messages/${messageId}`,
+      conversationId,
+      messageId,
+      reason,
+      status: 'open',
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      handledBy: null,
+      handledAt: null,
+    });
+
+    await logAuditEvent('message_reported', uid, 'user', {
+      reportId: reportRef.id,
+      messageId,
+      conversationId,
+      reason,
+    });
+
+    return {
+      success: true,
+      message: 'Message reported successfully',
+      reportId: reportRef.id,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const moderateMessage = functions.https.onCall(async (data: { messageId: string; conversationId: string; action: 'delete' | 'restore' }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const userDoc = await db.collection('users').doc(uid).get();
+  const userData = userDoc.data();
+
+  if (userData?.role !== 'governor' && !(await hasPermission(uid, 'moderateContent'))) {
+    throw new functions.https.HttpsError('permission-denied', 'Insufficient permissions');
+  }
+
+  const { messageId, conversationId, action } = data;
+
+  try {
+    const messageRef = db.collection('conversations').doc(conversationId).collection('messages').doc(messageId);
+
+    await messageRef.update({
+      deleted: action === 'delete',
+      moderatedBy: uid,
+      moderatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    await db.collection('moderationAudit').add({
+      action,
+      targetType: 'message',
+      targetId: messageId,
+      conversationId,
+      moderatorId: uid,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    await logAuditEvent('message_moderated', uid, userData?.role || 'moderator', {
+      action,
+      messageId,
+      conversationId,
+    });
+
+    return {
+      success: true,
+      message: `Message ${action === 'delete' ? 'deleted' : 'restored'} successfully`,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const muteUser = functions.https.onCall(async (data: { targetUserId: string; conversationId?: string; duration?: number }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const userDoc = await db.collection('users').doc(uid).get();
+  const userData = userDoc.data();
+
+  if (userData?.role !== 'governor' && !(await hasPermission(uid, 'moderateContent'))) {
+    throw new functions.https.HttpsError('permission-denied', 'Insufficient permissions');
+  }
+
+  const { targetUserId, conversationId, duration } = data;
+
+  try {
+    const targetUserRef = db.collection('users').doc(targetUserId);
+
+    const muteUntil = duration ? Date.now() + duration : null;
+
+    if (conversationId) {
+      await targetUserRef.update({
+        [`mutedConversations.${conversationId}`]: muteUntil || 'permanent',
+      });
+    } else {
+      await targetUserRef.update({
+        isMuted: true,
+        mutedUntil: muteUntil,
+        mutedBy: uid,
+        mutedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    await db.collection('moderationAudit').add({
+      action: 'mute_user',
+      targetType: 'user',
+      targetId: targetUserId,
+      conversationId: conversationId || null,
+      moderatorId: uid,
+      duration,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    await logAuditEvent('user_muted', uid, userData?.role || 'moderator', {
+      targetUserId,
+      conversationId,
+      duration,
+    });
+
+    return {
+      success: true,
+      message: `User muted ${conversationId ? 'in conversation' : 'globally'}`,
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const banUser = functions.https.onCall(async (data: { targetUserId: string; reason: string }, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'User must be authenticated');
+  }
+
+  const { uid } = context.auth;
+  const userDoc = await db.collection('users').doc(uid).get();
+  const userData = userDoc.data();
+
+  if (userData?.role !== 'governor' && !(await hasPermission(uid, 'moderateContent'))) {
+    throw new functions.https.HttpsError('permission-denied', 'Insufficient permissions');
+  }
+
+  const { targetUserId, reason } = data;
+
+  try {
+    await db.collection('users').doc(targetUserId).update({
+      isBanned: true,
+      bannedBy: uid,
+      bannedAt: admin.firestore.FieldValue.serverTimestamp(),
+      banReason: reason,
+    });
+
+    await db.collection('moderationAudit').add({
+      action: 'ban_user',
+      targetType: 'user',
+      targetId: targetUserId,
+      moderatorId: uid,
+      reason,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    await logAuditEvent('user_banned', uid, userData?.role || 'moderator', {
+      targetUserId,
+      reason,
+    });
+
+    return {
+      success: true,
+      message: 'User banned successfully',
+    };
+  } catch (error: any) {
+    throw new functions.https.HttpsError('internal', error.message);
+  }
+});
+
+export const updateLeaderboard = functions.pubsub.schedule('every 15 minutes').onRun(async () => {
+  try {
+    const usersSnapshot = await db.collection('users')
+      .orderBy('points', 'desc')
+      .limit(100)
+      .get();
+
+    const globalLeaderboard = usersSnapshot.docs.map((doc, index) => {
+      const data = doc.data();
+      return {
+        userId: doc.id,
+        name: data.name,
+        points: data.points || 0,
+        badge: data.badge || 'bronze',
+        country: data.country,
+        rank: index + 1,
+      };
+    });
+
+    await db.collection('leaderboard').doc('global').set({
+      entries: globalLeaderboard,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    const countryCounts: Record<string, any[]> = {};
+    usersSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const country = data.country || 'Unknown';
+      if (!countryCounts[country]) {
+        countryCounts[country] = [];
+      }
+      countryCounts[country].push({
+        userId: doc.id,
+        name: data.name,
+        points: data.points || 0,
+        badge: data.badge || 'bronze',
+      });
+    });
+
+    for (const [country, entries] of Object.entries(countryCounts)) {
+      const sortedEntries = entries.sort((a, b) => b.points - a.points).slice(0, 50);
+      sortedEntries.forEach((entry, index) => {
+        entry.rank = index + 1;
+      });
+
+      await db.collection('leaderboard').doc(`country_${country}`).set({
+        country,
+        entries: sortedEntries,
+        updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+      });
+    }
+
+    const weekAgo = Date.now() - 7 * 86400000;
+    const recentPointsSnapshot = await db.collection('point_events')
+      .where('timestamp', '>=', new Date(weekAgo))
+      .get();
+
+    const weeklyPoints: Record<string, number> = {};
+    recentPointsSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const userId = data.user_id;
+      weeklyPoints[userId] = (weeklyPoints[userId] || 0) + data.points;
+    });
+
+    const weeklyLeaderboard = Object.entries(weeklyPoints)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 50)
+      .map(([userId, points], index) => ({ userId, points, rank: index + 1 }));
+
+    await db.collection('leaderboard').doc('weekly').set({
+      entries: weeklyLeaderboard,
+      updatedAt: admin.firestore.FieldValue.serverTimestamp(),
+    });
+
+    console.log('Leaderboard updated successfully');
+  } catch (error) {
+    console.error('Error updating leaderboard:', error);
+  }
+});

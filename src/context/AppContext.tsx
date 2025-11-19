@@ -150,7 +150,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
               handleDailyLogin(firebaseUser.uid).catch(console.error);
             } else {
               console.warn('User document not found in Firestore. User may need to complete registration.');
-              // Force logout if user document doesn't exist
               console.warn('User document missing, forcing logout');
               auth.signOut();
               setCurrentUser(null);
@@ -160,16 +159,32 @@ export function AppProvider({ children }: { children: ReactNode }) {
           },
           (error) => {
             console.error('Error listening to user document:', error);
-            // Force logout on any Firestore error to prevent auth loops
-            console.warn('Firestore error, forcing logout to prevent auth loop');
-            auth.signOut();
-            setCurrentUser(null);
-            localStorage.removeItem('currentUser');
-            sessionStorage.clear();
+
+            if (error.code === 'permission-denied') {
+              console.warn('Permission denied - auth token may not have propagated yet. Retrying in 2s...');
+              setTimeout(() => {
+                console.log('Forcing token refresh and retry');
+                firebaseUser.getIdToken(true).then(() => {
+                  console.log('Token refreshed successfully');
+                }).catch((tokenError) => {
+                  console.error('Token refresh failed:', tokenError);
+                  console.warn('Forcing logout due to persistent permission error');
+                  auth.signOut();
+                  setCurrentUser(null);
+                  localStorage.removeItem('currentUser');
+                  sessionStorage.clear();
+                });
+              }, 2000);
+            } else {
+              console.warn('Firestore error, forcing logout to prevent auth loop');
+              auth.signOut();
+              setCurrentUser(null);
+              localStorage.removeItem('currentUser');
+              sessionStorage.clear();
+            }
           }
         );
 
-        // Store the unsubscribe function in the ref
         firestoreUnsubscribeRef.current = unsubscribeFirestore;
       } else {
         console.log('User signed out');

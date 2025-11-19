@@ -32,7 +32,7 @@ export default function Navbar() {
   if (!currentUser) return null;
 
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-40">
+    <nav className="glass-nav sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-20">
           <Link to="/dashboard" className="flex items-center">
@@ -50,7 +50,7 @@ export default function Navbar() {
 
             <button
               onClick={() => navigate('/notifications')}
-              className="relative p-1.5 md:p-2 hover:bg-gray-100 rounded-lg transition"
+              className="relative p-1.5 md:p-2 glass-button-secondary rounded-full transition-all"
             >
               <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
               {unreadCount > 0 && (
@@ -63,7 +63,7 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowProfileMenu(!showProfileMenu)}
-                className="flex items-center gap-1 md:gap-3 hover:bg-gray-100 rounded-lg px-2 md:px-3 py-1.5 md:py-2 transition"
+                className="flex items-center gap-1 md:gap-3 glass-button-secondary rounded-3xl px-2 md:px-3 py-1.5 md:py-2 transition-all"
               >
                 <img
                   src={currentUser.photoURL || `data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22%3E%3Crect fill=%22%23ddd%22 width=%22200%22 height=%22200%22/%3E%3Ctext fill=%22%23999%22 font-family=%22sans-serif%22 font-size=%2260%22 dy=%2210.5rem%22 font-weight=%22bold%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22%3E${currentUser.name?.[0] || 'U'}%3C/text%3E%3C/svg%3E`}
@@ -80,15 +80,16 @@ export default function Navbar() {
               <AnimatePresence>
                 {showProfileMenu && (
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl py-2 text-[#1C1C1C]"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    className="absolute right-0 mt-2 w-56 glass-modal py-2 text-[#1C1C1C]"
                   >
                     <Link
                       to="/profile"
                       onClick={() => setShowProfileMenu(false)}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all"
                     >
                       <User className="w-4 h-4" />
                       <span>My Profile</span>
@@ -98,7 +99,7 @@ export default function Navbar() {
                         setShowProfileMenu(false);
                         alert('Settings page coming soon!');
                       }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-[#F5F5F5] transition w-full text-left"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-white/50 rounded-xl mx-2 transition-all w-full text-left"
                     >
                       <Settings className="w-4 h-4" />
                       <span>Settings</span>
@@ -110,7 +111,7 @@ export default function Navbar() {
                         logout();
                         navigate('/');
                       }}
-                      className="flex items-center gap-3 px-4 py-3 hover:bg-red-50 transition w-full text-left text-red-600"
+                      className="flex items-center gap-3 px-4 py-3 hover:bg-red-50/50 rounded-xl mx-2 transition-all w-full text-left text-red-600"
                     >
                       <LogOut className="w-4 h-4" />
                       <span>Logout</span>

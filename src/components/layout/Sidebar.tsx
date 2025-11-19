@@ -124,10 +124,10 @@ export default function Sidebar() {
     studentLinks;
 
   return (
-    <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 shadow-sm md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
+    <aside className="w-full md:w-64 glass-sidebar border-b md:border-b-0 md:border-r border-white/20 md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
       <div className="p-3 md:p-4">
         {currentUser.role === 'governor' && (
-          <div className="mb-3 md:mb-4 p-2 md:p-3 bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white rounded-lg md:rounded-xl">
+          <div className="mb-3 md:mb-4 p-2 md:p-3 glass-primary text-white rounded-2xl shadow-xl">
             <div className="flex items-center gap-2 mb-1">
               <Shield className="w-3 h-3 md:w-4 md:h-4" />
               <span className="text-xs md:text-sm font-bold">Governor Access</span>
@@ -154,14 +154,14 @@ export default function Sidebar() {
                     setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
                   }
                 }}
-                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-lg md:rounded-xl transition whitespace-nowrap md:whitespace-normal relative ${
+                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-2xl transition-all whitespace-nowrap md:whitespace-normal relative parallax-hover ${
                   isActive
-                    ? 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white shadow-md'
+                    ? 'glass-primary text-white shadow-xl'
                     : highlight
-                    ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white font-bold hover:shadow-lg'
+                    ? 'glass-primary text-white font-bold'
                     : isLocked
-                    ? 'text-gray-400 hover:bg-gray-50 opacity-60'
-                    : 'text-gray-700 hover:bg-[#F5F5F5]'
+                    ? 'text-gray-400 glass-ultra-thin opacity-60'
+                    : 'text-gray-700 glass-button-secondary'
                 }`}
               >
                 <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />

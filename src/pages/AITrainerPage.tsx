@@ -215,7 +215,7 @@ export default function AITrainerPage() {
           animate={{ opacity: 1 }}
           className="space-y-6"
         >
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-card rounded-2xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-[#000000] mb-4">Upload or Paste Your CV</h2>
             <p className="text-sm text-gray-600 mb-4">
               Paste your CV content or upload a file to get detailed improvement feedback from our AI recruiter.
@@ -232,7 +232,7 @@ export default function AITrainerPage() {
             <div className="mb-4">
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#D71921] transition cursor-pointer bg-gray-50 hover:bg-gray-100"
+                className="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-[#D71921] transition cursor-pointer glass-light hover:glass-bubble"
               >
                 <Upload className="w-12 h-12 text-gray-400 mx-auto mb-3" />
                 <p className="text-sm text-gray-600 font-semibold">Click to upload your CV</p>
@@ -320,13 +320,13 @@ Customer service professional with 3 years of experience in hospitality..."
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl shadow-lg p-6"
+              className="glass-card rounded-2xl shadow-lg p-6"
             >
               <h3 className="text-xl font-bold text-[#000000] mb-4 flex items-center gap-2">
                 <Wand2 className="w-6 h-6 text-[#CBA135]" />
                 Your ATS-Optimized Aviation CV
               </h3>
-              <div className="bg-gray-50 rounded-xl p-6 mb-4 max-h-96 overflow-y-auto">
+              <div className="glass-light rounded-xl p-6 mb-4 max-h-96 overflow-y-auto">
                 <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
                   {optimizedCV}
                 </pre>
@@ -349,7 +349,7 @@ Customer service professional with 3 years of experience in hospitality..."
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col"
+          className="glass-card rounded-2xl shadow-lg overflow-hidden flex flex-col"
           style={{ height: 'calc(100vh - 300px)', minHeight: '500px' }}
         >
           <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -365,7 +365,7 @@ Customer service professional with 3 years of experience in hospitality..."
                     <button
                       key={i}
                       onClick={() => setChatInput(q)}
-                      className="w-full px-4 py-3 bg-gray-50 hover:bg-[#EADBC8] border-2 border-gray-200 hover:border-[#D71921] rounded-xl text-left text-sm text-gray-700 transition"
+                      className="w-full px-4 py-3 glass-light hover:bg-[#EADBC8] border-2 border-gray-200 hover:border-[#D71921] rounded-xl text-left text-sm text-gray-700 transition"
                     >
                       {q}
                     </button>

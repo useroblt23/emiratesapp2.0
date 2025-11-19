@@ -110,7 +110,7 @@ export default function ModuleViewerPage() {
           Back to Modules
         </button>
 
-        <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-6">
+        <div className="glass-card rounded-xl shadow-lg overflow-hidden mb-6">
           {module.cover_image && (
             <img
               src={module.cover_image}
@@ -181,7 +181,7 @@ export default function ModuleViewerPage() {
                 key={lesson.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                className="glass-card rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
                 onClick={() => {
                   // Navigate to lesson viewer or play video
                   window.open(lesson.videoUrl, '_blank');
@@ -213,7 +213,7 @@ export default function ModuleViewerPage() {
                 key={course.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                className="glass-card rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
                 onClick={() => navigate(`/courses/${course.id}`)}
               >
                 <img
@@ -257,7 +257,7 @@ export default function ModuleViewerPage() {
                 key={relatedModule.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
+                className="glass-card rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer"
                 onClick={() => navigate(`/modules/${relatedModule.id}`)}
               >
                 <div className="bg-gradient-to-br from-blue-600 to-blue-700 h-32 flex items-center justify-center">
@@ -279,7 +279,7 @@ export default function ModuleViewerPage() {
       )}
 
       {courses.length === 0 && relatedModules.length === 0 && (!module.lessons || module.lessons.length === 0) && (
-        <div className="bg-white rounded-xl shadow-lg p-12 text-center">
+        <div className="glass-card rounded-xl shadow-lg p-12 text-center">
           <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-gray-800 mb-2">Content Coming Soon</h2>
           <p className="text-gray-600">

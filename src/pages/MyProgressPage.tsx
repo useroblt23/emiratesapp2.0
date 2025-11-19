@@ -141,7 +141,7 @@ export default function MyProgressPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-8">
+    <div className="min-h-screen pb-8">
       <div className="max-w-6xl mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-2">My Progress</h1>
@@ -163,7 +163,7 @@ export default function MyProgressPage() {
             </div>
             <div className="w-full bg-white/20 rounded-full h-2">
               <div
-                className="bg-white rounded-full h-2 transition-all duration-500"
+                className="glass-card rounded-full h-2 transition-all duration-500"
                 style={{ width: `${stats.averageProgress}%` }}
               />
             </div>
@@ -339,7 +339,7 @@ export default function MyProgressPage() {
           ))}
 
           {enrolledModules.length === 0 && (
-            <div className="col-span-2 bg-white rounded-2xl p-12 text-center shadow-lg">
+            <div className="col-span-2 glass-card rounded-2xl p-12 text-center shadow-lg">
               <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-xl font-bold text-gray-800 mb-2">No Enrolled Modules</h3>
               <p className="text-gray-600 mb-6">

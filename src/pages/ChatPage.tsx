@@ -176,7 +176,7 @@ export default function ChatPage() {
         </div>
       </motion.div>
 
-      <div className="flex-1 bg-white rounded-2xl shadow-2xl overflow-hidden flex border border-gray-100">
+      <div className="flex-1 glass-card rounded-2xl shadow-2xl overflow-hidden flex border border-gray-100">
         <AnimatePresence>
           {showConversationList && (
             <motion.div

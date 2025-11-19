@@ -17,8 +17,9 @@
   body {
     font-family: 'Lato', sans-serif;
     font-weight: 400;
-    /* Soft Gradient Background - Beige to Coral Pink */
-    background: linear-gradient(135deg, #f5f0e8 0%, #ffd4c8 35%, #ffb5a3 65%, #ff9a8b 100%);
+    /* Soft Gradient Background from uploaded image */
+    background: url('/Untitled design (1).png') no-repeat center center fixed;
+    background-size: cover;
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
@@ -33,14 +34,16 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: url('/Untitled design.png') no-repeat center center;
+    background: linear-gradient(135deg, #f5f0e8 0%, #ffd4c8 35%, #ffb5a3 65%, #ff9a8b 100%);
     background-size: cover;
-    /* Ultra-high quality rendering */
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
     z-index: -999;
-    /* Prevent any interaction */
     pointer-events: none;
+    opacity: 0;
+  }
+
+  /* Fallback if image doesn't load */
+  body:not(.bg-loaded)::before {
+    opacity: 1;
   }
 
   /* Ensure all major layout elements sit above background */

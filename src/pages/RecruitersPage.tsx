@@ -166,7 +166,7 @@ export default function RecruitersPage() {
         </div>
 
         {filteredRecruiters.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-2xl shadow-lg">
+          <div className="text-center py-16 glass-card rounded-2xl shadow-lg">
             <Briefcase className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2">No Recruiters Found</h3>
             <p className="text-gray-600">
@@ -182,7 +182,7 @@ export default function RecruitersPage() {
                 key={recruiter.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition"
+                className="glass-card rounded-xl shadow-lg p-6 hover:shadow-xl transition"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -200,13 +200,13 @@ export default function RecruitersPage() {
                     <div className="flex gap-2">
                       <button
                         onClick={() => handleOpenModal(recruiter)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition"
+                        className="p-2 hover:glass-bubble rounded-lg transition"
                       >
                         <Edit className="w-4 h-4 text-blue-600" />
                       </button>
                       <button
                         onClick={() => handleDelete(recruiter.id!)}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition"
+                        className="p-2 hover:glass-bubble rounded-lg transition"
                       >
                         <Trash2 className="w-4 h-4 text-red-600" />
                       </button>
@@ -220,7 +220,7 @@ export default function RecruitersPage() {
 
                 <button
                   onClick={() => setViewingRecruiter(recruiter)}
-                  className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-semibold transition"
+                  className="w-full px-4 py-2 glass-bubble hover:bg-gray-200 text-gray-800 rounded-lg font-semibold transition"
                 >
                   View Details
                 </button>
@@ -244,7 +244,7 @@ export default function RecruitersPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6"
+              className="glass-card rounded-2xl shadow-2xl w-full max-w-lg p-6"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">
@@ -252,7 +252,7 @@ export default function RecruitersPage() {
                 </h2>
                 <button
                   onClick={handleCloseModal}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                  className="p-2 hover:glass-bubble rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -342,13 +342,13 @@ export default function RecruitersPage() {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6"
+              className="glass-card rounded-2xl shadow-2xl w-full max-w-lg p-6"
             >
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-gray-900">{viewingRecruiter.name}</h2>
                 <button
                   onClick={() => setViewingRecruiter(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition"
+                  className="p-2 hover:glass-bubble rounded-lg transition"
                 >
                   <X className="w-5 h-5" />
                 </button>

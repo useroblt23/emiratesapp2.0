@@ -215,7 +215,7 @@ export default function OpenDaySimulatorPage() {
               <h2 className="text-xl font-bold text-gray-900 mb-4">What to Expect:</h2>
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center font-bold text-[#D71920]">
+                  <div className="w-10 h-10 glass-card rounded-full flex items-center justify-center font-bold text-[#D71920]">
                     1
                   </div>
                   <div>

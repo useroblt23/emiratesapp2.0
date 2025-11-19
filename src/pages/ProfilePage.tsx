@@ -163,7 +163,7 @@ export default function ProfilePage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-card rounded-2xl shadow-lg p-6">
             <div className="flex flex-col items-center mb-6">
               <div className="relative mb-4">
                 <img
@@ -191,7 +191,7 @@ export default function ProfilePage() {
               {isEditing && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg font-semibold transition text-sm"
+                  className="flex items-center gap-2 px-4 py-2 glass-bubble hover:bg-gray-200 text-gray-800 rounded-lg font-semibold transition text-sm"
                 >
                   <Upload className="w-4 h-4" />
                   Change Photo
@@ -246,7 +246,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-card rounded-2xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-2xl font-bold text-gray-900">Account Information</h3>
               {!isEditing ? (
@@ -293,7 +293,7 @@ export default function ProfilePage() {
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:bg-gray-50 disabled:text-gray-600"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:glass-light disabled:text-gray-600"
                 />
               </div>
 
@@ -303,7 +303,7 @@ export default function ProfilePage() {
                   type="email"
                   value={formData.email}
                   disabled
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl glass-light text-gray-600"
                 />
                 <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
               </div>
@@ -315,7 +315,7 @@ export default function ProfilePage() {
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
                   disabled={!isEditing}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:bg-gray-50 disabled:text-gray-600"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:glass-light disabled:text-gray-600"
                 />
               </div>
 
@@ -327,7 +327,7 @@ export default function ProfilePage() {
                   type="text"
                   value={currentUser.plan.toUpperCase()}
                   disabled
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600 capitalize"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl glass-light text-gray-600 capitalize"
                 />
               </div>
 
@@ -337,7 +337,7 @@ export default function ProfilePage() {
                   type="text"
                   value={currentUser.role}
                   disabled
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-50 text-gray-600 capitalize"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl glass-light text-gray-600 capitalize"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Role can only be changed by a Governor
@@ -353,7 +353,7 @@ export default function ProfilePage() {
                   onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
                   disabled={!isEditing}
                   rows={4}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:bg-gray-50 disabled:text-gray-600 resize-none"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#D71920] focus:ring-2 focus:ring-[#D71920]/20 transition disabled:glass-light disabled:text-gray-600 resize-none"
                   placeholder="Tell us about yourself..."
                 />
               </div>
@@ -367,7 +367,7 @@ export default function ProfilePage() {
                 </p>
 
                 {currentUser.cvUrl ? (
-                  <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                  <div className="flex items-center gap-3 p-4 glass-light rounded-xl border-2 border-gray-200">
                     <div className="w-12 h-12 bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-lg flex items-center justify-center">
                       <FileText className="w-6 h-6 text-white" />
                     </div>
@@ -382,14 +382,14 @@ export default function ProfilePage() {
                         href={currentUser.cvUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 bg-white hover:bg-gray-100 rounded-lg border-2 border-gray-200 transition"
+                        className="p-2 glass-card hover:glass-bubble rounded-lg border-2 border-gray-200 transition"
                         title="Download CV"
                       >
                         <Download className="w-5 h-5 text-gray-700" />
                       </a>
                       <button
                         onClick={handleDeleteCV}
-                        className="p-2 bg-white hover:bg-red-50 rounded-lg border-2 border-gray-200 hover:border-red-300 transition"
+                        className="p-2 glass-card hover:bg-red-50 rounded-lg border-2 border-gray-200 hover:border-red-300 transition"
                         title="Delete CV"
                       >
                         <Trash2 className="w-5 h-5 text-red-600" />
@@ -400,7 +400,7 @@ export default function ProfilePage() {
                   <button
                     onClick={() => cvInputRef.current?.click()}
                     disabled={uploadingCV}
-                    className="w-full flex items-center justify-center gap-3 px-4 py-4 bg-gray-50 hover:bg-gray-100 border-2 border-dashed border-gray-300 hover:border-[#D71920] rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full flex items-center justify-center gap-3 px-4 py-4 glass-light hover:glass-bubble border-2 border-dashed border-gray-300 hover:border-[#D71920] rounded-xl transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Upload className="w-5 h-5 text-gray-600" />
                     <span className="font-bold text-gray-700">
@@ -424,7 +424,7 @@ export default function ProfilePage() {
 
       {currentUser.role === 'student' && (
         <div className="mt-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-card rounded-2xl shadow-lg p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">Graduation Status</h3>
             <DeclareCrewButton
               userId={currentUser.uid}
@@ -442,7 +442,7 @@ export default function ProfilePage() {
 
       {currentUser.cvUrl && (
         <div className="mt-6">
-          <div className="bg-white rounded-2xl shadow-lg p-6">
+          <div className="glass-card rounded-2xl shadow-lg p-6">
             <h3 className="text-2xl font-bold text-gray-900 mb-6">CV Analysis & ATS Converter</h3>
             <CVAnalyzer cvUrl={currentUser.cvUrl} userId={currentUser.uid} />
           </div>

@@ -64,13 +64,13 @@ export default function LeaderboardPage() {
 
   const getRankBackground = (index: number) => {
     if (index === 0) return 'bg-gradient-to-r from-yellow-50 to-amber-50 border-yellow-300';
-    if (index === 1) return 'bg-gray-50 border-gray-300';
+    if (index === 1) return 'glass-light border-gray-300';
     if (index === 2) return 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-300';
     return 'bg-white border-gray-200';
   };
 
   return (
-    <div className="min-h-screen bg-white p-6">
+    <div className="min-h-screen p-6">
       <div className="max-w-4xl mx-auto">
         <div className="bg-gradient-to-r from-[#D71920] to-[#B91518] rounded-2xl p-8 text-white mb-6" style={{ boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)' }}>
           <div className="flex items-center gap-4">
@@ -88,7 +88,7 @@ export default function LeaderboardPage() {
             <p className="text-gray-600 mt-4 font-semibold">Loading leaderboard...</p>
           </div>
         ) : leaderboard.length === 0 ? (
-          <div className="bg-white rounded-xl p-12 text-center shadow-lg">
+          <div className="glass-card rounded-xl p-12 text-center shadow-lg">
             <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <p className="text-gray-600 font-semibold">No members on the leaderboard yet</p>
             <p className="text-gray-500 text-sm mt-2">Be the first to earn points!</p>

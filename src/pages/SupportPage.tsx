@@ -123,8 +123,8 @@ export default function SupportPage() {
         <p className="text-gray-600">Get help and contact our team</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-        <div className="border-b border-gray-200 bg-gray-50">
+      <div className="glass-card rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div className="border-b border-gray-200 glass-light">
           <div className="flex overflow-x-auto">
             {tabs.map((tab) => {
               const Icon = tab.icon;
@@ -135,7 +135,7 @@ export default function SupportPage() {
                   className={`flex items-center gap-2 px-6 py-4 font-bold transition whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'text-[#D71921] border-b-2 border-[#D71921] bg-white'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                      : 'text-gray-600 hover:text-gray-900 hover:glass-bubble'
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -175,7 +175,7 @@ export default function SupportPage() {
 
                 <div
                   onClick={() => navigate('/documentation')}
-                  className="bg-white rounded-2xl p-6 text-center border border-gray-100 hover:shadow-md transition cursor-pointer"
+                  className="glass-card rounded-2xl p-6 text-center border border-gray-100 hover:shadow-md transition cursor-pointer"
                 >
                   <div className="w-16 h-16 bg-gradient-to-br from-gray-700 to-gray-900 rounded-full flex items-center justify-center mx-auto mb-4">
                     <BookOpen className="w-8 h-8 text-white" />
@@ -186,7 +186,7 @@ export default function SupportPage() {
                 </div>
               </div>
 
-              <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+              <div className="glass-light rounded-2xl p-6 border border-gray-200">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                   <HelpCircle className="w-6 h-6 text-[#D71921]" />
                   Frequently Asked Questions
@@ -210,7 +210,7 @@ export default function SupportPage() {
                       a: 'Navigate to the Messages section and select your mentor from the contacts list.'
                     }
                   ].map((faq, index) => (
-                    <div key={index} className="bg-white rounded-xl p-4 border border-gray-200">
+                    <div key={index} className="glass-card rounded-xl p-4 border border-gray-200">
                       <h3 className="font-bold text-gray-900 mb-2 flex items-center gap-2">
                         <div className="w-2 h-2 bg-[#D71921] rounded-full"></div>
                         {faq.q}
@@ -233,7 +233,7 @@ export default function SupportPage() {
                 <p className="text-gray-600">Our support team will respond as soon as possible</p>
               </div>
 
-              <form onSubmit={handleCreateTicket} className="space-y-6 bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200">
+              <form onSubmit={handleCreateTicket} className="space-y-6 glass-light rounded-2xl p-6 md:p-8 border border-gray-200">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Subject *
@@ -328,7 +328,7 @@ export default function SupportPage() {
                 <p className="text-gray-600">Help us improve by reporting any issues you encounter</p>
               </div>
 
-              <form onSubmit={handleBugReport} className="space-y-6 bg-gray-50 rounded-2xl p-6 md:p-8 border border-gray-200">
+              <form onSubmit={handleBugReport} className="space-y-6 glass-light rounded-2xl p-6 md:p-8 border border-gray-200">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Bug Title *
@@ -375,7 +375,7 @@ export default function SupportPage() {
                                 p === 'high' ? 'bg-orange-600 text-white' :
                                 p === 'medium' ? 'bg-yellow-600 text-white' :
                                 'bg-green-600 text-white'
-                              : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-300'
+                              : 'bg-white text-gray-700 hover:glass-bubble border border-gray-300'
                           }`}
                         >
                           {p.charAt(0).toUpperCase() + p.slice(1)}

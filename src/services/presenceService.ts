@@ -1,7 +1,13 @@
 import { getDatabase, ref, set, onValue, onDisconnect, serverTimestamp, get } from 'firebase/database';
 import { auth } from '../lib/firebase';
 
-const rtdb = getDatabase();
+let rtdb: ReturnType<typeof getDatabase>;
+
+try {
+  rtdb = getDatabase();
+} catch (error) {
+  console.error('Error initializing Firebase Realtime Database:', error);
+}
 
 export interface PresenceData {
   online: boolean;
@@ -17,6 +23,7 @@ export interface TypingData {
 
 export const presenceService = {
   initializePresence() {
+    if (!rtdb) return;
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
@@ -41,6 +48,7 @@ export const presenceService = {
   },
 
   setCurrentConversation(conversationId: string | null) {
+    if (!rtdb) return;
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
@@ -53,6 +61,7 @@ export const presenceService = {
   },
 
   subscribeToPresence(userId: string, callback: (data: PresenceData | null) => void) {
+    if (!rtdb) return () => {};
     const presenceRef = ref(rtdb, `presence/${userId}`);
     return onValue(presenceRef, (snapshot) => {
       callback(snapshot.val());
@@ -60,12 +69,14 @@ export const presenceService = {
   },
 
   async getPresence(userId: string): Promise<PresenceData | null> {
+    if (!rtdb) return null;
     const presenceRef = ref(rtdb, `presence/${userId}`);
     const snapshot = await get(presenceRef);
     return snapshot.val();
   },
 
   setTyping(conversationId: string, userName: string) {
+    if (!rtdb) return;
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
@@ -84,6 +95,7 @@ export const presenceService = {
   },
 
   clearTyping(conversationId: string) {
+    if (!rtdb) return;
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
@@ -92,6 +104,7 @@ export const presenceService = {
   },
 
   subscribeToTyping(conversationId: string, callback: (typingUsers: TypingData[]) => void) {
+    if (!rtdb) return () => {};
     const typingRef = ref(rtdb, `typing/${conversationId}`);
     return onValue(typingRef, (snapshot) => {
       const data = snapshot.val();
@@ -110,6 +123,7 @@ export const presenceService = {
   },
 
   cleanup() {
+    if (!rtdb) return;
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 

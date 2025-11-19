@@ -9,13 +9,26 @@ import { presenceService, TypingData } from '../services/presenceService';
 import { auth } from '../lib/firebase';
 
 export default function CommunityPage() {
-  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>('publicRoom');
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingData[]>([]);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const initCommunityChat = async () => {
+      try {
+        await communityChatService.ensureCommunityChat();
+        const userId = auth.currentUser?.uid;
+        if (userId) {
+          await communityChatService.joinCommunityChat(userId);
+        }
+      } catch (error) {
+        console.error('Error initializing community chat:', error);
+      }
+    };
+
+    initCommunityChat();
     presenceService.initializePresence();
 
     return () => {
@@ -134,19 +147,27 @@ export default function CommunityPage() {
         <div className="flex-1 flex flex-col">
           {selectedConversationId ? (
             <>
-              <div className="p-4 border-b border-gray-200 bg-gray-50 flex items-center gap-3">
+              <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-[#D71921] to-[#B01419] flex items-center gap-3">
                 <button
                   onClick={() => setSelectedConversationId(null)}
-                  className="lg:hidden p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                  className="lg:hidden p-2 hover:bg-white hover:bg-opacity-20 rounded-lg transition-colors"
                 >
-                  <ArrowLeft className="w-5 h-5 text-gray-600" />
+                  <ArrowLeft className="w-5 h-5 text-white" />
                 </button>
                 <div className="flex-1">
-                  <h2 className="text-lg font-semibold text-[#000000]">Conversation</h2>
-                  {typingUsers.length > 0 && (
-                    <p className="text-sm text-gray-500">
+                  <h2 className="text-lg font-semibold text-white">
+                    {selectedConversationId === 'publicRoom' ? '🌍 Community Chat' : 'Conversation'}
+                  </h2>
+                  {typingUsers.length > 0 ? (
+                    <p className="text-sm text-white text-opacity-80">
                       {typingUsers[0].userName} is typing...
                     </p>
+                  ) : (
+                    selectedConversationId === 'publicRoom' && (
+                      <p className="text-sm text-white text-opacity-80">
+                        Connect with all students worldwide
+                      </p>
+                    )
                   )}
                 </div>
               </div>

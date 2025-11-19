@@ -5,7 +5,7 @@ import { getAllUsers, User } from '../../services/chatService';
 import { auth } from '../../lib/firebase';
 
 interface ConversationListProps {
-  onSelectConversation: (conversationId: string, title: string) => void;
+  onSelectConversation: (conversationId: string) => void;
   selectedConversationId?: string;
   onClose?: () => void;
 }
@@ -26,6 +26,12 @@ export default function ConversationList({
   const [creating, setCreating] = useState(false);
 
   useEffect(() => {
+    const initCommunityChat = async () => {
+      await communityChatService.ensureCommunityChat();
+    };
+
+    initCommunityChat();
+
     const unsubscribe = communityChatService.subscribeToConversations((convs) => {
       setConversations(convs);
       setLoading(false);
@@ -80,7 +86,7 @@ export default function ConversationList({
       setShowNewConversation(false);
       setSelectedUsers([]);
       setGroupTitle('');
-      onSelectConversation(conversationId, title);
+      onSelectConversation(conversationId);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
       alert(error.message || 'Failed to create conversation');
@@ -173,15 +179,21 @@ export default function ConversationList({
           filteredConversations.map((conversation) => (
             <button
               key={conversation.id}
-              onClick={() => onSelectConversation(conversation.id, conversation.title)}
+              onClick={() => onSelectConversation(conversation.id)}
               className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
                 selectedConversationId === conversation.id
                   ? 'bg-red-50 border-l-4 border-l-[#D71921]'
                   : ''
-              }`}
+              } ${conversation.id === 'publicRoom' ? 'bg-gradient-to-r from-red-50 to-orange-50' : ''}`}
             >
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#D71921] to-[#B01419] flex items-center justify-center text-white font-semibold shadow">
-                {conversation.type === 'group' ? (
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold shadow ${
+                conversation.id === 'publicRoom'
+                  ? 'bg-gradient-to-br from-[#D71921] via-[#FF6B35] to-[#FFA500] text-2xl'
+                  : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
+              }`}>
+                {conversation.id === 'publicRoom' ? (
+                  '🌍'
+                ) : conversation.type === 'group' ? (
                   <Users className="w-6 h-6" />
                 ) : (
                   conversation.title.charAt(0).toUpperCase()
@@ -190,7 +202,16 @@ export default function ConversationList({
 
               <div className="flex-1 text-left min-w-0">
                 <div className="flex items-center justify-between mb-1">
-                  <h3 className="font-semibold text-gray-900 truncate">{conversation.title}</h3>
+                  <h3 className={`font-semibold truncate ${
+                    conversation.id === 'publicRoom' ? 'text-[#D71921] font-bold' : 'text-gray-900'
+                  }`}>
+                    {conversation.title}
+                    {conversation.id === 'publicRoom' && (
+                      <span className="ml-2 text-xs bg-[#D71921] text-white px-2 py-0.5 rounded-full">
+                        Global
+                      </span>
+                    )}
+                  </h3>
                   {conversation.lastMessage && (
                     <span className="text-xs text-gray-400">
                       {conversation.lastMessage.createdAt.toDate().toLocaleTimeString([], {
@@ -201,20 +222,32 @@ export default function ConversationList({
                   )}
                 </div>
 
-                {conversation.lastMessage && (
+                {conversation.lastMessage ? (
                   <p className="text-sm text-gray-500 truncate">
                     {conversation.lastMessage.text}
                   </p>
-                )}
+                ) : conversation.id === 'publicRoom' ? (
+                  <p className="text-sm text-gray-500 italic">
+                    Start chatting with students worldwide
+                  </p>
+                ) : null}
 
                 <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-gray-400">
-                    {conversation.members.length} members
-                  </span>
-                  {conversation.pinned && (
-                    <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
-                      Pinned
+                  {conversation.id === 'publicRoom' ? (
+                    <span className="text-xs text-[#D71921] font-medium">
+                      All students • Global community
                     </span>
+                  ) : (
+                    <>
+                      <span className="text-xs text-gray-400">
+                        {conversation.members.length} members
+                      </span>
+                      {conversation.pinned && (
+                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
+                          Pinned
+                        </span>
+                      )}
+                    </>
                   )}
                 </div>
               </div>

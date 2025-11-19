@@ -97,6 +97,20 @@ export const communityChatService = {
     }
   },
 
+  async joinCommunityChat(userId: string): Promise<void> {
+    const communityRef = doc(db, 'groupChats', 'publicRoom');
+    const communityDoc = await getDoc(communityRef);
+
+    if (communityDoc.exists()) {
+      const currentMembers = communityDoc.data().members || [];
+      if (!currentMembers.includes(userId)) {
+        await updateDoc(communityRef, {
+          members: arrayUnion(userId),
+        });
+      }
+    }
+  },
+
   async createConversation(
     type: 'group' | 'private',
     title: string,
@@ -168,6 +182,14 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
+    const communityRef = doc(db, 'groupChats', 'publicRoom');
+    const communityDoc = await getDoc(communityRef);
+    const conversations: Conversation[] = [];
+
+    if (communityDoc.exists()) {
+      conversations.push({ id: communityDoc.id, ...communityDoc.data() } as Conversation);
+    }
+
     const q = query(
       collection(db, 'groupChats'),
       where('members', 'array-contains', userId),
@@ -176,10 +198,15 @@ export const communityChatService = {
     );
 
     const snapshot = await getDocs(q);
-    const conversations = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() } as Conversation));
+    const userConversations = snapshot.docs
+      .filter(doc => doc.id !== 'publicRoom')
+      .map((doc) => ({ id: doc.id, ...doc.data() } as Conversation));
 
-    // Sort by lastMessage if it exists, otherwise by createdAt
+    conversations.push(...userConversations);
+
     return conversations.sort((a, b) => {
+      if (a.id === 'publicRoom') return -1;
+      if (b.id === 'publicRoom') return 1;
       const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
       const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
       return bTime - aTime;
@@ -190,21 +217,35 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const q = query(
-      collection(db, 'groupChats'),
-      where('members', 'array-contains', userId),
-      orderBy('createdAt', 'desc'),
-      limit(50)
-    );
+    const communityRef = doc(db, 'groupChats', 'publicRoom');
+    const unsubscribeCommunity = onSnapshot(communityRef, async () => {
+      const q = query(
+        collection(db, 'groupChats'),
+        where('members', 'array-contains', userId),
+        orderBy('createdAt', 'desc'),
+        limit(50)
+      );
 
-    return onSnapshot(q, (snapshot) => {
-      const conversations = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      } as Conversation));
+      const snapshot = await getDocs(q);
+      const userConversations = snapshot.docs
+        .filter(doc => doc.id !== 'publicRoom')
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as Conversation));
 
-      // Sort by lastMessage if it exists, otherwise by createdAt
+      const communityDoc = await getDoc(communityRef);
+      const conversations: Conversation[] = [];
+
+      if (communityDoc.exists()) {
+        conversations.push({ id: communityDoc.id, ...communityDoc.data() } as Conversation);
+      }
+
+      conversations.push(...userConversations);
+
       const sorted = conversations.sort((a, b) => {
+        if (a.id === 'publicRoom') return -1;
+        if (b.id === 'publicRoom') return 1;
         const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
         const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
         return bTime - aTime;
@@ -212,6 +253,46 @@ export const communityChatService = {
 
       callback(sorted);
     });
+
+    const q = query(
+      collection(db, 'groupChats'),
+      where('members', 'array-contains', userId),
+      orderBy('createdAt', 'desc'),
+      limit(50)
+    );
+
+    const unsubscribeUser = onSnapshot(q, async (snapshot) => {
+      const userConversations = snapshot.docs
+        .filter(doc => doc.id !== 'publicRoom')
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        } as Conversation));
+
+      const communityDoc = await getDoc(communityRef);
+      const conversations: Conversation[] = [];
+
+      if (communityDoc.exists()) {
+        conversations.push({ id: communityDoc.id, ...communityDoc.data() } as Conversation);
+      }
+
+      conversations.push(...userConversations);
+
+      const sorted = conversations.sort((a, b) => {
+        if (a.id === 'publicRoom') return -1;
+        if (b.id === 'publicRoom') return 1;
+        const aTime = a.lastMessage?.createdAt?.toMillis() || a.createdAt?.toMillis() || 0;
+        const bTime = b.lastMessage?.createdAt?.toMillis() || b.createdAt?.toMillis() || 0;
+        return bTime - aTime;
+      });
+
+      callback(sorted);
+    });
+
+    return () => {
+      unsubscribeCommunity();
+      unsubscribeUser();
+    };
   },
 
   async sendMessage(

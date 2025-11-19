@@ -17,25 +17,11 @@
   body {
     font-family: 'Lato', sans-serif;
     font-weight: 400;
-    /* iOS 26 Liquid Gradient Background - Wine Red with depth */
-    background: radial-gradient(circle at 20% 30%, #8B1538 0%, #6B0F2A 30%, #4A0A1D 70%, #2D0512 100%);
+    /* Clean white background */
+    background: #ffffff;
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
-  }
-
-  /* Vibrant depth overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(circle at 80% 70%, rgba(139, 21, 56, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 10% 10%, rgba(255, 51, 102, 0.15) 0%, transparent 40%);
-    pointer-events: none;
-    z-index: 0;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -43,13 +29,15 @@
   }
 
   * {
-    scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
 
   *::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    display: none;
+    width: 0;
+    height: 0;
+    background: transparent;
   }
 
   *::-webkit-scrollbar-track {
@@ -57,12 +45,11 @@
   }
 
   *::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    background: transparent;
   }
 
   *::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: transparent;
   }
 }
 
@@ -259,43 +246,39 @@
 
   /* Clean sidebar without dividers */
   .liquid-sidebar {
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
     border-right: none;
-    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
   }
 
   /* Clean navbar without dividers */
   .liquid-navbar {
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
     border-bottom: none;
-    box-shadow: 0 4px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: none;
   }
 
   /* Input fields with crystal effect */
   .liquid-input {
     backdrop-filter: blur(16px);
     -webkit-backdrop-filter: blur(16px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.03);
+    border: 2px solid rgba(0, 0, 0, 0.1);
     border-radius: 14px;
-    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
     transition: all 0.3s;
-    color: white;
+    color: #000000;
   }
 
   .liquid-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: rgba(0, 0, 0, 0.4);
   }
 
   .liquid-input:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1),
-                inset 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: rgba(0, 0, 0, 0.05);
+    border-color: #D71920;
+    box-shadow: 0 0 0 3px rgba(215, 25, 32, 0.1),
+                inset 0 2px 8px rgba(0, 0, 0, 0.05);
     outline: none;
   }
 
@@ -325,15 +308,15 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.4);
   }
 
-  /* Text on liquid background */
+  /* Text on white background */
   .liquid-text-primary {
-    color: white;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    color: #000000;
+    text-shadow: none;
   }
 
   .liquid-text-secondary {
-    color: rgba(255, 255, 255, 0.85);
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    color: #666666;
+    text-shadow: none;
   }
 
   /* Shimmer animation for premium feel */

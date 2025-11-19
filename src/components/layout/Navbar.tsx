@@ -39,7 +39,7 @@ export default function Navbar() {
             <img
               src="/Crews (2).png"
               alt="The Crew Academy"
-              className="h-12 md:h-16 w-auto object-contain"
+              className="h-16 md:h-24 w-auto object-contain"
             />
           </Link>
 
@@ -52,9 +52,9 @@ export default function Navbar() {
               onClick={() => navigate('/notifications')}
               className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"
             >
-              <Bell className="w-4 h-4 md:w-5 md:h-5 text-white" />
+              <Bell className="w-4 h-4 md:w-5 md:h-5 text-gray-900" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D71920] text-white rounded-full text-xs font-bold flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#D71920] text-gray-900 rounded-full text-xs font-bold flex items-center justify-center">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
@@ -74,7 +74,7 @@ export default function Navbar() {
                   <div className="text-sm font-bold liquid-text-primary">{currentUser.name}</div>
                   <div className="text-xs liquid-text-secondary capitalize">{currentUser.role}</div>
                 </div>
-                <ChevronDown className="w-3 h-3 md:w-4 md:h-4 text-white" />
+                <ChevronDown className="w-3 h-3 md:w-4 md:h-4 text-gray-900" />
               </button>
 
               <AnimatePresence>

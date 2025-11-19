@@ -103,20 +103,20 @@ export default function LoginPage() {
             />
           </div>
 
-          <h1 className="text-3xl font-bold text-center liquid-text-primary mb-2">
+          <h1 className="text-3xl font-bold text-center text-gray-900 mb-2">
             Welcome Back
           </h1>
-          <p className="text-center liquid-text-secondary mb-8">
+          <p className="text-center text-gray-600 mb-8">
             Sign in to The Crew Academy
           </p>
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-bold liquid-text-primary mb-2">
+              <label className="block text-sm font-bold text-gray-900 mb-2">
                 Email Address
               </label>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="email"
                   value={email}
@@ -129,11 +129,11 @@ export default function LoginPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-bold liquid-text-primary mb-2">
+              <label className="block text-sm font-bold text-gray-900 mb-2">
                 Password
               </label>
               <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/70" />
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="password"
                   value={password}
@@ -149,7 +149,7 @@ export default function LoginPage() {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="liquid-card-overlay bg-red-500/20 border-red-400/40 text-white px-4 py-3 text-sm"
+                className="liquid-card-overlay bg-red-500/20 border-red-400/40 text-gray-900 px-4 py-3 text-sm"
               >
                 {error}
               </motion.div>
@@ -165,11 +165,11 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="liquid-text-secondary text-sm">
+            <p className="text-gray-600 text-sm">
               Don't have an account?{' '}
               <Link
                 to="/register"
-                className="text-white font-bold hover:underline"
+                className="text-[#D71920] font-bold hover:underline"
               >
                 Register
               </Link>

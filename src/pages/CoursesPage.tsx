@@ -150,7 +150,27 @@ function CoursesPageContent() {
     }
 
     try {
-      await enrollInModule(currentUser.uid, moduleId);
+      const coursesRef = collection(db, 'courses');
+      const coursesQuery = query(coursesRef, where('module_id', '==', moduleId));
+      const coursesSnap = await getDocs(coursesQuery);
+
+      let course1Id: string | undefined;
+      let course2Id: string | undefined;
+      let courseId: string | undefined;
+
+      if (coursesSnap.docs.length === 1) {
+        courseId = coursesSnap.docs[0].id;
+      } else if (coursesSnap.docs.length >= 2) {
+        const sortedCourses = coursesSnap.docs.sort((a, b) => {
+          const orderA = a.data().order_in_module || 0;
+          const orderB = b.data().order_in_module || 0;
+          return orderA - orderB;
+        });
+        course1Id = sortedCourses[0].id;
+        course2Id = sortedCourses[1].id;
+      }
+
+      await enrollInModule(currentUser.uid, moduleId, courseId, course1Id, course2Id);
       await loadMainModules();
       navigate(`/${moduleType === 'main_module' ? 'main-modules' : 'submodules'}/${moduleId}`);
     } catch (error) {

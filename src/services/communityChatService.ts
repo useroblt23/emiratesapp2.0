@@ -273,7 +273,7 @@ export const communityChatService = {
       reactions: {},
       likesCount: 0,
       readBy: { [userId]: Timestamp.now() },
-      replyTo,
+      replyTo: replyTo || null,
     };
 
     await setDoc(messageRef, messageData);

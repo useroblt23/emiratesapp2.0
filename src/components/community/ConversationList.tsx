@@ -5,13 +5,15 @@ import { getAllUsers, User } from '../../services/chatService';
 import { auth } from '../../lib/firebase';
 
 interface ConversationListProps {
-  onSelectConversation: (conversationId: string) => void;
+  onSelectConversation: (conversationId: string, title: string) => void;
   selectedConversationId?: string;
+  onClose?: () => void;
 }
 
 export default function ConversationList({
   onSelectConversation,
   selectedConversationId,
+  onClose,
 }: ConversationListProps) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,7 +80,7 @@ export default function ConversationList({
       setShowNewConversation(false);
       setSelectedUsers([]);
       setGroupTitle('');
-      onSelectConversation(conversationId);
+      onSelectConversation(conversationId, title);
     } catch (error: any) {
       console.error('Error creating conversation:', error);
       alert(error.message || 'Failed to create conversation');
@@ -171,7 +173,7 @@ export default function ConversationList({
           filteredConversations.map((conversation) => (
             <button
               key={conversation.id}
-              onClick={() => onSelectConversation(conversation.id)}
+              onClick={() => onSelectConversation(conversation.id, conversation.title)}
               className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
                 selectedConversationId === conversation.id
                   ? 'bg-red-50 border-l-4 border-l-[#D71921]'

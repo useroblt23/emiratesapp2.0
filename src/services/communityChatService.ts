@@ -76,6 +76,28 @@ export interface MessageReport {
 const PAGE_SIZE = 50;
 
 export const communityChatService = {
+  async ensureCommunityChat(): Promise<void> {
+    const communityId = 'global-community-chat';
+    const communityRef = doc(db, 'conversations', communityId);
+    const communityDoc = await getDoc(communityRef);
+
+    if (!communityDoc.exists()) {
+      const conversationData: Conversation = {
+        id: communityId,
+        type: 'group',
+        title: 'Community Chat',
+        members: [],
+        createdBy: 'system',
+        createdAt: Timestamp.now(),
+        pinned: false,
+        mutedBy: {},
+        isArchivedBy: {},
+      };
+
+      await setDoc(communityRef, conversationData);
+    }
+  },
+
   async createConversation(
     type: 'group' | 'private',
     title: string,

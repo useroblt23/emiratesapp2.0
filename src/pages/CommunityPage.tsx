@@ -122,7 +122,7 @@ export default function CommunityPage() {
       <div className="flex-1 bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden flex">
         <div className="w-80 border-r border-gray-200 flex-shrink-0">
           <ConversationList
-            onSelectConversation={setSelectedConversationId}
+            onSelectConversation={(id) => setSelectedConversationId(id)}
             selectedConversationId={selectedConversationId || undefined}
           />
         </div>

@@ -19,6 +19,7 @@ import MainModuleViewerPage from './pages/MainModuleViewerPage';
 import SubmoduleViewerPage from './pages/SubmoduleViewerPage';
 import GovernorControlNexus from './pages/governor/GovernorControlNexus';
 import ChatModerationConsole from './pages/governor/ChatModerationConsole';
+import FeatureShutdownControl from './pages/governor/FeatureShutdownControl';
 import PlaceholderPage from './pages/PlaceholderPage';
 import NotificationsPage from './pages/NotificationsPage';
 import AITrainerPage from './pages/AITrainerPage';
@@ -116,6 +117,7 @@ function AppContent() {
             <Route path="/governor/nexus" element={<GovernorControlNexus />} />
             <Route path="/governor/initialize" element={<InitializeData />} />
             <Route path="/governor/moderation" element={<ChatModerationConsole />} />
+            <Route path="/governor/shutdown" element={<FeatureShutdownControl />} />
           </>
         )}
 

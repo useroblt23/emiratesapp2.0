@@ -7,10 +7,11 @@ import MessageComposer from '../components/community/MessageComposer';
 import { communityChatService, Message } from '../services/communityChatService';
 import { presenceService, TypingData } from '../services/presenceService';
 import { auth } from '../lib/firebase';
+import FeatureAccessGuard from '../components/FeatureAccessGuard';
 
 const COMMUNITY_CHAT_ID = 'publicRoom';
 
-export default function ChatPage() {
+function ChatPageContent() {
   const [selectedConversationId, setSelectedConversationId] = useState<string>(COMMUNITY_CHAT_ID);
   const [conversationTitle, setConversationTitle] = useState('Community Chat');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -270,5 +271,13 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <FeatureAccessGuard featureKey="communityChat">
+      <ChatPageContent />
+    </FeatureAccessGuard>
   );
 }

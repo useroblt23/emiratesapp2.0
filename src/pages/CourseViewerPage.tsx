@@ -8,11 +8,12 @@ import UpgradePrompt from '../components/UpgradePrompt';
 import { markLessonWatched } from '../services/rewardsService';
 import { trackCourseProgress } from '../services/enrollmentService';
 import { getExamByCourseId, getUserExamResult, Exam, ExamResult } from '../services/examService';
+import FeatureAccessGuard from '../components/FeatureAccessGuard';
 import ExamInterface from '../components/ExamInterface';
 import ExamResultModal from '../components/ExamResultModal';
 import { AnimatePresence } from 'framer-motion';
 
-export default function CourseViewerPage() {
+function CourseViewerPageContent() {
   const { courseId } = useParams<{ courseId: string }>();
   const navigate = useNavigate();
   const { currentUser } = useApp();
@@ -433,5 +434,13 @@ export default function CourseViewerPage() {
       allowDownload={course.allow_download}
       onClose={() => navigate('/courses')}
     />
+  );
+}
+
+export default function CourseViewerPage() {
+  return (
+    <FeatureAccessGuard featureKey="videos">
+      <CourseViewerPageContent />
+    </FeatureAccessGuard>
   );
 }

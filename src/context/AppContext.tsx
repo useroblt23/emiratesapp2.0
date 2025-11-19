@@ -11,6 +11,7 @@ import {
   SystemAnnouncement,
 } from '../services/systemControlService';
 import { handleDailyLogin, initializeUserPoints } from '../services/rewardsService';
+import { startAutoRestoreScheduler } from '../services/featureShutdownService';
 
 export type Role = 'student' | 'mentor' | 'governor';
 export type Plan = 'free' | 'pro' | 'vip';
@@ -98,7 +99,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    return unsubscribe;
+    const stopAutoRestore = startAutoRestoreScheduler();
+
+    return () => {
+      unsubscribe();
+      stopAutoRestore();
+    };
   }, []);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Shield, AlertCircle } from 'lucide-react';
+import { Shield, AlertCircle, PowerOff } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
@@ -28,6 +29,7 @@ interface Announcement {
 }
 
 export default function GovernorControlNexus() {
+  const navigate = useNavigate();
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -124,6 +126,28 @@ export default function GovernorControlNexus() {
         <AnnouncementManager />
 
         <FeatureControl />
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass-light rounded-2xl p-6 border-2 border-gray-200 hover:border-red-500 transition-all cursor-pointer"
+          onClick={() => navigate('/governor/shutdown')}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center">
+                <PowerOff className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900">Feature Shutdown Control</h3>
+                <p className="text-gray-600 text-sm">Emergency maintenance controls for all major features</p>
+              </div>
+            </div>
+            <div className="text-red-600 font-bold text-sm px-4 py-2 bg-red-50 rounded-lg">
+              EMERGENCY
+            </div>
+          </div>
+        </motion.div>
 
         <BugReportsManager />
 

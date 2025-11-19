@@ -6,6 +6,7 @@ import { useApp } from '../context/AppContext';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 import { enrollInModule, isEnrolledInModule } from '../services/enrollmentService';
+import FeatureAccessGuard from '../components/FeatureAccessGuard';
 
 interface Submodule {
   id: string;
@@ -35,7 +36,7 @@ interface MainModule {
   enrolled?: boolean;
 }
 
-export default function CoursesPage() {
+function CoursesPageContent() {
   const navigate = useNavigate();
   const { currentUser } = useApp();
   const [mainModules, setMainModules] = useState<MainModule[]>([]);
@@ -341,5 +342,13 @@ export default function CoursesPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CoursesPage() {
+  return (
+    <FeatureAccessGuard featureKey="modules">
+      <CoursesPageContent />
+    </FeatureAccessGuard>
   );
 }

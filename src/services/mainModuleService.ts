@@ -35,6 +35,9 @@ export interface Submodule {
   title: string;
   description: string;
   coverImage: string;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -89,6 +92,9 @@ export const createSubmodule = async (data: {
   title: string;
   description: string;
   coverImage: string;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
 }): Promise<string> => {
   try {
     const submoduleRef = doc(collection(db, 'submodules'));
@@ -105,6 +111,10 @@ export const createSubmodule = async (data: {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
+
+    if (data.course_id) submodule.course_id = data.course_id;
+    if (data.course1_id) submodule.course1_id = data.course1_id;
+    if (data.course2_id) submodule.course2_id = data.course2_id;
 
     await setDoc(submoduleRef, submodule);
     console.log('Submodule created:', submoduleId);

@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { ArrowLeft, Upload, FolderPlus, Image as ImageIcon, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { db } from '../lib/firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 import {
   createMainModule,
   createSubmodule,
@@ -26,15 +28,52 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const [availableCourses, setAvailableCourses] = useState<any[]>([]);
+  const [selectedCourse1, setSelectedCourse1] = useState('');
+  const [selectedCourse2, setSelectedCourse2] = useState('');
+  const [selectedSubmodule, setSelectedSubmodule] = useState('');
+  const [availableSubmodules, setAvailableSubmodules] = useState<any[]>([]);
+
   useEffect(() => {
     if (isOpen) {
       loadMainModules();
+      loadCourses();
+      loadSubmodules();
     }
   }, [isOpen]);
 
   const loadMainModules = async () => {
     const modules = await getAllMainModules();
     setMainModules(modules);
+  };
+
+  const loadCourses = async () => {
+    try {
+      const coursesRef = collection(db, 'courses');
+      const q = query(coursesRef, orderBy('created_at', 'desc'));
+      const snapshot = await getDocs(q);
+      const courses = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAvailableCourses(courses);
+    } catch (error) {
+      console.error('Error loading courses:', error);
+    }
+  };
+
+  const loadSubmodules = async () => {
+    try {
+      const submodulesRef = collection(db, 'submodules');
+      const snapshot = await getDocs(submodulesRef);
+      const submodules = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setAvailableSubmodules(submodules);
+    } catch (error) {
+      console.error('Error loading submodules:', error);
+    }
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,21 +108,43 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
     setLoading(true);
     try {
       if (moduleType === 'main') {
-        await createMainModule({
+        const moduleData: any = {
           title: title.trim(),
           description: description.trim(),
           coverImage,
           visible
-        });
+        };
+
+        if (selectedCourse1 && selectedCourse2) {
+          moduleData.course1_id = selectedCourse1;
+          moduleData.course2_id = selectedCourse2;
+        } else if (selectedCourse1) {
+          moduleData.course_id = selectedCourse1;
+        }
+
+        if (selectedSubmodule) {
+          moduleData.submodule_id = selectedSubmodule;
+        }
+
+        await createMainModule(moduleData);
         alert('Main module created successfully!');
       } else {
-        await createSubmodule({
+        const submoduleData: any = {
           parentModuleId,
           order: submoduleNumber,
           title: title.trim(),
           description: description.trim(),
           coverImage
-        });
+        };
+
+        if (selectedCourse1 && selectedCourse2) {
+          submoduleData.course1_id = selectedCourse1;
+          submoduleData.course2_id = selectedCourse2;
+        } else if (selectedCourse1) {
+          submoduleData.course_id = selectedCourse1;
+        }
+
+        await createSubmodule(submoduleData);
         alert('Submodule created successfully!');
       }
 
@@ -106,6 +167,9 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
     setVisible(true);
     setParentModuleId('');
     setSubmoduleNumber(1);
+    setSelectedCourse1('');
+    setSelectedCourse2('');
+    setSelectedSubmodule('');
   };
 
   return (
@@ -219,6 +283,54 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
                       ))}
                     </select>
                   </div>
+
+                  <div className="space-y-4 p-6 glass-light rounded-2xl border-2 border-blue-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Assign Courses to Submodule</h3>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Video 1 / Course 1 (Optional)
+                      </label>
+                      <select
+                        value={selectedCourse1}
+                        onChange={(e) => setSelectedCourse1(e.target.value)}
+                        className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
+                      >
+                        <option value="">No video/course selected</option>
+                        {availableCourses.map((course) => (
+                          <option key={course.id} value={course.id}>
+                            {course.title || course.name || 'Untitled Course'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedCourse1 && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Video 2 / Course 2 (Optional)
+                        </label>
+                        <select
+                          value={selectedCourse2}
+                          onChange={(e) => setSelectedCourse2(e.target.value)}
+                          className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
+                        >
+                          <option value="">No second video/course</option>
+                          {availableCourses
+                            .filter(course => course.id !== selectedCourse1)
+                            .map((course) => (
+                              <option key={course.id} value={course.id}>
+                                {course.title || course.name || 'Untitled Course'}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-xl">
+                      <strong>Note:</strong> If you select 2 videos, they will be stored as course1_id and course2_id. If you select only 1 video, it will be stored as course_id.
+                    </div>
+                  </div>
                 </motion.div>
               )}
 
@@ -297,25 +409,93 @@ export default function CreateModuleForm({ isOpen, onClose, onSuccess }: CreateM
               </div>
 
               {moduleType === 'main' && (
-                <div className="flex items-center gap-3 p-4 sm:p-5 glass-light rounded-2xl border border-gray-200">
-                  <button
-                    type="button"
-                    onClick={() => setVisible(!visible)}
-                    className={`relative w-14 h-7 rounded-full transition-colors ${
-                      visible ? 'bg-blue-600' : 'bg-gray-300'
-                    }`}
-                  >
-                    <div
-                      className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
-                        visible ? 'translate-x-7' : 'translate-x-0'
-                      }`}
-                    />
-                  </button>
-                  <div>
-                    <div className="font-semibold text-gray-900 text-sm sm:text-base">Visible to Students</div>
-                    <div className="text-xs sm:text-sm text-gray-500">Make this module available immediately</div>
+                <>
+                  <div className="space-y-4 p-6 glass-light rounded-2xl border-2 border-blue-200">
+                    <h3 className="text-lg font-bold text-gray-900 mb-4">Assign Courses</h3>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Video 1 / Course 1 (Optional)
+                      </label>
+                      <select
+                        value={selectedCourse1}
+                        onChange={(e) => setSelectedCourse1(e.target.value)}
+                        className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
+                      >
+                        <option value="">No video/course selected</option>
+                        {availableCourses.map((course) => (
+                          <option key={course.id} value={course.id}>
+                            {course.title || course.name || 'Untitled Course'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {selectedCourse1 && (
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3">
+                          Video 2 / Course 2 (Optional)
+                        </label>
+                        <select
+                          value={selectedCourse2}
+                          onChange={(e) => setSelectedCourse2(e.target.value)}
+                          className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
+                        >
+                          <option value="">No second video/course</option>
+                          {availableCourses
+                            .filter(course => course.id !== selectedCourse1)
+                            .map((course) => (
+                              <option key={course.id} value={course.id}>
+                                {course.title || course.name || 'Untitled Course'}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                    )}
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-3">
+                        Link Submodule (Optional)
+                      </label>
+                      <select
+                        value={selectedSubmodule}
+                        onChange={(e) => setSelectedSubmodule(e.target.value)}
+                        className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20 transition-all outline-none"
+                      >
+                        <option value="">No submodule selected</option>
+                        {availableSubmodules.map((submodule) => (
+                          <option key={submodule.id} value={submodule.id}>
+                            {submodule.title || 'Untitled Submodule'}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="text-sm text-gray-600 bg-blue-50 p-4 rounded-xl">
+                      <strong>Note:</strong> If you select 2 videos, they will be stored as course1_id and course2_id. If you select only 1 video, it will be stored as course_id.
+                    </div>
                   </div>
-                </div>
+
+                  <div className="flex items-center gap-3 p-4 sm:p-5 glass-light rounded-2xl border border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => setVisible(!visible)}
+                      className={`relative w-14 h-7 rounded-full transition-colors ${
+                        visible ? 'bg-blue-600' : 'bg-gray-300'
+                      }`}
+                    >
+                      <div
+                        className={`absolute top-1 left-1 w-5 h-5 rounded-full bg-white shadow-md transition-transform ${
+                          visible ? 'translate-x-7' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                    <div>
+                      <div className="font-semibold text-gray-900 text-sm sm:text-base">Visible to Students</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Make this module available immediately</div>
+                    </div>
+                  </div>
+                </>
               )}
 
               <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4 pt-4">

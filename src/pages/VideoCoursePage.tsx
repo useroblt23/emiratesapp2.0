@@ -160,7 +160,7 @@ export default function VideoCoursePage() {
   const currentVideoData = currentVideo === 1 ? progress.video1 : progress.video2;
 
   return (
-    <div className="min-h-screen bg-white p-4 md:p-8">
+    <div className="min-h-screen p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={() => navigate('/courses')}

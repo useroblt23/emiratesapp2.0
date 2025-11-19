@@ -83,7 +83,7 @@ export default function MainModuleViewerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-8">
+    <div className="min-h-screen pb-8">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={() => navigate(isAdmin ? '/coach-dashboard' : '/courses')}
@@ -93,7 +93,7 @@ export default function MainModuleViewerPage() {
           Back to {isAdmin ? 'Dashboard' : 'Courses'}
         </button>
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+        <div className="glass-card overflow-hidden mb-8">
           {mainModule.coverImage && (
             <img
               src={mainModule.coverImage}
@@ -141,7 +141,7 @@ export default function MainModuleViewerPage() {
                   key={course.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
+                  className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
                   onClick={() => navigate(`/course/${course.id}`)}
                 >
                   <div className="relative">
@@ -194,7 +194,7 @@ export default function MainModuleViewerPage() {
                   key={submodule.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-blue-500"
+                  className="glass-card overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-blue-500"
                   onClick={() => navigate(`/submodules/${submodule.id}`)}
                 >
                   {submodule.coverImage ? (
@@ -224,7 +224,7 @@ export default function MainModuleViewerPage() {
         )}
 
         {courses.length === 0 && submodules.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+          <div className="glass-card p-12 text-center">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">No Content Yet</h3>
             <p className="text-gray-600 mb-6">

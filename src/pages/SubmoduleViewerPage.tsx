@@ -76,7 +76,7 @@ export default function SubmoduleViewerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white pb-8">
+    <div className="min-h-screen pb-8">
       <div className="max-w-6xl mx-auto">
         <button
           onClick={() => navigate(`/main-modules/${submodule.parentModuleId}`)}
@@ -86,7 +86,7 @@ export default function SubmoduleViewerPage() {
           Back to Main Module
         </button>
 
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-8">
+        <div className="glass-card overflow-hidden mb-8">
           {submodule.coverImage && (
             <img
               src={submodule.coverImage}
@@ -132,7 +132,7 @@ export default function SubmoduleViewerPage() {
                   key={course.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
+                  className="glass-course overflow-hidden transition cursor-pointer border-2 border-transparent hover:border-[#D71920]"
                   onClick={() => navigate(`/course/${course.id}`)}
                 >
                   <div className="relative">
@@ -169,7 +169,7 @@ export default function SubmoduleViewerPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
+          <div className="glass-card p-12 text-center">
             <BookOpen className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-800 mb-2">No Courses Yet</h3>
             <p className="text-gray-600 mb-6">

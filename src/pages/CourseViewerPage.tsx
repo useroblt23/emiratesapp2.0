@@ -152,6 +152,7 @@ function CourseViewerPageContent() {
       const moduleId = course.main_module_id || course.submodule_id;
       if (moduleId) {
         await trackCourseProgress(currentUser.uid, courseId, moduleId, 100, 100);
+        await updateCourseProgress(currentUser.uid, courseId, 100);
       }
     }
   };
@@ -184,7 +185,7 @@ function CourseViewerPageContent() {
   if (!isUnlocked) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div className="glass-modal p-8 max-w-md w-full text-center">
           <Lock className="w-16 h-16 mx-auto mb-4 text-orange-500" />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Course Locked</h1>
           <p className="text-gray-600 mb-6">
@@ -204,7 +205,7 @@ function CourseViewerPageContent() {
   if (!hasAccess()) {
     return (
       <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+        <div className="glass-modal p-8 max-w-md w-full text-center">
           <Lock className="w-16 h-16 mx-auto mb-4 text-gray-400" />
           <h1 className="text-2xl font-bold text-gray-800 mb-2">Course Locked</h1>
           <p className="text-gray-600 mb-6">
@@ -283,7 +284,7 @@ function CourseViewerPageContent() {
 
   if (course.video_url) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen">
         <div className="max-w-5xl mx-auto p-4 md:p-6">
           <button
             onClick={() => navigate('/courses')}
@@ -293,7 +294,7 @@ function CourseViewerPageContent() {
             Back to Courses
           </button>
 
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+          <div className="glass-video overflow-hidden mb-6">
             <div className="aspect-video w-full bg-black relative">
               {course.video_url ? (
                 <iframe
@@ -319,7 +320,7 @@ function CourseViewerPageContent() {
             )}
           </div>
 
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="glass-card p-6 mb-6">
             <h1 className="text-3xl font-bold text-[#1C1C1C] mb-2">{course.title}</h1>
             <p className="text-gray-600 mb-4">{course.description}</p>
             <div className="flex flex-wrap gap-2 text-sm text-gray-500 mb-4">

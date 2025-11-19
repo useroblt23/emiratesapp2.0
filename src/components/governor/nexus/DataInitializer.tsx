@@ -79,7 +79,7 @@ export default function DataInitializer() {
       className="bg-white border border-gray-200 rounded-xl p-6 shadow-xl"
     >
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 bg-slate-700 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center">
           <Database className="w-5 h-5 text-gray-700" />
         </div>
         <div>
@@ -120,7 +120,7 @@ export default function DataInitializer() {
         <button
           onClick={handleInitializeAll}
           disabled={loading}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-gray-900 rounded-xl font-semibold transition border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#3D4A52] to-[#2A3439] hover:from-[#2A3439] hover:to-[#1F2629] text-gray-900 rounded-xl font-semibold transition border border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           {loading ? 'Initializing...' : 'Initialize Sample Data'}

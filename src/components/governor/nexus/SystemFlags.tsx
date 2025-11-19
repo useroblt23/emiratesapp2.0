@@ -101,7 +101,7 @@ export default function SystemFlags() {
       key: 'englishTest' as keyof SystemFeatures,
       label: 'English Test',
       icon: Brain,
-      color: 'purple',
+      color: 'charcoal',
       description: 'Enable/disable English test functionality',
     },
     {
@@ -144,9 +144,9 @@ export default function SystemFlags() {
       </div>
 
       {!isGovernor && (
-        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700/50 rounded-xl flex items-start gap-2">
-          <AlertCircle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-          <p className="text-sm text-yellow-300">
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-300 rounded-xl flex items-start gap-2">
+          <AlertCircle className="w-4 h-4 text-yellow-600 mt-0.5 flex-shrink-0" />
+          <p className="text-sm text-yellow-700">
             View only mode. System flag control requires governor access.
           </p>
         </div>
@@ -164,23 +164,23 @@ export default function SystemFlags() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1 }}
-              className="p-4 bg-slate-700 rounded-xl border border-gray-300"
+              className="p-4 bg-gray-50 rounded-xl border border-gray-200"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                    flag.color === 'blue' ? 'bg-blue-900/50' :
-                    flag.color === 'green' ? 'bg-green-900/50' :
-                    flag.color === 'purple' ? 'bg-purple-900/50' :
-                    flag.color === 'orange' ? 'bg-orange-900/50' :
-                    'bg-red-900/50'
+                    flag.color === 'blue' ? 'bg-blue-100' :
+                    flag.color === 'green' ? 'bg-green-100' :
+                    flag.color === 'charcoal' ? 'bg-gray-200' :
+                    flag.color === 'orange' ? 'bg-orange-100' :
+                    'bg-red-100'
                   }`}>
                     <Icon className={`w-5 h-5 ${
-                      flag.color === 'blue' ? 'text-blue-400' :
-                      flag.color === 'green' ? 'text-green-400' :
-                      flag.color === 'purple' ? 'text-purple-400' :
-                      flag.color === 'orange' ? 'text-orange-400' :
-                      'text-red-400'
+                      flag.color === 'blue' ? 'text-blue-600' :
+                      flag.color === 'green' ? 'text-green-600' :
+                      flag.color === 'charcoal' ? 'text-gray-700' :
+                      flag.color === 'orange' ? 'text-orange-600' :
+                      'text-[#D71920]'
                     }`} />
                   </div>
                   <div>
@@ -192,8 +192,8 @@ export default function SystemFlags() {
                 <button
                   onClick={() => handleToggle(flag.key)}
                   disabled={!isGovernor || isUpdating}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                    isEnabled ? 'bg-green-500' : 'bg-slate-600'
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    isEnabled ? 'bg-green-500' : 'bg-gray-300'
                   }`}
                 >
                   <span
@@ -205,7 +205,7 @@ export default function SystemFlags() {
               </div>
 
               {isEnabled && (
-                <div className="mt-2 flex items-center gap-1 text-xs text-green-400">
+                <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
                   Active across platform
                 </div>
@@ -215,8 +215,8 @@ export default function SystemFlags() {
         })}
       </div>
 
-      <div className="mt-4 p-3 bg-blue-900/30 border border-blue-700/50 rounded-xl">
-        <p className="text-xs text-blue-300">
+      <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+        <p className="text-xs text-blue-700">
           <strong>Note:</strong> Changes to system flags are instantly reflected across the entire platform.
         </p>
       </div>

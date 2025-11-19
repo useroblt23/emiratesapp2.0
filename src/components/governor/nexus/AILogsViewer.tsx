@@ -75,7 +75,7 @@ export default function AILogsViewer() {
         className="bg-white/50 rounded-xl p-6 border border-gray-200"
       >
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
+          <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
           <span className="ml-3 text-gray-700">Loading AI logs...</span>
         </div>
       </motion.div>
@@ -105,17 +105,17 @@ export default function AILogsViewer() {
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-500/20 rounded-xl">
-            <FileText className="w-5 h-5 text-purple-400" />
+          <div className="p-2 bg-[#5A6B75]/20 rounded-xl">
+            <FileText className="w-5 h-5 text-[#5A6B75]" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">AI Logs</h3>
+            <h3 className="text-lg font-semibold text-gray-900">AI Logs</h3>
             <p className="text-sm text-gray-600">{logs.length} total requests</p>
           </div>
         </div>
         <button
           onClick={fetchLogs}
-          className="px-4 py-2 bg-blue-500/20 text-blue-400 rounded-xl hover:bg-blue-500/30 transition-colors"
+          className="px-4 py-2 bg-blue-100 text-blue-700 rounded-xl hover:bg-blue-200 transition-colors"
         >
           Refresh
         </button>
@@ -129,7 +129,7 @@ export default function AILogsViewer() {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search logs by prompt, response, or user ID..."
-            className="w-full pl-10 pr-4 py-2 bg-slate-700/50 border border-gray-300 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:border-blue-500"
+            className="w-full pl-10 pr-4 py-2 bg-gray-100 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-500"
           />
         </div>
       </div>
@@ -146,7 +146,7 @@ export default function AILogsViewer() {
               key={log.id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="bg-slate-700/30 rounded-xl p-4 border border-gray-300 hover:border-blue-500/50 transition-colors cursor-pointer"
+              className="bg-gray-50 rounded-xl p-4 border border-gray-300 hover:border-gray-300 transition-colors cursor-pointer"
               onClick={() => setSelectedLog(log)}
             >
               <div className="flex items-start justify-between mb-2">
@@ -157,7 +157,7 @@ export default function AILogsViewer() {
                   <span className="font-mono text-xs">{log.user_id.substring(0, 8)}...</span>
                 </div>
                 {log.tokens_used && (
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">
+                  <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">
                     {log.tokens_used} tokens
                   </span>
                 )}
@@ -165,7 +165,7 @@ export default function AILogsViewer() {
               <div className="space-y-2">
                 <div>
                   <span className="text-xs text-gray-500 uppercase font-semibold">Prompt:</span>
-                  <p className="text-sm text-white mt-1">{truncateText(log.prompt)}</p>
+                  <p className="text-sm text-gray-900 mt-1">{truncateText(log.prompt)}</p>
                 </div>
                 <div>
                   <span className="text-xs text-gray-500 uppercase font-semibold">Response:</span>
@@ -191,10 +191,10 @@ export default function AILogsViewer() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold text-white">AI Log Details</h3>
+              <h3 className="text-xl font-semibold text-gray-900">AI Log Details</h3>
               <button
                 onClick={() => setSelectedLog(null)}
-                className="text-gray-600 hover:text-white transition-colors"
+                className="text-gray-600 hover:text-gray-900 transition-colors"
               >
                 ✕
               </button>
@@ -203,37 +203,37 @@ export default function AILogsViewer() {
             <div className="space-y-4">
               <div>
                 <span className="text-sm text-gray-600">Timestamp</span>
-                <p className="text-white mt-1">{new Date(selectedLog.created_at).toLocaleString()}</p>
+                <p className="text-gray-900 mt-1">{new Date(selectedLog.created_at).toLocaleString()}</p>
               </div>
 
               <div>
                 <span className="text-sm text-gray-600">User ID</span>
-                <p className="text-white mt-1 font-mono text-sm">{selectedLog.user_id}</p>
+                <p className="text-gray-900 mt-1 font-mono text-sm">{selectedLog.user_id}</p>
               </div>
 
               <div>
                 <span className="text-sm text-gray-600">Model</span>
-                <p className="text-white mt-1">{selectedLog.model}</p>
+                <p className="text-gray-900 mt-1">{selectedLog.model}</p>
               </div>
 
               {selectedLog.tokens_used && (
                 <div>
                   <span className="text-sm text-gray-600">Tokens Used</span>
-                  <p className="text-white mt-1">{selectedLog.tokens_used}</p>
+                  <p className="text-gray-900 mt-1">{selectedLog.tokens_used}</p>
                 </div>
               )}
 
               <div>
                 <span className="text-sm text-gray-600">Prompt</span>
-                <div className="mt-1 p-4 bg-slate-700/50 rounded-xl">
-                  <p className="text-white whitespace-pre-wrap">{selectedLog.prompt}</p>
+                <div className="mt-1 p-4 bg-gray-100 rounded-xl">
+                  <p className="text-gray-900 whitespace-pre-wrap">{selectedLog.prompt}</p>
                 </div>
               </div>
 
               <div>
                 <span className="text-sm text-gray-600">Response</span>
-                <div className="mt-1 p-4 bg-slate-700/50 rounded-xl">
-                  <p className="text-white whitespace-pre-wrap">{selectedLog.response}</p>
+                <div className="mt-1 p-4 bg-gray-100 rounded-xl">
+                  <p className="text-gray-900 whitespace-pre-wrap">{selectedLog.response}</p>
                 </div>
               </div>
             </div>

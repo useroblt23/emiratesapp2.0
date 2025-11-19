@@ -98,11 +98,11 @@ export default function BugReportsManager() {
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'critical': return 'bg-red-600 text-white';
+      case 'critical': return 'bg-[#D71920] text-white';
       case 'high': return 'bg-orange-600 text-white';
       case 'medium': return 'bg-yellow-600 text-white';
       case 'low': return 'bg-green-600 text-white';
-      default: return 'bg-gray-600 text-white';
+      default: return 'bg-[#3D4A52] text-white';
     }
   };
 
@@ -132,7 +132,7 @@ export default function BugReportsManager() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
-            className="px-4 py-2 bg-slate-700 border border-gray-300 rounded-xl text-gray-900 text-sm"
+            className="px-4 py-2 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 text-sm"
           >
             <option value="all">All Status</option>
             <option value="open">Open</option>
@@ -156,7 +156,7 @@ export default function BugReportsManager() {
               key={report.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="bg-slate-700 border border-gray-300 rounded-xl p-4 hover:border-slate-500 transition cursor-pointer"
+              className="bg-gray-50 border border-gray-300 rounded-xl p-4 hover:border-gray-400 transition cursor-pointer"
               onClick={() => setSelectedReport(report)}
             >
               <div className="flex items-start justify-between gap-4">
@@ -169,7 +169,7 @@ export default function BugReportsManager() {
                       {report.status.toUpperCase()}
                     </span>
                     {report.escalatedToGovernor && (
-                      <span className="px-2 py-1 rounded bg-purple-600 text-white text-xs font-bold">
+                      <span className="px-2 py-1 rounded bg-[#3D4A52] text-white text-xs font-bold">
                         ESCALATED
                       </span>
                     )}
@@ -185,7 +185,7 @@ export default function BugReportsManager() {
                       <Calendar className="w-3 h-3" />
                       <span>{report.createdAt?.toDate?.()?.toLocaleDateString?.() || 'N/A'}</span>
                     </div>
-                    <span className="px-2 py-0.5 bg-slate-600 rounded">{report.category}</span>
+                    <span className="px-2 py-0.5 bg-gray-200 rounded">{report.category}</span>
                   </div>
                 </div>
                 <div className="flex flex-col gap-2">
@@ -228,7 +228,7 @@ export default function BugReportsManager() {
             className="bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-slate-700 p-6 border-b border-gray-300">
+            <div className="sticky top-0 bg-gray-50 p-6 border-b border-gray-300">
               <h3 className="text-2xl font-bold text-gray-900">{selectedReport.title}</h3>
               <div className="flex items-center gap-2 mt-2">
                 <span className={`px-2 py-1 rounded text-xs font-bold ${getPriorityColor(selectedReport.priority)}`}>
@@ -265,7 +265,7 @@ export default function BugReportsManager() {
                   </h4>
                   <div className="space-y-3">
                     {selectedReport.responses.map((response) => (
-                      <div key={response.id} className="bg-slate-700 rounded-xl p-3">
+                      <div key={response.id} className="bg-gray-50 rounded-xl p-3">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-sm font-semibold text-gray-900">{response.userName}</span>
                           <span className="text-xs text-gray-600">
@@ -286,7 +286,7 @@ export default function BugReportsManager() {
                   onChange={(e) => setResponseMessage(e.target.value)}
                   placeholder="Type your response..."
                   rows={3}
-                  className="w-full px-4 py-3 bg-slate-700 border border-gray-300 rounded-xl text-gray-900 placeholder-slate-400 focus:border-slate-500 focus:outline-none resize-none"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-xl text-gray-900 placeholder-gray-400 focus:border-[#D71920] focus:outline-none resize-none"
                 />
                 <button
                   onClick={handleAddResponse}

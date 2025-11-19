@@ -156,7 +156,7 @@ export default function UserManager() {
                     <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
                       {user.role}
                     </span>
-                    <span className="text-xs px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full">
+                    <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
                       {user.plan}
                     </span>
                   </div>
@@ -190,7 +190,7 @@ export default function UserManager() {
                       <button
                         onClick={() => handlePromote(user)}
                         disabled={processing === user.id}
-                        className="p-2 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg transition disabled:opacity-50"
+                        className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-700 rounded-lg transition disabled:opacity-50"
                         title="Promote to sub-governor"
                       >
                         <Shield className="w-4 h-4" />

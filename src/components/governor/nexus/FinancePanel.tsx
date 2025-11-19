@@ -139,18 +139,18 @@ export default function FinancePanel() {
       animate={{ opacity: 1, y: 0 }}
       className="bg-white border border-gray-200 rounded-xl overflow-hidden"
     >
-      <div className="bg-gradient-to-r from-green-900/20 to-emerald-900/20 border-b border-gray-200 px-6 py-4">
+      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border-b border-gray-200 px-6 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-500/10 rounded-xl flex items-center justify-center border border-green-500/20">
-              <DollarSign className="w-6 h-6 text-green-400" />
+            <div className="w-10 h-10 bg-green-100 rounded-xl flex items-center justify-center border border-green-200">
+              <DollarSign className="w-6 h-6 text-green-600" />
             </div>
             <div>
               <h2 className="text-xl font-bold text-gray-900">Finance & Billing</h2>
               <p className="text-xs text-gray-600">Revenue, subscriptions, and payments</p>
             </div>
           </div>
-          <button className="px-3 py-1 bg-slate-700 hover:bg-slate-600 text-gray-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
+          <button className="px-3 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-xl text-sm font-semibold transition flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export
           </button>
@@ -163,7 +163,7 @@ export default function FinancePanel() {
             onClick={() => setActiveTab('overview')}
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'overview'
-                ? 'border-green-500 text-green-400'
+                ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
@@ -173,7 +173,7 @@ export default function FinancePanel() {
             onClick={() => setActiveTab('customers')}
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'customers'
-                ? 'border-green-500 text-green-400'
+                ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
@@ -183,7 +183,7 @@ export default function FinancePanel() {
             onClick={() => setActiveTab('subscriptions')}
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'subscriptions'
-                ? 'border-green-500 text-green-400'
+                ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
@@ -193,7 +193,7 @@ export default function FinancePanel() {
             onClick={() => setActiveTab('invoices')}
             className={`py-3 px-4 text-sm font-semibold border-b-2 transition ${
               activeTab === 'invoices'
-                ? 'border-green-500 text-green-400'
+                ? 'border-green-500 text-green-600'
                 : 'border-transparent text-gray-600 hover:text-gray-700'
             }`}
           >
@@ -208,7 +208,7 @@ export default function FinancePanel() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <TrendingUp className="w-4 h-4 text-green-400" />
+                  <TrendingUp className="w-4 h-4 text-green-600" />
                   <span className="text-xs font-semibold text-gray-600">MRR</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">${calculateMRR().toFixed(2)}</p>
@@ -226,7 +226,7 @@ export default function FinancePanel() {
 
               <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-purple-400" />
+                  <Users className="w-4 h-4 text-[#5A6B75]" />
                   <span className="text-xs font-semibold text-gray-600">Active</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{subscriptions.length}</p>
@@ -235,7 +235,7 @@ export default function FinancePanel() {
 
               <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-200">
                 <div className="flex items-center gap-2 mb-2">
-                  <AlertTriangle className="w-4 h-4 text-red-400" />
+                  <AlertTriangle className="w-4 h-4 text-red-600" />
                   <span className="text-xs font-semibold text-gray-600">Failed</span>
                 </div>
                 <p className="text-2xl font-bold text-gray-900">{getFailedPayments()}</p>
@@ -284,7 +284,7 @@ export default function FinancePanel() {
                 <div key={sub.id} className="bg-gray-50/50 rounded-xl p-3 border border-gray-200">
                   <div className="flex items-center justify-between mb-2">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                      sub.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
+                      sub.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-600'
                     }`}>
                       {sub.status}
                     </span>
@@ -312,10 +312,10 @@ export default function FinancePanel() {
                     <div className="flex items-center gap-2">
                       <span className={`px-2 py-1 rounded text-xs font-semibold ${
                         invoice.status === 'paid'
-                          ? 'bg-green-500/20 text-green-400'
+                          ? 'bg-green-100 text-green-700'
                           : invoice.status === 'failed'
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-gray-500/20 text-gray-400'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-200 text-gray-600'
                       }`}>
                         {invoice.status}
                       </span>

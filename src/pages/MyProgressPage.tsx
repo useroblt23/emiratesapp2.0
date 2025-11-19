@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, BookOpen, Award, PlayCircle, ChevronRight } from 'lucide-react';
+import { TrendingUp, BookOpen, Award, PlayCircle, ChevronRight, CheckCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -10,17 +10,8 @@ import {
   UserProgress,
   ModuleProgress
 } from '../services/progressService';
-import { getCourseById } from '../services/courseService';
+import { getAllModules, Module } from '../services/moduleService';
 import ModuleProgressCard from '../components/ModuleProgressCard';
-import { collection, getDocs, orderBy, query } from 'firebase/firestore';
-import { db } from '../lib/firebase';
-
-interface Module {
-  id: string;
-  title: string;
-  order: number;
-  lessonCount: number;
-}
 
 export default function MyProgressPage() {
   const navigate = useNavigate();
@@ -36,7 +27,7 @@ export default function MyProgressPage() {
   const [modulesProgress, setModulesProgress] = useState<Map<string, ModuleProgress>>(new Map());
   const [modulesLessons, setModulesLessons] = useState<Map<string, any[]>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [courseId] = useState('main-course');
+  const [courseId] = useState('global-modules');
 
   useEffect(() => {
     if (currentUser) {
@@ -53,23 +44,16 @@ export default function MyProgressPage() {
       const progress = await getUserProgress(currentUser.uid);
       setUserProgress(progress);
 
-      const modulesRef = collection(db, 'courses', courseId, 'modules');
-      const modulesQuery = query(modulesRef, orderBy('order', 'asc'));
-      const modulesSnap = await getDocs(modulesQuery);
-
-      const modulesList: Module[] = modulesSnap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      } as Module));
+      const modulesList = await getAllModules();
 
       setModules(modulesList);
 
-      const progressMap = await getAllModulesProgress(currentUser.uid, courseId);
+      const progressMap = await getAllModulesProgress(currentUser.uid, 'global-modules');
       setModulesProgress(progressMap);
 
       const lessonsMap = new Map<string, any[]>();
       for (const module of modulesList) {
-        const lessons = await getModuleLessons(courseId, module.id);
+        const lessons = await getModuleLessons('global-modules', module.id);
         lessonsMap.set(module.id, lessons);
       }
       setModulesLessons(lessonsMap);
@@ -82,13 +66,13 @@ export default function MyProgressPage() {
   };
 
   const handleLessonClick = (lessonId: string, moduleId: string) => {
-    navigate(`/lesson/${courseId}/${moduleId}/${lessonId}`);
+    navigate(`/lesson/global-modules/${moduleId}/${lessonId}`);
   };
 
   const handleContinueLearning = () => {
     if (userProgress.recentActivity.length > 0) {
       const lastActivity = userProgress.recentActivity[0];
-      navigate(`/lesson/${courseId}/${lastActivity.moduleId}/${lastActivity.lessonId}`);
+      navigate(`/lesson/global-modules/${lastActivity.moduleId}/${lastActivity.lessonId}`);
     } else {
       navigate('/courses');
     }
@@ -215,7 +199,7 @@ export default function MyProgressPage() {
           {modules.map((module, index) => {
             const progress = modulesProgress.get(module.id) || {
               completedLessons: 0,
-              totalLessons: module.lessonCount,
+              totalLessons: module.lessonCount || 0,
               progressPercentage: 0
             };
 
@@ -236,7 +220,7 @@ export default function MyProgressPage() {
                   progressPercentage={progress.progressPercentage}
                   lessons={lessons}
                   userId={currentUser!.uid}
-                  courseId={courseId}
+                 courseId="global-modules"
                   onLessonClick={(lessonId) => handleLessonClick(lessonId, module.id)}
                 />
               </motion.div>

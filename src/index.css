@@ -17,11 +17,62 @@
   body {
     font-family: 'Lato', sans-serif;
     font-weight: 400;
-    /* Clean white background */
-    background: #ffffff;
+    /* Ultra-High Quality Background Image */
+    background: url('/Untitled design.png') no-repeat center center fixed;
+    background-size: cover;
     background-attachment: fixed;
     min-height: 100vh;
     position: relative;
+    /* Ensure background stays behind all content */
+    isolation: isolate;
+  }
+
+  /* Background container with enhanced quality */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/Untitled design.png') no-repeat center center;
+    background-size: cover;
+    /* Ultra-high quality rendering */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    z-index: -999;
+    /* Prevent any interaction */
+    pointer-events: none;
+  }
+
+  /* Ensure all major layout elements sit above background */
+  #root {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+  }
+
+  /* Navigation and sidebars above background */
+  nav,
+  aside,
+  header,
+  footer {
+    position: relative;
+    z-index: 100;
+  }
+
+  /* Main content area above background */
+  main {
+    position: relative;
+    z-index: 10;
+  }
+
+  /* Modals and overlays at highest level */
+  [role="dialog"],
+  [role="alertdialog"],
+  .modal,
+  .popup {
+    z-index: 1000;
   }
 
   h1, h2, h3, h4, h5, h6 {

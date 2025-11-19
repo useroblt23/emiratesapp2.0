@@ -15,18 +15,22 @@ import {
   Zap,
   Shield,
   Trophy,
-  TrendingUp
+  TrendingUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { checkFeatureAccess, Feature } from '../../utils/featureAccess';
 import UpgradePrompt from '../UpgradePrompt';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar() {
   const { currentUser } = useApp();
   const location = useLocation();
   const [upgradePrompt, setUpgradePrompt] = useState<{ isOpen: boolean; feature: Feature; featureName: string } | null>(null);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   if (!currentUser) return null;
 
@@ -119,19 +123,97 @@ export default function Sidebar() {
     studentLinks;
 
   return (
-    <aside className="w-full md:w-64 liquid-sidebar border-b md:border-b-0 md:border-r border-white/20 md:h-[calc(100vh-5rem)] md:sticky md:top-20 overflow-y-auto">
-      <div className="p-3 md:p-4">
+    <>
+      {/* Mobile Sidebar */}
+      <aside className="w-full md:hidden liquid-sidebar border-b border-white/20">
+        <div className="p-3">
+          <nav className="flex gap-1 overflow-x-auto pb-2">
+            {links.map((link) => {
+              const Icon = link.icon;
+              const isActive = location.pathname === link.path;
+              const isLocked = 'locked' in link && link.locked;
+
+              return (
+                <Link
+                  key={link.path}
+                  to={isLocked ? '#' : link.path}
+                  onClick={(e) => {
+                    if (isLocked && 'feature' in link && link.feature) {
+                      e.preventDefault();
+                      setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-2xl transition-all whitespace-nowrap ${
+                    isActive
+                      ? 'glass-primary text-gray-900 shadow-xl'
+                      : isLocked
+                      ? 'text-gray-400 glass-ultra-thin opacity-60'
+                      : 'text-gray-700 glass-button-secondary'
+                  }`}
+                >
+                  <Icon className="w-4 h-4 flex-shrink-0" />
+                  <span className="font-medium text-xs">{link.label}</span>
+                  {isLocked && <Lock className="w-3 h-3 flex-shrink-0" />}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      </aside>
+
+      {/* Desktop Collapsible Sidebar */}
+      <motion.aside
+        initial={false}
+        animate={{
+          width: isCollapsed ? '5rem' : '16rem'
+        }}
+        transition={{
+          duration: 0.3,
+          ease: [0.4, 0, 0.2, 1]
+        }}
+        onMouseEnter={() => setIsCollapsed(false)}
+        onMouseLeave={() => setIsCollapsed(true)}
+        className="hidden md:block liquid-sidebar border-r border-white/20 h-[calc(100vh-5rem)] sticky top-20 overflow-hidden"
+      >
+      <div className="p-4 h-full flex flex-col">
         {currentUser.role === 'governor' && (
-          <div className="mb-3 md:mb-4 p-2 md:p-3 glass-primary text-gray-900 rounded-2xl shadow-xl">
+          <motion.div
+            initial={false}
+            className="mb-4 p-3 glass-primary text-gray-900 rounded-2xl shadow-xl overflow-hidden"
+          >
             <div className="flex items-center gap-2 mb-1">
-              <Shield className="w-3 h-3 md:w-4 md:h-4" />
-              <span className="text-xs md:text-sm font-bold">Governor Access</span>
+              <Shield className="w-4 h-4 flex-shrink-0" />
+              <AnimatePresence>
+                {!isCollapsed && (
+                  <motion.span
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: 'auto' }}
+                    exit={{ opacity: 0, width: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-sm font-bold whitespace-nowrap overflow-hidden"
+                  >
+                    Governor Access
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </div>
-            <p className="text-xs text-gray-300 hidden md:block">Full system control</p>
-          </div>
+            <AnimatePresence>
+              {!isCollapsed && (
+                <motion.p
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="text-xs text-gray-300 overflow-hidden"
+                >
+                  Full system control
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </motion.div>
         )}
 
-        <nav className="flex md:flex-col gap-1 md:space-y-1 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+        <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.path;
@@ -149,7 +231,7 @@ export default function Sidebar() {
                     setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
                   }
                 }}
-                className={`flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 rounded-2xl transition-all whitespace-nowrap md:whitespace-normal relative parallax-hover ${
+                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all relative parallax-hover group ${
                   isActive
                     ? 'glass-primary text-gray-900 shadow-xl'
                     : highlight
@@ -159,32 +241,95 @@ export default function Sidebar() {
                     : 'text-gray-700 glass-button-secondary'
                 }`}
               >
-                <Icon className="w-4 h-4 md:w-5 md:h-5 flex-shrink-0" />
-                <span className="font-medium text-xs md:text-base flex-1">{link.label}</span>
-                {isLocked && <Lock className="w-3 h-3 md:w-4 md:h-4 flex-shrink-0" />}
-                {badge && (
-                  <span className={`px-2 py-0.5 text-[10px] md:text-xs font-bold rounded-full ${
-                    badge === 'VIP'
-                      ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-gray-900'
-                      : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-gray-900'
-                  }`}>
-                    {badge}
-                  </span>
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <AnimatePresence>
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: 'auto' }}
+                      exit={{ opacity: 0, width: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="font-medium text-base flex-1 whitespace-nowrap overflow-hidden"
+                    >
+                      {link.label}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {!isCollapsed && isLocked && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      <Lock className="w-4 h-4 flex-shrink-0" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <AnimatePresence>
+                  {!isCollapsed && badge && (
+                    <motion.span
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={`px-2 py-0.5 text-xs font-bold rounded-full ${
+                        badge === 'VIP'
+                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-gray-900'
+                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-gray-900'
+                      }`}
+                    >
+                      {badge}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                {isCollapsed && (
+                  <div className="absolute left-full ml-2 px-3 py-2 glass-primary text-gray-900 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                    {link.label}
+                  </div>
                 )}
               </Link>
             );
           })}
         </nav>
+
+        <motion.button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl glass-button-secondary text-gray-700 transition-all hover:shadow-lg"
+        >
+          <motion.div
+            animate={{ rotate: isCollapsed ? 0 : 180 }}
+            transition={{ duration: 0.3 }}
+          >
+            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          </motion.div>
+          <AnimatePresence>
+            {!isCollapsed && (
+              <motion.span
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2 }}
+                className="font-medium text-base whitespace-nowrap overflow-hidden"
+              >
+                Collapse
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </motion.button>
       </div>
-      {upgradePrompt && (
-        <UpgradePrompt
-          isOpen={upgradePrompt.isOpen}
-          onClose={() => setUpgradePrompt(null)}
-          requiredPlan={checkFeatureAccess(currentUser, upgradePrompt.feature).requiresPlan || 'pro'}
-          message={checkFeatureAccess(currentUser, upgradePrompt.feature).message || ''}
-          feature={upgradePrompt.featureName}
-        />
-      )}
-    </aside>
+    </motion.aside>
+
+    {upgradePrompt && (
+      <UpgradePrompt
+        isOpen={upgradePrompt.isOpen}
+        onClose={() => setUpgradePrompt(null)}
+        requiredPlan={checkFeatureAccess(currentUser, upgradePrompt.feature).requiresPlan || 'pro'}
+        message={checkFeatureAccess(currentUser, upgradePrompt.feature).message || ''}
+        feature={upgradePrompt.featureName}
+      />
+    )}
+    </>
   );
 }

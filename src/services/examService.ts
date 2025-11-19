@@ -319,9 +319,8 @@ export const submitExam = async (
     }
 
     const now = new Date();
-    const canRetryAt = passed ? undefined : new Date(now.getTime() + exam.cooldownMinutes * 60 * 1000).toISOString();
 
-    const userResult: UserExamResult = {
+    const userResult: any = {
       userId,
       moduleId,
       lessonId,
@@ -329,11 +328,19 @@ export const submitExam = async (
       attempts,
       lastScore: score,
       passed,
-      passedAt: passed ? now.toISOString() : existingResult.exists() ? existingResult.data().passedAt : undefined,
       lastAttemptAt: now.toISOString(),
-      answers: submission.answers,
-      canRetryAt
+      answers: submission.answers
     };
+
+    if (passed) {
+      userResult.passedAt = now.toISOString();
+    } else if (existingResult.exists() && existingResult.data().passedAt) {
+      userResult.passedAt = existingResult.data().passedAt;
+    }
+
+    if (!passed && exam.cooldownMinutes > 0) {
+      userResult.canRetryAt = new Date(now.getTime() + exam.cooldownMinutes * 60 * 1000).toISOString();
+    }
 
     await setDoc(resultRef, userResult);
 

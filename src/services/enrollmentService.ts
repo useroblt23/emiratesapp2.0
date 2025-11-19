@@ -112,7 +112,11 @@ export const updateLastAccessed = async (
     await updateDoc(enrollmentRef, {
       last_accessed: new Date().toISOString()
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      console.warn('⚠️ Last accessed permission denied - deploy Firestore rules to fix');
+      return;
+    }
     console.error('Error updating last accessed:', error);
   }
 };
@@ -227,7 +231,11 @@ export const updateModuleProgress = async (
     }
 
     await updateDoc(enrollmentRef, updates);
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === 'permission-denied') {
+      console.warn('⚠️ Module progress permission denied - deploy Firestore rules to fix');
+      return;
+    }
     console.error('Error updating module progress:', error);
   }
 };

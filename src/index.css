@@ -643,6 +643,59 @@
     border-radius: 8px;
   }
 
+  /* Custom styled select dropdowns */
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.25rem;
+    padding-right: 2.5rem;
+    cursor: pointer;
+  }
+
+  /* Glass style select dropdown */
+  select.glass-light,
+  select[class*="glass-"] {
+    background-color: rgba(255, 255, 255, 0.3) !important;
+    backdrop-filter: blur(14px) saturate(180%) !important;
+    -webkit-backdrop-filter: blur(14px) saturate(180%) !important;
+    border: 2px solid rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08) !important;
+    color: #2a2a2a !important;
+    font-weight: 500;
+  }
+
+  select.glass-light:hover,
+  select[class*="glass-"]:hover {
+    background-color: rgba(255, 255, 255, 0.38) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  select.glass-light:focus,
+  select[class*="glass-"]:focus {
+    outline: none;
+    border-color: rgba(215, 25, 32, 0.6) !important;
+    box-shadow: 0 0 0 4px rgba(215, 25, 32, 0.1), 0 6px 24px rgba(0, 0, 0, 0.12) !important;
+  }
+
+  /* Dropdown options styling */
+  select option {
+    background-color: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    color: #1f1f1f;
+    padding: 0.75rem;
+    font-weight: 500;
+  }
+
+  select option:hover,
+  select option:checked {
+    background: linear-gradient(135deg, rgba(215, 25, 32, 0.1), rgba(255, 51, 102, 0.1));
+    color: #1f1f1f;
+  }
+
   /* Priority buttons in bug report - make them fully rounded */
   button[type="button"] {
     border-radius: 8px;

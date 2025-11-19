@@ -243,7 +243,7 @@ export default function SupportPage() {
                     value={subject}
                     onChange={(e) => setSubject(e.target.value)}
                     placeholder="Brief description of your issue"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
+                    className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-[#D71920] focus:ring-4 focus:ring-[#D71920]/20 transition-all outline-none"
                     required
                   />
                 </div>
@@ -256,7 +256,7 @@ export default function SupportPage() {
                     <select
                       value={department}
                       onChange={(e) => setDepartment(e.target.value as Department)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
+                      className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-[#D71920] focus:ring-4 focus:ring-[#D71920]/20 transition-all outline-none"
                     >
                       <option value="general">General</option>
                       <option value="technical">Technical</option>
@@ -272,7 +272,7 @@ export default function SupportPage() {
                     <select
                       value={topic}
                       onChange={(e) => setTopic(e.target.value as Topic)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
+                      className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-[#D71920] focus:ring-4 focus:ring-[#D71920]/20 transition-all outline-none"
                     >
                       <option value="account">Account</option>
                       <option value="courses">Courses</option>
@@ -338,7 +338,7 @@ export default function SupportPage() {
                     value={bugTitle}
                     onChange={(e) => setBugTitle(e.target.value)}
                     placeholder="Brief description of the issue"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                    className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all outline-none"
                     required
                   />
                 </div>
@@ -351,7 +351,7 @@ export default function SupportPage() {
                     <select
                       value={bugCategory}
                       onChange={(e) => setBugCategory(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                      className="w-full px-4 py-4 glass-light border-2 border-gray-200 rounded-2xl text-gray-900 focus:border-orange-500 focus:ring-4 focus:ring-orange-500/20 transition-all outline-none"
                     >
                       {bugCategories.map(cat => (
                         <option key={cat.value} value={cat.value}>{cat.label}</option>

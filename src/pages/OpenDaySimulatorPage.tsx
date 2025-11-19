@@ -179,33 +179,6 @@ export default function OpenDaySimulatorPage() {
     );
   }
 
-  if (!isPro) {
-    return (
-      <div className="p-4 md:p-8 max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 rounded-2xl p-8 text-center"
-        >
-          <div className="w-20 h-20 bg-gradient-to-br from-[#D71920] to-[#B91518] rounded-full flex items-center justify-center mx-auto mb-6">
-            <Plane className="w-10 h-10 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Open Day Simulator</h1>
-          <p className="text-lg text-gray-700 mb-6">
-            Exclusive for Pro and VIP members. Upgrade to practice your Open Day simulation and get
-            instant feedback on your performance.
-          </p>
-          <button
-            onClick={() => navigate('/upgrade')}
-            className="px-8 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-xl font-bold hover:shadow-lg transition"
-          >
-            Upgrade Now
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
-
   const getBackgroundClass = () => {
     switch (phase) {
       case 'quiz':

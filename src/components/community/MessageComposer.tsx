@@ -144,21 +144,21 @@ export default function MessageComposer({
         </div>
       )}
 
-      <div className="flex items-end gap-3">
+      <div className="flex items-end gap-2">
         <button
           onClick={() => fileInputRef.current?.click()}
-          className="p-4 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all"
+          className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex-shrink-0"
           disabled={sending}
         >
-          <ImageIcon className="w-6 h-6 text-gray-600" />
+          <ImageIcon className="w-5 h-5 text-gray-600" />
         </button>
 
         <button
           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-          className="p-4 bg-gray-100 hover:bg-gray-200 rounded-xl transition-all"
+          className="p-2.5 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all flex-shrink-0"
           disabled={sending}
         >
-          <Smile className="w-6 h-6 text-gray-600" />
+          <Smile className="w-5 h-5 text-gray-600" />
         </button>
 
         <input
@@ -169,35 +169,31 @@ export default function MessageComposer({
           className="hidden"
         />
 
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <textarea
             value={message}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            rows={2}
-            className="w-full px-5 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-[#D71921] resize-none text-base"
+            rows={1}
+            className="w-full px-3 py-2.5 bg-gray-50 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-[#D71921] resize-none text-sm"
             disabled={sending}
-            style={{ minHeight: '60px' }}
+            style={{ maxHeight: '80px' }}
           />
         </div>
 
         <button
           onClick={handleSend}
           disabled={(!message.trim() && !attachment) || sending}
-          className="p-4 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:shadow-lg rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="p-2.5 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:shadow-lg rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         >
           {sending ? (
-            <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
           ) : (
-            <Send className="w-6 h-6 text-white" />
+            <Send className="w-5 h-5 text-white" />
           )}
         </button>
       </div>
-
-      <p className="text-xs text-gray-500 mt-3">
-        Press Enter to send, Shift+Enter for new line. Images only, max 5MB
-      </p>
     </div>
   );
 }

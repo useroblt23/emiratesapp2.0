@@ -35,6 +35,7 @@ import LeaderboardPage from './pages/LeaderboardPage';
 import InitializeData from './pages/governor/InitializeData';
 import MyProgressPage from './pages/MyProgressPage';
 import LessonViewerPage from './pages/LessonViewerPage';
+import VideoCoursePage from './pages/VideoCoursePage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -75,6 +76,7 @@ function AppContent() {
         <Route path="/courses" element={<CoursesPage />} />
         <Route path="/courses/:courseId" element={<CourseViewerPage />} />
         <Route path="/modules/:moduleId" element={<ModuleViewerPage />} />
+        <Route path="/video-course/:moduleId" element={<VideoCoursePage />} />
         <Route path="/chat" element={<CommunityPage />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<SupportPage />} />

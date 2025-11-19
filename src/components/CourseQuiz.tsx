@@ -6,8 +6,10 @@ import { saveQuizResult } from '../services/quizService';
 import { useApp } from '../context/AppContext';
 
 interface CourseQuizProps {
-  quiz: Quiz;
-  onComplete: (passed: boolean, score: number) => void;
+  quiz?: Quiz;
+  moduleId?: string;
+  onComplete: (score: number, passed: boolean) => void;
+  onBack?: () => void;
 }
 
 interface QuizResult {
@@ -15,7 +17,7 @@ interface QuizResult {
   score: number;
 }
 
-export default function CourseQuiz({ quiz, onComplete }: CourseQuizProps) {
+export default function CourseQuiz({ quiz, moduleId, onComplete, onBack }: CourseQuizProps) {
   const { currentUser } = useApp();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<number[]>([]);
@@ -24,13 +26,38 @@ export default function CourseQuiz({ quiz, onComplete }: CourseQuizProps) {
   const [quizResult, setQuizResult] = useState<QuizResult | null>(null);
   const [shuffledQuestions, setShuffledQuestions] = useState<QuizQuestion[]>([]);
 
+  const defaultQuiz: Quiz = {
+    courseId: moduleId || 'default',
+    title: 'Module Quiz',
+    passingScore: 70,
+    questions: [
+      {
+        questionText: 'What is the minimum watch time required to complete a video?',
+        options: ['50%', '60%', '70%', '80%'],
+        correctAnswer: '80%'
+      },
+      {
+        questionText: 'How many videos must you complete before taking the quiz?',
+        options: ['1 video', '2 videos', '3 videos', 'No videos required'],
+        correctAnswer: '2 videos'
+      },
+      {
+        questionText: 'What score do you need to unlock submodules?',
+        options: ['50%', '60%', '70%', '80%'],
+        correctAnswer: '70%'
+      }
+    ]
+  };
+
+  const activeQuiz = quiz || defaultQuiz;
+
   useEffect(() => {
-    const shuffled = quiz.questions.map(q => shuffleOptions(q));
+    const shuffled = activeQuiz.questions.map(q => shuffleOptions(q));
     setShuffledQuestions(shuffled);
-  }, [quiz]);
+  }, [activeQuiz]);
 
   const currentQuestion = shuffledQuestions[currentQuestionIndex];
-  const totalQuestions = quiz.questions.length;
+  const totalQuestions = activeQuiz.questions.length;
   const isLastQuestion = currentQuestionIndex === totalQuestions - 1;
 
   const handleAnswerSelect = (answerIndex: number) => {
@@ -61,7 +88,7 @@ export default function CourseQuiz({ quiz, onComplete }: CourseQuizProps) {
     });
 
     const scorePercentage = Math.round((correctCount / totalQuestions) * 100);
-    const passed = scorePercentage >= quiz.passingScore;
+    const passed = scorePercentage >= activeQuiz.passingScore;
 
     const result: QuizResult = {
       quizStatus: passed ? 'PASS' : 'FAIL',
@@ -70,12 +97,12 @@ export default function CourseQuiz({ quiz, onComplete }: CourseQuizProps) {
 
     setQuizResult(result);
     setShowResult(true);
-    onComplete(passed, scorePercentage);
+    onComplete(scorePercentage, passed);
 
     if (currentUser) {
       await saveQuizResult({
         user_id: currentUser.uid,
-        course_id: quiz.courseId,
+        course_id: activeQuiz.courseId,
         score: scorePercentage,
         passed: passed,
         answers: answers,
@@ -85,7 +112,7 @@ export default function CourseQuiz({ quiz, onComplete }: CourseQuizProps) {
   };
 
   const handleRetry = () => {
-    const shuffled = quiz.questions.map(q => shuffleOptions(q));
+    const shuffled = activeQuiz.questions.map(q => shuffleOptions(q));
     setShuffledQuestions(shuffled);
     setCurrentQuestionIndex(0);
     setUserAnswers([]);

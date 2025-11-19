@@ -19,6 +19,10 @@ export interface MainModule {
   description: string;
   coverImage: string;
   visible: boolean;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
+  submodule_id?: string;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +44,10 @@ export const createMainModule = async (data: {
   description: string;
   coverImage: string;
   visible: boolean;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
+  submodule_id?: string;
 }): Promise<string> => {
   try {
     console.log('createMainModule: Starting creation with data:', data);
@@ -57,6 +65,11 @@ export const createMainModule = async (data: {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     };
+
+    if (data.course_id) mainModule.course_id = data.course_id;
+    if (data.course1_id) mainModule.course1_id = data.course1_id;
+    if (data.course2_id) mainModule.course2_id = data.course2_id;
+    if (data.submodule_id) mainModule.submodule_id = data.submodule_id;
 
     console.log('createMainModule: Module object to save:', mainModule);
     console.log('createMainModule: Saving to collection path: main_modules');

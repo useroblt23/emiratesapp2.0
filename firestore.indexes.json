@@ -292,6 +292,14 @@
       "fields": [
         { "fieldPath": "timestamp", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "list",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "created", "order": "DESCENDING" }
+      ]
     }
   ],
   "fieldOverrides": []

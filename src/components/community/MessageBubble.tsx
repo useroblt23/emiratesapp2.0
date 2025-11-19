@@ -44,10 +44,10 @@ export default function MessageBubble({
         )}
 
         <div
-          className={`relative px-4 py-3 rounded-2xl shadow-sm ${
+          className={`relative px-4 py-3 rounded-3xl shadow-xl backdrop-blur-2xl ${
             isOwnMessage
-              ? 'bg-[#D71921] text-white'
-              : 'bg-white border border-gray-200 text-gray-900'
+              ? 'bg-[#D71921]/90 text-white border border-white/20'
+              : 'bg-white/80 border border-white/30 text-gray-900'
           }`}
         >
           {message.replyTo && (
@@ -64,7 +64,7 @@ export default function MessageBubble({
                 <img
                   src={message.attachmentUrl}
                   alt="Attachment"
-                  className="rounded-lg max-w-full max-h-64 object-cover"
+                  className="rounded-2xl max-w-full max-h-64 object-cover shadow-lg border border-white/20"
                 />
               ) : (
                 <a

@@ -310,27 +310,21 @@ export const communityChatService = {
     let attachmentRef: string | null = null;
     let attachmentMetadata: any = null;
 
-    if (attachmentFile) {
-      const storagePath = `attachments/${conversationId}/${messageRef.id}/${attachmentFile.name}`;
-      const storageRef = ref(storage, storagePath);
-      const uploadTask = uploadBytesResumable(storageRef, attachmentFile);
-
-      await new Promise((resolve, reject) => {
-        uploadTask.on(
-          'state_changed',
-          null,
-          reject,
-          async () => {
-            attachmentUrl = await getDownloadURL(uploadTask.snapshot.ref);
-            attachmentRef = storagePath;
-            attachmentMetadata = {
-              name: attachmentFile.name,
-              size: attachmentFile.size,
-              type: attachmentFile.type,
-            };
-            resolve(true);
-          }
-        );
+    if (attachmentFile && attachmentFile.type.startsWith('image/')) {
+      await new Promise<void>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          attachmentUrl = reader.result as string;
+          attachmentRef = `base64:${messageRef.id}`;
+          attachmentMetadata = {
+            name: attachmentFile.name,
+            size: attachmentFile.size,
+            type: attachmentFile.type,
+          };
+          resolve();
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(attachmentFile);
       });
 
       try {

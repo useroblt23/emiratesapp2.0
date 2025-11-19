@@ -145,13 +145,13 @@ export default function ConversationList({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white">
-      <div className="p-4 border-b border-gray-200">
+    <div className="h-full flex flex-col bg-white/50 backdrop-blur-xl">
+      <div className="p-4 border-b border-white/20">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-[#000000]">Conversations</h2>
           <button
             onClick={() => setShowNewConversation(true)}
-            className="p-2 bg-[#D71921] hover:bg-[#B01419] rounded-lg transition-colors"
+            className="p-2 bg-[#D71921]/90 hover:bg-[#B01419] rounded-2xl transition-all backdrop-blur-xl shadow-lg"
             title="New conversation"
           >
             <Plus className="w-5 h-5 text-white" />
@@ -164,7 +164,7 @@ export default function ConversationList({
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 bg-white/60 backdrop-blur-xl border border-white/30 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921]/50 focus:border-transparent shadow-lg"
           />
         </div>
       </div>
@@ -180,11 +180,11 @@ export default function ConversationList({
             <button
               key={conversation.id}
               onClick={() => onSelectConversation(conversation.id)}
-              className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
+              className={`w-full p-4 flex items-start gap-3 hover:bg-white/50 transition-all border-b border-white/10 ${
                 selectedConversationId === conversation.id
-                  ? 'bg-red-50 border-l-4 border-l-[#D71921]'
+                  ? 'bg-red-50/70 backdrop-blur-xl border-l-4 border-l-[#D71921]'
                   : ''
-              } ${conversation.id === 'publicRoom' ? 'bg-gradient-to-r from-red-50 to-orange-50' : ''}`}
+              } ${conversation.id === 'publicRoom' ? 'bg-gradient-to-r from-red-50/60 to-orange-50/60 backdrop-blur-xl' : ''}`}
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold shadow ${
                 conversation.id === 'publicRoom'

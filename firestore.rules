@@ -43,7 +43,8 @@ service cloud.firestore {
     // USERS
     ///////////////////////////////////////////////////////////////////////////
     match /users/{userId} {
-      allow read: if request.auth.uid == userId || (request.auth.uid != userId && isStaff());
+      allow read: if request.auth.uid == userId || isStaff();
+      allow list: if isStaff();
       allow create: if isAuthenticated() && request.auth.uid == userId;
       allow update: if isAuthenticated() && (
         request.auth.uid == userId ||
@@ -51,6 +52,19 @@ service cloud.firestore {
         hasPermission('manageUsers')
       );
       allow delete: if false;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // NOTIFICATIONS
+    ///////////////////////////////////////////////////////////////////////////
+    match /notifications/{notificationId} {
+      allow read, update: if isAuthenticated() && (
+        resource.data.userId == request.auth.uid ||
+        isStaff()
+      );
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow delete: if isGovernor();
     }
 
     ///////////////////////////////////////////////////////////////////////////
@@ -118,6 +132,7 @@ service cloud.firestore {
     match /open_day_simulations/{simId} {
       allow read, update, delete: if isAuthenticated() &&
         resource.data.user_id == request.auth.uid;
+      allow list: if isStaff();
       allow create: if isAuthenticated() &&
         request.resource.data.user_id == request.auth.uid;
     }

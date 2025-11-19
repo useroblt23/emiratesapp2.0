@@ -72,15 +72,16 @@ export default function BugReportButton() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm"
+              className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-md"
+              style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}
               onClick={() => setIsOpen(false)}
             />
-            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none">
+            <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 pointer-events-none" style={{ top: 0, left: 0, right: 0, bottom: 0, position: 'fixed' }}>
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="relative w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto"
+                className="relative w-full max-w-2xl bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-[90vh] overflow-hidden flex flex-col pointer-events-auto"
                 onClick={(e) => e.stopPropagation()}
               >
               <div className="sticky top-0 chat-header flex items-center justify-between rounded-t-2xl">

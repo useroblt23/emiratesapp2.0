@@ -18,6 +18,7 @@ import AnnouncementManager from './AnnouncementManager';
 import BugReportsManager from '../../components/governor/nexus/BugReportsManager';
 import ModuleManager from '../../components/governor/nexus/ModuleManager';
 import DataInitializer from '../../components/governor/nexus/DataInitializer';
+import FeatureControl from '../../components/governor/nexus/FeatureControl';
 
 interface Announcement {
   active: boolean;
@@ -121,6 +122,8 @@ export default function GovernorControlNexus() {
         <CourseManager />
 
         <AnnouncementManager />
+
+        <FeatureControl />
 
         <BugReportsManager />
 

@@ -1,12 +1,31 @@
 import { db } from '../lib/firebase';
 import { doc, getDoc, setDoc, updateDoc, onSnapshot, serverTimestamp, Unsubscribe } from 'firebase/firestore';
 
+export type FeatureSeverity = 'info' | 'low' | 'urgent' | 'critical';
+
+export interface FeatureRestriction {
+  enabled: boolean;
+  severity?: FeatureSeverity;
+  reason?: string;
+  disabledAt?: string;
+  availableAt?: string;
+  estimatedDuration?: string;
+}
+
 export interface SystemFeatures {
-  chat: boolean;
-  quiz: boolean;
-  englishTest: boolean;
-  profileEdit: boolean;
-  openDayModule: boolean;
+  chat: FeatureRestriction;
+  quiz: FeatureRestriction;
+  englishTest: FeatureRestriction;
+  profileEdit: FeatureRestriction;
+  openDayModule: FeatureRestriction;
+  courses: FeatureRestriction;
+  aiTrainer: FeatureRestriction;
+  recruiters: FeatureRestriction;
+  openDays: FeatureRestriction;
+  simulator: FeatureRestriction;
+  messages: FeatureRestriction;
+  leaderboard: FeatureRestriction;
+  community: FeatureRestriction;
 }
 
 export interface SystemAnnouncement {
@@ -44,13 +63,23 @@ export const getSystemControl = async (): Promise<SystemControl | null> => {
 
 const createDefaultSystemControl = async (): Promise<SystemControl | null> => {
   try {
+    const defaultFeature: FeatureRestriction = { enabled: true };
+
     const defaultControl: SystemControl = {
       features: {
-        chat: true,
-        quiz: true,
-        englishTest: true,
-        profileEdit: true,
-        openDayModule: true,
+        chat: defaultFeature,
+        quiz: defaultFeature,
+        englishTest: defaultFeature,
+        profileEdit: defaultFeature,
+        openDayModule: defaultFeature,
+        courses: defaultFeature,
+        aiTrainer: defaultFeature,
+        recruiters: defaultFeature,
+        openDays: defaultFeature,
+        simulator: defaultFeature,
+        messages: defaultFeature,
+        leaderboard: defaultFeature,
+        community: defaultFeature,
       },
       announcement: {
         active: false,
@@ -135,4 +164,38 @@ export const subscribeToSystemControl = (
   );
 
   return unsubscribe;
+};
+
+export const updateFeatureStatus = async (
+  featureName: keyof SystemFeatures,
+  restriction: FeatureRestriction,
+  userId: string
+): Promise<void> => {
+  try {
+    const systemControl = await getSystemControl();
+    if (!systemControl) throw new Error('System control not found');
+
+    const updatedFeatures = {
+      ...systemControl.features,
+      [featureName]: restriction,
+    };
+
+    await updateSystemControl({ features: updatedFeatures }, userId);
+    console.log(`Feature ${featureName} updated:`, restriction);
+  } catch (error) {
+    console.error(`Error updating feature ${featureName}:`, error);
+    throw error;
+  }
+};
+
+export const isFeatureEnabled = (features: SystemFeatures, featureName: keyof SystemFeatures): boolean => {
+  const feature = features[featureName];
+  if (!feature) return true;
+  return feature.enabled;
+};
+
+export const getFeatureRestriction = (features: SystemFeatures, featureName: keyof SystemFeatures): FeatureRestriction | null => {
+  const feature = features[featureName];
+  if (!feature || feature.enabled) return null;
+  return feature;
 };

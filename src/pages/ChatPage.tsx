@@ -154,8 +154,8 @@ export default function ChatPage() {
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-              Messages
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-2 animate-pulse">
+              🎨 NEW DESIGN - Messages
             </h1>
             <p className="text-gray-600">
               Connect with mentors, students, and the community

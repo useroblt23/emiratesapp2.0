@@ -318,5 +318,30 @@ service cloud.firestore {
       allow create: if isAuthenticated();
       allow delete: if false;
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // USER PROGRESS TRACKING
+    ///////////////////////////////////////////////////////////////////////////
+    match /userProgress/{userId}/modules/{moduleId} {
+      allow read: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isGovernor()
+      );
+      allow write: if isAuthenticated() && (
+        request.auth.uid == userId ||
+        isGovernor()
+      );
+
+      match /lessons/{lessonId} {
+        allow read: if isAuthenticated() && (
+          request.auth.uid == userId ||
+          isGovernor()
+        );
+        allow write: if isAuthenticated() && (
+          request.auth.uid == userId ||
+          isGovernor()
+        );
+      }
+    }
   }
 }

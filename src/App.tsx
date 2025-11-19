@@ -30,6 +30,8 @@ import DocumentationPage from './pages/DocumentationPage';
 import StudentsPage from './pages/StudentsPage';
 import LeaderboardPage from './pages/LeaderboardPage';
 import InitializeData from './pages/governor/InitializeData';
+import MyProgressPage from './pages/MyProgressPage';
+import LessonViewerPage from './pages/LessonViewerPage';
 
 function MaintenanceScreen({ message }: { message: string }) {
   return (
@@ -83,6 +85,8 @@ function AppContent() {
 
         <Route path="/students" element={<StudentsPage />} />
         <Route path="/leaderboard" element={<LeaderboardPage />} />
+        <Route path="/my-progress" element={<MyProgressPage />} />
+        <Route path="/lesson/:courseId/:moduleId/:lessonId" element={<LessonViewerPage />} />
 
         {(currentUser.role === 'mentor' || currentUser.role === 'governor') && (
           <>

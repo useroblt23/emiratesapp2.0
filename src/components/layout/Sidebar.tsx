@@ -14,7 +14,8 @@ import {
   UserCircle,
   Zap,
   Shield,
-  Trophy
+  Trophy,
+  TrendingUp
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -38,6 +39,7 @@ export default function Sidebar() {
 
     const baseLinks = [
       { path: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', feature: null },
+      { path: '/my-progress', icon: TrendingUp, label: 'My Progress', feature: null },
       { path: '/courses', icon: BookOpen, label: 'Courses', feature: null },
       {
         path: '/ai-trainer',

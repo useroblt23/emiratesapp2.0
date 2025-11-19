@@ -15,9 +15,7 @@ import {
   Zap,
   Shield,
   Trophy,
-  TrendingUp,
-  ChevronLeft,
-  ChevronRight
+  TrendingUp
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Link, useLocation } from 'react-router-dom';
@@ -165,46 +163,47 @@ export default function Sidebar() {
       <motion.aside
         initial={false}
         animate={{
-          width: isCollapsed ? '5rem' : '16rem'
+          width: isCollapsed ? '4.5rem' : '16rem'
         }}
         transition={{
-          duration: 0.3,
-          ease: [0.4, 0, 0.2, 1]
+          type: "spring",
+          stiffness: 300,
+          damping: 30
         }}
         onMouseEnter={() => setIsCollapsed(false)}
         onMouseLeave={() => setIsCollapsed(true)}
         className="hidden md:block liquid-sidebar border-r border-white/20 h-[calc(100vh-5rem)] sticky top-20 overflow-hidden"
       >
-      <div className="p-4 h-full flex flex-col">
+      <div className="p-3 h-full flex flex-col">
         {currentUser.role === 'governor' && (
           <motion.div
             initial={false}
-            className="mb-4 p-3 glass-primary text-gray-900 rounded-2xl shadow-xl overflow-hidden"
+            className="mb-3 p-3 glass-primary text-gray-900 rounded-2xl shadow-xl overflow-hidden"
           >
-            <div className="flex items-center gap-2 mb-1">
+            <div className={`flex items-center gap-2 mb-1 ${isCollapsed ? 'justify-center' : ''}`}>
               <Shield className="w-4 h-4 flex-shrink-0" />
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {!isCollapsed && (
                   <motion.span
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: 'auto' }}
-                    exit={{ opacity: 0, width: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="text-sm font-bold whitespace-nowrap overflow-hidden"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                    className="text-sm font-bold whitespace-nowrap"
                   >
                     Governor Access
                   </motion.span>
                 )}
               </AnimatePresence>
             </div>
-            <AnimatePresence>
+            <AnimatePresence mode="wait">
               {!isCollapsed && (
                 <motion.p
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: 'auto' }}
                   exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="text-xs text-gray-300 overflow-hidden"
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                  className="text-xs text-gray-300"
                 >
                   Full system control
                 </motion.p>
@@ -213,7 +212,7 @@ export default function Sidebar() {
           </motion.div>
         )}
 
-        <nav className="flex-1 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent">
+        <nav className="flex-1 space-y-1.5 overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-gray-400/20 scrollbar-track-transparent py-1">
           {links.map((link) => {
             const Icon = link.icon;
             const isActive = location.pathname === link.path;
@@ -231,53 +230,56 @@ export default function Sidebar() {
                     setUpgradePrompt({ isOpen: true, feature: link.feature, featureName: link.label });
                   }
                 }}
-                className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all relative parallax-hover group ${
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl relative group ${
                   isActive
-                    ? 'glass-primary text-gray-900 shadow-xl'
+                    ? 'glass-primary text-gray-900 shadow-lg'
                     : highlight
                     ? 'glass-primary text-gray-900 font-bold'
                     : isLocked
                     ? 'text-gray-400 glass-ultra-thin opacity-60'
-                    : 'text-gray-700 glass-button-secondary'
-                }`}
+                    : 'text-gray-700 glass-button-secondary hover:shadow-md'
+                } ${isCollapsed ? 'justify-center' : ''}`}
+                style={{
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
               >
-                <Icon className="w-5 h-5 flex-shrink-0" />
-                <AnimatePresence>
+                <Icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? '' : ''}`} />
+                <AnimatePresence mode="wait">
                   {!isCollapsed && (
                     <motion.span
-                      initial={{ opacity: 0, width: 0 }}
-                      animate={{ opacity: 1, width: 'auto' }}
-                      exit={{ opacity: 0, width: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="font-medium text-base flex-1 whitespace-nowrap overflow-hidden"
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                      className="font-medium text-sm flex-1 whitespace-nowrap"
                     >
                       {link.label}
                     </motion.span>
                   )}
                 </AnimatePresence>
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   {!isCollapsed && isLocked && (
                     <motion.div
-                      initial={{ opacity: 0, scale: 0 }}
+                      initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     >
-                      <Lock className="w-4 h-4 flex-shrink-0" />
+                      <Lock className="w-3.5 h-3.5 flex-shrink-0" />
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <AnimatePresence>
+                <AnimatePresence mode="wait">
                   {!isCollapsed && badge && (
                     <motion.span
-                      initial={{ opacity: 0, scale: 0 }}
+                      initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0 }}
-                      transition={{ duration: 0.2 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      transition={{ type: "spring", stiffness: 400, damping: 25 }}
                       className={`px-2 py-0.5 text-xs font-bold rounded-full ${
                         badge === 'VIP'
-                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-gray-900'
-                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-gray-900'
+                          ? 'bg-gradient-to-r from-[#3D4A52] to-[#2A3439] text-white'
+                          : 'bg-gradient-to-r from-[#FF3B3F] to-[#E6282C] text-white'
                       }`}
                     >
                       {badge}
@@ -285,39 +287,19 @@ export default function Sidebar() {
                   )}
                 </AnimatePresence>
                 {isCollapsed && (
-                  <div className="absolute left-full ml-2 px-3 py-2 glass-primary text-gray-900 rounded-xl shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    whileHover={{ opacity: 1, x: 0 }}
+                    className="absolute left-full ml-3 px-3 py-2 bg-gray-900 text-white text-sm rounded-lg shadow-2xl pointer-events-none whitespace-nowrap z-50"
+                  >
                     {link.label}
-                  </div>
+                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900" />
+                  </motion.div>
                 )}
               </Link>
             );
           })}
         </nav>
-
-        <motion.button
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="mt-4 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl glass-button-secondary text-gray-700 transition-all hover:shadow-lg"
-        >
-          <motion.div
-            animate={{ rotate: isCollapsed ? 0 : 180 }}
-            transition={{ duration: 0.3 }}
-          >
-            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-          </motion.div>
-          <AnimatePresence>
-            {!isCollapsed && (
-              <motion.span
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
-                className="font-medium text-base whitespace-nowrap overflow-hidden"
-              >
-                Collapse
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
       </div>
     </motion.aside>
 

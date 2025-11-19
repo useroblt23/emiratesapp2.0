@@ -32,25 +32,37 @@ export default function ChatPage() {
     if (!selectedConversationId) return;
 
     setLoading(true);
-    const unsubscribe = communityChatService.subscribeToMessages(
-      selectedConversationId,
-      (msgs) => {
-        setMessages(msgs);
-        setLoading(false);
-        scrollToBottom();
-      }
-    );
+    let unsubscribe: (() => void) | undefined;
+    let unsubscribeTyping: (() => void) | undefined;
 
-    presenceService.setCurrentConversation(selectedConversationId);
+    try {
+      unsubscribe = communityChatService.subscribeToMessages(
+        selectedConversationId,
+        (msgs) => {
+          setMessages(msgs);
+          setLoading(false);
+          scrollToBottom();
+        },
+        (error) => {
+          console.error('Error subscribing to messages:', error);
+          setLoading(false);
+        }
+      );
 
-    const unsubscribeTyping = presenceService.subscribeToTyping(
-      selectedConversationId,
-      setTypingUsers
-    );
+      presenceService.setCurrentConversation(selectedConversationId);
+
+      unsubscribeTyping = presenceService.subscribeToTyping(
+        selectedConversationId,
+        setTypingUsers
+      );
+    } catch (error) {
+      console.error('Error setting up subscriptions:', error);
+      setLoading(false);
+    }
 
     return () => {
-      unsubscribe();
-      unsubscribeTyping();
+      if (unsubscribe) unsubscribe();
+      if (unsubscribeTyping) unsubscribeTyping();
       presenceService.clearTyping(selectedConversationId);
     };
   }, [selectedConversationId]);
@@ -58,8 +70,10 @@ export default function ChatPage() {
   const ensureCommunityChat = async () => {
     try {
       await communityChatService.ensureCommunityChat();
+      console.log('Community chat ensured');
     } catch (error) {
       console.error('Error ensuring community chat:', error);
+      alert('Failed to initialize community chat. Please check your connection and try again.');
     }
   };
 

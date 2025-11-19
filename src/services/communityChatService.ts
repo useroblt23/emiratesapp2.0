@@ -321,6 +321,7 @@ export const communityChatService = {
   subscribeToMessages(
     conversationId: string,
     callback: (messages: Message[]) => void,
+    onError?: (error: Error) => void,
     limitCount: number = 50
   ) {
     const q = query(
@@ -329,10 +330,19 @@ export const communityChatService = {
       limit(limitCount)
     );
 
-    return onSnapshot(q, (snapshot) => {
-      const messages = snapshot.docs.map((doc) => doc.data() as Message);
-      callback(messages.reverse());
-    });
+    return onSnapshot(
+      q,
+      (snapshot) => {
+        const messages = snapshot.docs.map((doc) => doc.data() as Message);
+        callback(messages.reverse());
+      },
+      (error) => {
+        console.error('Snapshot error:', error);
+        if (onError) {
+          onError(error as Error);
+        }
+      }
+    );
   },
 
   async markAsRead(conversationId: string, messageId: string): Promise<void> {

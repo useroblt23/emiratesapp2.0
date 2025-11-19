@@ -33,6 +33,10 @@ export default function CommunityPage() {
         setMessages(msgs);
         setLoading(false);
         scrollToBottom();
+      },
+      (error) => {
+        console.error('Error subscribing to messages:', error);
+        setLoading(false);
       }
     );
 

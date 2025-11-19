@@ -77,13 +77,12 @@ const PAGE_SIZE = 50;
 
 export const communityChatService = {
   async ensureCommunityChat(): Promise<void> {
-    const communityId = 'global-community-chat';
-    const communityRef = doc(db, 'conversations', communityId);
+    const communityRef = doc(db, 'groupChats', 'publicRoom');
     const communityDoc = await getDoc(communityRef);
 
     if (!communityDoc.exists()) {
       const conversationData: Conversation = {
-        id: communityId,
+        id: 'publicRoom',
         type: 'group',
         title: 'Community Chat',
         members: [],
@@ -125,7 +124,7 @@ export const communityChatService = {
       }
     }
 
-    const conversationRef = doc(collection(db, 'conversations'));
+    const conversationRef = doc(collection(db, 'groupChats'));
     const conversationData: Conversation = {
       id: conversationRef.id,
       type,
@@ -146,7 +145,7 @@ export const communityChatService = {
     if (memberIds.length !== 2) return null;
 
     const q = query(
-      collection(db, 'conversations'),
+      collection(db, 'groupChats'),
       where('type', '==', 'private'),
       where('members', 'array-contains', memberIds[0])
     );
@@ -170,7 +169,7 @@ export const communityChatService = {
     if (!userId) throw new Error('Not authenticated');
 
     const q = query(
-      collection(db, 'conversations'),
+      collection(db, 'groupChats'),
       where('members', 'array-contains', userId),
       orderBy('lastMessage.createdAt', 'desc'),
       limit(50)
@@ -185,7 +184,7 @@ export const communityChatService = {
     if (!userId) throw new Error('Not authenticated');
 
     const q = query(
-      collection(db, 'conversations'),
+      collection(db, 'groupChats'),
       where('members', 'array-contains', userId),
       orderBy('lastMessage.createdAt', 'desc'),
       limit(50)
@@ -210,7 +209,7 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const messageRef = doc(collection(db, 'conversations', conversationId, 'messages'));
+    const messageRef = doc(collection(db, 'groupChats', conversationId, 'messages'));
     let attachmentUrl: string | null = null;
     let attachmentRef: string | null = null;
     let attachmentMetadata: any = null;
@@ -264,7 +263,7 @@ export const communityChatService = {
 
     await setDoc(messageRef, messageData);
 
-    const conversationRef = doc(db, 'conversations', conversationId);
+    const conversationRef = doc(db, 'groupChats', conversationId);
     await updateDoc(conversationRef, {
       lastMessage: {
         text: content,
@@ -291,7 +290,7 @@ export const communityChatService = {
     }
 
     const q = query(
-      collection(db, 'conversations', conversationId, 'messages'),
+      collection(db, 'groupChats', conversationId, 'messages'),
       ...constraints
     );
 
@@ -310,7 +309,7 @@ export const communityChatService = {
     limitCount: number = 50
   ) {
     const q = query(
-      collection(db, 'conversations', conversationId, 'messages'),
+      collection(db, 'groupChats', conversationId, 'messages'),
       orderBy('createdAt', 'desc'),
       limit(limitCount)
     );
@@ -325,7 +324,7 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) return;
 
-    const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
     await updateDoc(messageRef, {
       [`readBy.${userId}`]: Timestamp.now(),
     });
@@ -340,7 +339,7 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
     const messageDoc = await getDoc(messageRef);
     const messageData = messageDoc.data();
 
@@ -370,7 +369,7 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
     const messageDoc = await getDoc(messageRef);
     const messageData = messageDoc.data();
 
@@ -398,7 +397,7 @@ export const communityChatService = {
     const userId = auth.currentUser?.uid;
     if (!userId) throw new Error('Not authenticated');
 
-    const messageRef = doc(db, 'conversations', conversationId, 'messages', messageId);
+    const messageRef = doc(db, 'groupChats', conversationId, 'messages', messageId);
     await updateDoc(messageRef, {
       likesCount: increment(1),
     });

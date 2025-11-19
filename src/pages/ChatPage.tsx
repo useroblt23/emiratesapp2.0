@@ -8,7 +8,7 @@ import { communityChatService, Message } from '../services/communityChatService'
 import { presenceService, TypingData } from '../services/presenceService';
 import { auth } from '../lib/firebase';
 
-const COMMUNITY_CHAT_ID = 'global-community-chat';
+const COMMUNITY_CHAT_ID = 'publicRoom';
 
 export default function ChatPage() {
   const [selectedConversationId, setSelectedConversationId] = useState<string>(COMMUNITY_CHAT_ID);

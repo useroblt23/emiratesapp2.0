@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ArrowLeft, MessageCircle, Users, Sparkles, Menu } from 'lucide-react';
+import { MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ConversationList from '../components/community/ConversationList';
 import MessageBubble from '../components/community/MessageBubble';
@@ -13,7 +13,6 @@ export default function CommunityPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showSidebar, setShowSidebar] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -131,73 +130,28 @@ export default function CommunityPage() {
         animate={{ opacity: 1, y: 0 }}
         className="mb-6"
       >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-2xl flex items-center justify-center shadow-lg">
-              <MessageCircle className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-black text-gray-900">
-                Community Chat
-              </h1>
-              <p className="text-sm text-gray-500 font-medium">
-                Connect with students and mentors worldwide
-              </p>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-2xl flex items-center justify-center shadow-lg">
+            <MessageCircle className="w-6 h-6 text-white" />
           </div>
-          <button
-            onClick={() => setShowSidebar(!showSidebar)}
-            className="lg:hidden p-3 bg-white rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-95"
-          >
-            <Menu className="w-6 h-6 text-gray-700" />
-          </button>
+          <div>
+            <h1 className="text-3xl md:text-4xl font-black text-gray-900">
+              Community Chat
+            </h1>
+            <p className="text-sm text-gray-500 font-medium">
+              Connect with students and mentors worldwide
+            </p>
+          </div>
         </div>
       </motion.div>
 
-      <div className="flex-1 flex gap-6 min-h-0 relative">
-        <AnimatePresence>
-          {(showSidebar || window.innerWidth >= 1024) && (
-            <motion.div
-              initial={{ x: -320, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -320, opacity: 0 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="w-80 flex-shrink-0 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col absolute lg:relative inset-y-0 left-0 z-50 lg:z-0"
-            >
-              <div className="p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
-                <div className="flex items-center justify-between mb-1">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-[#D71921]" />
-                    <h3 className="text-lg font-bold text-gray-900">Conversations</h3>
-                  </div>
-                  <button
-                    onClick={() => setShowSidebar(false)}
-                    className="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <ArrowLeft className="w-5 h-5 text-gray-600" />
-                  </button>
-                </div>
-                <p className="text-xs text-gray-500">Select a conversation to start chatting</p>
-              </div>
-              <div className="flex-1 overflow-y-auto">
-                <ConversationList
-                  onSelectConversation={(id) => {
-                    setSelectedConversationId(id);
-                    setShowSidebar(false);
-                  }}
-                  selectedConversationId={selectedConversationId || undefined}
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {showSidebar && (
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 lg:hidden"
-            onClick={() => setShowSidebar(false)}
+      <div className="flex-1 flex gap-6 min-h-0">
+        <div className="w-80 flex-shrink-0 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <ConversationList
+            onSelectConversation={(id) => setSelectedConversationId(id)}
+            selectedConversationId={selectedConversationId || undefined}
           />
-        )}
+        </div>
 
         <div className="flex-1 bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden flex flex-col min-w-0">
           {selectedConversationId ? (

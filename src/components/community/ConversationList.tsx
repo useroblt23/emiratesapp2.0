@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Users, MessageCircle, Search, Plus, X } from 'lucide-react';
+import { Users, MessageCircle, Search, Plus, X, Hash } from 'lucide-react';
 import { communityChatService, Conversation } from '../../services/communityChatService';
 import { getAllUsers, User } from '../../services/chatService';
 import { auth } from '../../lib/firebase';
@@ -136,6 +136,9 @@ export default function ConversationList({
     conv.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const groupChats = filteredConversations.filter(c => c.type === 'group' || c.id === 'publicRoom');
+  const privateChats = filteredConversations.filter(c => c.type === 'private');
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -145,13 +148,13 @@ export default function ConversationList({
   }
 
   return (
-    <div className="h-full flex flex-col bg-white/50 backdrop-blur-xl">
-      <div className="p-4 border-b border-white/20">
+    <div className="h-full flex flex-col">
+      <div className="p-4 border-b border-gray-200 bg-white flex-shrink-0">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-semibold text-[#000000]">Conversations</h2>
+          <h2 className="text-lg font-bold text-gray-900">Messages</h2>
           <button
             onClick={() => setShowNewConversation(true)}
-            className="p-2 bg-[#D71921]/90 hover:bg-[#B01419] rounded-2xl transition-all backdrop-blur-xl shadow-lg"
+            className="p-2 bg-gradient-to-r from-[#D71921] to-[#B01419] hover:shadow-lg rounded-xl transition-all"
             title="New conversation"
           >
             <Plus className="w-5 h-5 text-white" />
@@ -164,104 +167,151 @@ export default function ConversationList({
             placeholder="Search conversations..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-white/60 backdrop-blur-xl border border-white/30 rounded-2xl text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921]/50 focus:border-transparent shadow-lg"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent transition-all"
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto">
-        {filteredConversations.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
-            <MessageCircle className="w-12 h-12 mb-4" />
-            <p>No conversations yet</p>
-          </div>
-        ) : (
-          filteredConversations.map((conversation) => (
-            <button
-              key={conversation.id}
-              onClick={() => onSelectConversation(conversation.id)}
-              className={`w-full p-4 flex items-start gap-3 hover:bg-white/50 transition-all border-b border-white/10 ${
-                selectedConversationId === conversation.id
-                  ? 'bg-red-50/70 backdrop-blur-xl border-l-4 border-l-[#D71921]'
-                  : ''
-              } ${conversation.id === 'publicRoom' ? 'bg-gradient-to-r from-red-50/60 to-orange-50/60 backdrop-blur-xl' : ''}`}
-            >
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold shadow ${
-                conversation.id === 'publicRoom'
-                  ? 'bg-gradient-to-br from-[#D71921] via-[#FF6B35] to-[#FFA500] text-2xl'
-                  : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
-              }`}>
-                {conversation.id === 'publicRoom' ? (
-                  '🌍'
-                ) : conversation.type === 'group' ? (
-                  <Users className="w-6 h-6" />
-                ) : (
-                  conversation.title.charAt(0).toUpperCase()
-                )}
+      <div className="flex-1 overflow-y-auto bg-gray-50">
+        {groupChats.length > 0 && (
+          <div className="mb-1">
+            <div className="px-4 py-2 bg-white border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <Hash className="w-4 h-4 text-gray-500" />
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Group Chats</h3>
+                <span className="text-xs text-gray-400">({groupChats.length})</span>
               </div>
-
-              <div className="flex-1 text-left min-w-0">
-                <div className="flex items-center justify-between mb-1">
-                  <h3 className={`font-semibold truncate ${
-                    conversation.id === 'publicRoom' ? 'text-[#D71921] font-bold' : 'text-gray-900'
+            </div>
+            <div className="bg-white">
+              {groupChats.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation.id)}
+                  className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
+                    selectedConversationId === conversation.id
+                      ? 'bg-red-50 border-l-4 border-l-[#D71921]'
+                      : ''
+                  }`}
+                >
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-white font-bold shadow-md flex-shrink-0 ${
+                    conversation.id === 'publicRoom'
+                      ? 'bg-gradient-to-br from-[#D71921] to-[#FF6B35] text-2xl'
+                      : 'bg-gradient-to-br from-[#D71921] to-[#B01419]'
                   }`}>
-                    {conversation.title}
-                    {conversation.id === 'publicRoom' && (
-                      <span className="ml-2 text-xs bg-[#D71921] text-white px-2 py-0.5 rounded-full">
-                        Global
-                      </span>
+                    {conversation.id === 'publicRoom' ? (
+                      '🌍'
+                    ) : (
+                      <Users className="w-5 h-5" />
                     )}
-                  </h3>
-                  {conversation.lastMessage && (
-                    <span className="text-xs text-gray-400">
-                      {conversation.lastMessage.createdAt.toDate().toLocaleTimeString([], {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
-                    </span>
-                  )}
-                </div>
+                  </div>
 
-                {conversation.lastMessage ? (
-                  <p className="text-sm text-gray-500 truncate">
-                    {conversation.lastMessage.text}
-                  </p>
-                ) : conversation.id === 'publicRoom' ? (
-                  <p className="text-sm text-gray-500 italic">
-                    Start chatting with students worldwide
-                  </p>
-                ) : null}
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h3 className="font-bold text-gray-900 truncate text-sm">
+                        {conversation.title}
+                      </h3>
+                      {conversation.lastMessage && (
+                        <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                          {conversation.lastMessage.createdAt.toDate().toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      )}
+                    </div>
 
-                <div className="flex items-center gap-2 mt-1">
-                  {conversation.id === 'publicRoom' ? (
-                    <span className="text-xs text-[#D71921] font-medium">
-                      All students • Global community
-                    </span>
-                  ) : (
-                    <>
+                    {conversation.lastMessage ? (
+                      <p className="text-xs text-gray-500 truncate">
+                        {conversation.lastMessage.text}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">
+                        No messages yet
+                      </p>
+                    )}
+
+                    <div className="flex items-center gap-2 mt-1">
                       <span className="text-xs text-gray-400">
                         {conversation.members.length} members
                       </span>
-                      {conversation.pinned && (
-                        <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full font-medium">
-                          Pinned
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {privateChats.length > 0 && (
+          <div>
+            <div className="px-4 py-2 bg-white border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <MessageCircle className="w-4 h-4 text-gray-500" />
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider">Private Chats</h3>
+                <span className="text-xs text-gray-400">({privateChats.length})</span>
+              </div>
+            </div>
+            <div className="bg-white">
+              {privateChats.map((conversation) => (
+                <button
+                  key={conversation.id}
+                  onClick={() => onSelectConversation(conversation.id)}
+                  className={`w-full p-4 flex items-start gap-3 hover:bg-gray-50 transition-all border-b border-gray-100 ${
+                    selectedConversationId === conversation.id
+                      ? 'bg-red-50 border-l-4 border-l-[#D71921]'
+                      : ''
+                  }`}
+                >
+                  <div className="w-11 h-11 bg-gradient-to-br from-gray-600 to-gray-800 rounded-xl flex items-center justify-center text-white font-bold shadow-md flex-shrink-0">
+                    {conversation.title.charAt(0).toUpperCase()}
+                  </div>
+
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="flex items-center justify-between mb-0.5">
+                      <h3 className="font-bold text-gray-900 truncate text-sm">
+                        {conversation.title}
+                      </h3>
+                      {conversation.lastMessage && (
+                        <span className="text-xs text-gray-400 ml-2 flex-shrink-0">
+                          {conversation.lastMessage.createdAt.toDate().toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
                         </span>
                       )}
-                    </>
-                  )}
-                </div>
-              </div>
-            </button>
-          ))
+                    </div>
+
+                    {conversation.lastMessage ? (
+                      <p className="text-xs text-gray-500 truncate">
+                        {conversation.lastMessage.text}
+                      </p>
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">
+                        No messages yet
+                      </p>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {filteredConversations.length === 0 && (
+          <div className="flex flex-col items-center justify-center h-full text-gray-400 p-8">
+            <MessageCircle className="w-16 h-16 mb-4 text-gray-300" />
+            <p className="font-medium">No conversations yet</p>
+            <p className="text-sm text-gray-400 mt-1">Start a new chat to get started</p>
+          </div>
         )}
       </div>
 
       {showNewConversation && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
             <div className="p-6 border-b border-gray-200">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-[#000000]">New Conversation</h2>
+                <h2 className="text-2xl font-bold text-gray-900">New Conversation</h2>
                 <button
                   onClick={() => {
                     setShowNewConversation(false);
@@ -280,9 +330,9 @@ export default function ConversationList({
                     setConversationType('private');
                     setSelectedUsers([]);
                   }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2 px-4 rounded-xl font-bold transition-colors ${
                     conversationType === 'private'
-                      ? 'bg-[#D71921] text-white'
+                      ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] text-white shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -293,9 +343,9 @@ export default function ConversationList({
                     setConversationType('group');
                     setSelectedUsers([]);
                   }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-semibold transition-colors ${
+                  className={`flex-1 py-2 px-4 rounded-xl font-bold transition-colors ${
                     conversationType === 'group'
-                      ? 'bg-[#D71921] text-white'
+                      ? 'bg-gradient-to-r from-[#D71921] to-[#B01419] text-white shadow-lg'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -309,7 +359,7 @@ export default function ConversationList({
                   placeholder="Enter group name..."
                   value={groupTitle}
                   onChange={(e) => setGroupTitle(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#D71921] focus:border-transparent"
                 />
               )}
 
@@ -332,14 +382,14 @@ export default function ConversationList({
                     <button
                       key={user.uid}
                       onClick={() => toggleUserSelection(user.uid)}
-                      className={`w-full p-4 rounded-lg border-2 transition-all text-left ${
+                      className={`w-full p-4 rounded-xl border-2 transition-all text-left ${
                         selectedUsers.includes(user.uid)
-                          ? 'border-[#D71921] bg-red-50'
-                          : 'border-gray-200 hover:border-gray-300 bg-white'
+                          ? 'border-[#D71921] bg-red-50 shadow-md'
+                          : 'border-gray-200 hover:border-gray-300 bg-white hover:shadow-md'
                       }`}
                     >
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-full flex items-center justify-center text-white font-bold">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#D71921] to-[#B01419] rounded-xl flex items-center justify-center text-white font-bold shadow-md">
                           {user.name.charAt(0).toUpperCase()}
                         </div>
                         <div className="flex-1">
@@ -385,14 +435,14 @@ export default function ConversationList({
                     setSelectedUsers([]);
                     setGroupTitle('');
                   }}
-                  className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-colors"
+                  className="flex-1 py-3 px-6 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleCreateConversation}
                   disabled={creating || selectedUsers.length === 0 || (conversationType === 'group' && !groupTitle.trim())}
-                  className="flex-1 py-3 px-6 bg-[#D71921] text-white rounded-lg font-bold hover:bg-[#B01419] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 py-3 px-6 bg-gradient-to-r from-[#D71921] to-[#B01419] text-white rounded-xl font-bold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {creating ? 'Creating...' : 'Create Conversation'}
                 </button>

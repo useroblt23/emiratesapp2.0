@@ -198,12 +198,25 @@ export const getSubmodulesByParent = async (parentModuleId: string): Promise<Sub
 
 export const getSubmodule = async (submoduleId: string): Promise<Submodule | null> => {
   try {
-    const submoduleRef = doc(db, 'submodules', submoduleId);
-    const submoduleSnap = await getDoc(submoduleRef);
+    const modulesRef = collection(db, 'main_modules');
+    const snapshot = await getDocs(modulesRef);
 
-    if (submoduleSnap.exists()) {
-      return submoduleSnap.data() as Submodule;
+    for (const moduleDoc of snapshot.docs) {
+      const moduleData = moduleDoc.data();
+      const submodules = moduleData.submodules || [];
+
+      const foundSubmodule = submodules.find((sub: any) => sub.id === submoduleId);
+      if (foundSubmodule) {
+        return {
+          ...foundSubmodule,
+          type: 'submodule',
+          parentModuleId: moduleDoc.id,
+          created_at: moduleData.created_at || '',
+          updated_at: moduleData.updated_at || ''
+        } as Submodule;
+      }
     }
+
     return null;
   } catch (error) {
     console.error('Error fetching submodule:', error);

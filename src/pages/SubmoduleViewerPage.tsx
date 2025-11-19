@@ -42,8 +42,29 @@ export default function SubmoduleViewerPage() {
           await updateLastAccessed(currentUser.uid, submoduleId);
         }
 
-        const coursesData = await getCoursesBySubmodule(submoduleId);
-        setCourses(coursesData);
+        const courseIds: string[] = [];
+        if (sub.course_id) courseIds.push(sub.course_id);
+        if (sub.course1_id) courseIds.push(sub.course1_id);
+        if (sub.course2_id) courseIds.push(sub.course2_id);
+
+        if (courseIds.length > 0) {
+          const { collection, doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('../lib/firebase');
+
+          const coursesData = await Promise.all(
+            courseIds.map(async (courseId) => {
+              const courseDoc = await getDoc(doc(db, 'courses', courseId));
+              if (courseDoc.exists()) {
+                return { id: courseDoc.id, ...courseDoc.data() } as Course;
+              }
+              return null;
+            })
+          );
+
+          setCourses(coursesData.filter(c => c !== null) as Course[]);
+        } else {
+          setCourses([]);
+        }
       }
     } catch (error) {
       console.error('Error loading submodule:', error);

@@ -16,6 +16,9 @@ interface Submodule {
   title: string;
   description: string;
   coverImage: string;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
   created_at: string;
   updated_at: string;
   expanded: boolean;
@@ -29,6 +32,9 @@ interface MainModule {
   description: string;
   coverImage: string;
   visible: boolean;
+  course_id?: string;
+  course1_id?: string;
+  course2_id?: string;
   created_at: string;
   updated_at: string;
   submodules: Submodule[];
@@ -74,19 +80,24 @@ function CoursesPageContent() {
 
           const isEnrolled = currentUser ? await checkEnrollment(currentUser.uid, doc.id) : false;
 
-          const submodulesRef = collection(db, 'submodules');
-          const submodulesQuery = query(
-            submodulesRef,
-            where('parentModuleId', '==', doc.id)
-          );
-          const submodulesSnap = await getDocs(submodulesQuery);
+          const submodulesFromDoc = mainModuleData.submodules || [];
 
           const submodulesData: Submodule[] = await Promise.all(
-            submodulesSnap.docs.map(async (subDoc) => {
-              const isSubEnrolled = currentUser ? await checkEnrollment(currentUser.uid, subDoc.id) : false;
+            submodulesFromDoc.map(async (subData: any) => {
+              const isSubEnrolled = currentUser ? await checkEnrollment(currentUser.uid, subData.id) : false;
               return {
-                id: subDoc.id,
-                ...subDoc.data(),
+                id: subData.id,
+                type: 'submodule',
+                parentModuleId: doc.id,
+                order: subData.order,
+                title: subData.title,
+                description: subData.description,
+                coverImage: subData.coverImage,
+                course_id: subData.course_id,
+                course1_id: subData.course1_id,
+                course2_id: subData.course2_id,
+                created_at: mainModuleData.created_at || '',
+                updated_at: mainModuleData.updated_at || '',
                 expanded: false,
                 enrolled: isSubEnrolled
               } as Submodule;
@@ -102,6 +113,9 @@ function CoursesPageContent() {
             description: mainModuleData.description || '',
             coverImage: mainModuleData.coverImage || '',
             visible: mainModuleData.visible !== false,
+            course_id: mainModuleData.course_id,
+            course1_id: mainModuleData.course1_id,
+            course2_id: mainModuleData.course2_id,
             created_at: mainModuleData.created_at || '',
             updated_at: mainModuleData.updated_at || '',
             submodules: submodulesData,
@@ -113,6 +127,7 @@ function CoursesPageContent() {
 
       setMainModules(mainModulesData);
       console.log('Loaded main modules:', mainModulesData.length);
+      console.log('Modules with content:', mainModulesData);
     } catch (error) {
       console.error('Error loading main modules:', error);
     } finally {

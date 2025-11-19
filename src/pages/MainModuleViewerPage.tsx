@@ -45,12 +45,32 @@ export default function MainModuleViewerPage() {
           await updateLastAccessed(currentUser.uid, moduleId);
         }
 
-        const subs = await getSubmodulesByParent(moduleId);
-        setSubmodules(subs);
+        const submodulesFromModule = module.submodules || [];
+        setSubmodules(submodulesFromModule);
 
-        const coursesData = await getCoursesByModule(moduleId);
-        const mainModuleCourses = coursesData.filter(course => !course.submodule_id);
-        setCourses(mainModuleCourses);
+        const courseIds: string[] = [];
+        if (module.course_id) courseIds.push(module.course_id);
+        if (module.course1_id) courseIds.push(module.course1_id);
+        if (module.course2_id) courseIds.push(module.course2_id);
+
+        if (courseIds.length > 0) {
+          const { collection, doc, getDoc } = await import('firebase/firestore');
+          const { db } = await import('../lib/firebase');
+
+          const coursesData = await Promise.all(
+            courseIds.map(async (courseId) => {
+              const courseDoc = await getDoc(doc(db, 'courses', courseId));
+              if (courseDoc.exists()) {
+                return { id: courseDoc.id, ...courseDoc.data() } as Course;
+              }
+              return null;
+            })
+          );
+
+          setCourses(coursesData.filter(c => c !== null) as Course[]);
+        } else {
+          setCourses([]);
+        }
       }
     } catch (error) {
       console.error('Error loading main module:', error);
@@ -209,10 +229,15 @@ export default function MainModuleViewerPage() {
                     </div>
                   )}
                   <div className="p-6">
-                    <div className="mb-2">
+                    <div className="mb-2 flex items-center gap-2 flex-wrap">
                       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                         Submodule #{submodule.order}
                       </span>
+                      {(submodule.course_id || submodule.course1_id) && (
+                        <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                          {submodule.course1_id && submodule.course2_id ? '2 Videos' : '1 Video'}
+                        </span>
+                      )}
                     </div>
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{submodule.title}</h3>
                     <p className="text-gray-600 text-sm line-clamp-2">{submodule.description}</p>

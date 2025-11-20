@@ -76,10 +76,13 @@ export const updateCourseProgress = async (userId: string, courseId: string, pro
     const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
     const enrollmentSnap = await getDoc(enrollmentRef);
 
+    const completed = progress >= 100;
+
     if (enrollmentSnap.exists()) {
       await updateDoc(enrollmentRef, {
         progress,
-        completed: progress >= 100,
+        completed,
+        last_accessed: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
     } else {
@@ -87,14 +90,52 @@ export const updateCourseProgress = async (userId: string, courseId: string, pro
         user_id: userId,
         course_id: courseId,
         progress,
-        completed: progress >= 100,
+        completed,
         enrolled_at: new Date().toISOString(),
+        last_accessed: new Date().toISOString(),
         updated_at: new Date().toISOString()
       });
     }
   } catch (error) {
     console.error('Error updating course progress:', error);
     throw error;
+  }
+};
+
+// Calculate module progress based on completed courses
+export const calculateModuleProgress = async (
+  userId: string,
+  courseIds: string[]
+): Promise<{ progress: number; completedCount: number; totalCount: number }> => {
+  try {
+    const totalCourses = courseIds.filter(id => id).length;
+
+    if (totalCourses === 0) {
+      return { progress: 0, completedCount: 0, totalCount: 0 };
+    }
+
+    let completedCount = 0;
+
+    for (const courseId of courseIds) {
+      if (!courseId) continue;
+
+      const enrollmentRef = doc(db, 'course_enrollments', `${userId}_${courseId}`);
+      const enrollmentSnap = await getDoc(enrollmentRef);
+
+      if (enrollmentSnap.exists()) {
+        const data = enrollmentSnap.data();
+        if (data.completed) {
+          completedCount++;
+        }
+      }
+    }
+
+    const progress = Math.round((completedCount / totalCourses) * 100);
+
+    return { progress, completedCount, totalCount: totalCourses };
+  } catch (error) {
+    console.error('Error calculating module progress:', error);
+    return { progress: 0, completedCount: 0, totalCount: 0 };
   }
 };
 

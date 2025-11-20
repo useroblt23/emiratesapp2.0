@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Plus, FolderPlus, Upload, BookOpen, Play, Folder, CheckCircle } from 'lucide-react';
 import { getMainModule, getSubmodulesByParent, MainModule, Submodule } from '../services/mainModuleService';
-import { getCoursesByModule, Course } from '../services/courseService';
+import { getCoursesByModule, Course, calculateModuleProgress } from '../services/courseService';
 import { motion } from 'framer-motion';
 import CreateModuleForm from '../components/CreateModuleForm';
 import NewCourseForm from '../components/NewCourseForm';
@@ -20,6 +20,7 @@ export default function MainModuleViewerPage() {
   const [submodules, setSubmodules] = useState<Submodule[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [courseCompletionStatus, setCourseCompletionStatus] = useState<Record<string, { completed: boolean; examPassed: boolean }>>({});
+  const [moduleProgress, setModuleProgress] = useState({ progress: 0, completedCount: 0, totalCount: 0 });
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAddCourse, setShowAddCourse] = useState(false);
@@ -81,6 +82,10 @@ export default function MainModuleViewerPage() {
 
           if (currentUser && validCourses.length > 0) {
             await loadCourseCompletionStatus(validCourses.map(c => c.id));
+
+            // Calculate module progress
+            const progress = await calculateModuleProgress(currentUser.uid, courseIds);
+            setModuleProgress(progress);
           }
         } else {
           console.log('MainModuleViewer: No course IDs in module');
@@ -170,6 +175,23 @@ export default function MainModuleViewerPage() {
           <div className="p-8">
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{mainModule.title}</h1>
             <p className="text-lg text-gray-600 mb-6 leading-relaxed">{mainModule.description}</p>
+
+            {currentUser && moduleProgress.totalCount > 0 && (
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    Module Progress: {moduleProgress.completedCount} of {moduleProgress.totalCount} courses completed
+                  </span>
+                  <span className="text-sm font-bold text-[#D71920]">{moduleProgress.progress}%</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#D71920] to-[#B91518] transition-all duration-500 rounded-full"
+                    style={{ width: `${moduleProgress.progress}%` }}
+                  />
+                </div>
+              </div>
+            )}
 
             {isAdmin && (
               <div className="flex flex-wrap gap-3">

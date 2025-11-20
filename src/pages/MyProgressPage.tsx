@@ -10,9 +10,8 @@ import {
   getInProgressModulesCount,
   ModuleEnrollment
 } from '../services/enrollmentService';
-import { getMainModule, getSubmodule } from '../services/mainModuleService';
-import { getUserEnrollments as getCourseEnrollments } from '../services/courseService';
-import { getCourseById } from '../services/courseService';
+import { getMainModule, getSubmodule, getAllMainModules } from '../services/mainModuleService';
+import { calculateModuleProgress, getUserEnrollments as getCourseEnrollments } from '../services/courseService';
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
@@ -55,95 +54,98 @@ export default function MyProgressPage() {
 
     try {
       setLoading(true);
-      console.log('Fetching enrollments for user:', currentUser.uid);
 
-      // Fetch module enrollments
-      const moduleEnrollments = await getUserEnrollments(currentUser.uid);
-      console.log('Module enrollments:', moduleEnrollments);
-
-      // Fetch course enrollments
+      // Fetch course enrollments to know which modules user has started
       const courseEnrollments = await getCourseEnrollments(currentUser.uid);
       console.log('Course enrollments:', courseEnrollments);
 
-      // Process module enrollments
-      const modulesWithDetails = await Promise.all(
-        moduleEnrollments.map(async (enrollment) => {
-          try {
-            if (!enrollment.module_id) {
-              console.warn('Enrollment missing module_id:', enrollment);
-              return null;
-            }
+      // Get unique module IDs from course enrollments
+      const enrolledModuleIds = new Set<string>();
+      for (const enrollment of courseEnrollments) {
+        // Get the course to find its module
+        const coursesRef = collection(db, 'courses');
+        const q = query(coursesRef, where('__name__', '==', enrollment.course_id));
+        const snapshot = await getDocs(q);
 
-            const mainModule = await getMainModule(enrollment.module_id);
-            if (mainModule) {
+        if (!snapshot.empty) {
+          const courseData = snapshot.docs[0].data();
+          if (courseData.module_id) {
+            enrolledModuleIds.add(courseData.module_id);
+          }
+          if (courseData.submodule_id) {
+            enrolledModuleIds.add(courseData.submodule_id);
+          }
+        }
+      }
+
+      console.log('Enrolled module IDs:', Array.from(enrolledModuleIds));
+
+      // Fetch all modules and calculate progress for enrolled ones
+      const allModules = await getAllMainModules();
+      const modulesWithProgress = await Promise.all(
+        allModules
+          .filter(module => enrolledModuleIds.has(module.id))
+          .map(async (module) => {
+            try {
+              // Collect all course IDs for this module
+              const courseIds = [
+                module.course_id,
+                module.course1_id,
+                module.course2_id
+              ].filter((id): id is string => !!id);
+
+              // Calculate progress based on completed courses
+              const { progress, completedCount, totalCount } = await calculateModuleProgress(
+                currentUser.uid,
+                courseIds
+              );
+
+              // Get last accessed time from course enrollments
+              let lastAccessed = new Date(0).toISOString();
+              let enrolledAt = new Date().toISOString();
+
+              for (const courseId of courseIds) {
+                const enrollment = courseEnrollments.find(e => e.course_id === courseId);
+                if (enrollment) {
+                  if (enrollment.last_accessed && new Date(enrollment.last_accessed) > new Date(lastAccessed)) {
+                    lastAccessed = enrollment.last_accessed;
+                  }
+                  if (new Date(enrollment.enrolled_at) < new Date(enrolledAt)) {
+                    enrolledAt = enrollment.enrolled_at;
+                  }
+                }
+              }
+
               return {
-                id: enrollment.module_id,
-                title: mainModule.title,
-                description: mainModule.description,
+                id: module.id,
+                title: module.title,
+                description: module.description,
                 type: 'main_module' as const,
-                coverImage: mainModule.coverImage,
-                enrolled_at: enrollment.enrolled_at,
-                progress_percentage: enrollment.progress_percentage,
-                completed: enrollment.completed,
-                last_accessed: enrollment.last_accessed
+                coverImage: module.coverImage,
+                enrolled_at: enrolledAt,
+                progress_percentage: progress,
+                completed: progress === 100,
+                last_accessed: lastAccessed > new Date(0).toISOString() ? lastAccessed : enrolledAt
               };
-            }
-          } catch (error) {
-            console.error('Error loading module details:', error);
-          }
-          return null;
-        })
-      );
-
-      // Process course enrollments
-      const coursesWithDetails = await Promise.all(
-        courseEnrollments.map(async (enrollment) => {
-          try {
-            console.log('Processing enrollment:', enrollment);
-
-            if (!enrollment.course_id) {
-              console.warn('Enrollment missing course_id:', enrollment);
+            } catch (error) {
+              console.error('Error processing module:', module.id, error);
               return null;
             }
-
-            const course = await getCourseById(enrollment.course_id);
-            if (course) {
-              return {
-                id: enrollment.course_id,
-                title: course.title,
-                description: course.description || '',
-                type: 'course' as const,
-                coverImage: course.thumbnailUrl || '',
-                enrolled_at: enrollment.enrolled_at,
-                progress_percentage: enrollment.progress || 0,
-                completed: enrollment.completed || false,
-                last_accessed: enrollment.last_accessed || enrollment.enrolled_at
-              };
-            }
-          } catch (error) {
-            console.error('Error loading course details for enrollment:', enrollment, error);
-          }
-          return null;
-        })
+          })
       );
 
-      // Combine and filter valid items
-      const allItems = [...modulesWithDetails, ...coursesWithDetails];
-      const validItems = allItems.filter((m): m is EnrolledItem => m !== null);
-      console.log('Valid items after filtering:', validItems);
-
-      validItems.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
-      setEnrolledModules(validItems);
-      console.log('Enrolled items set to:', validItems.length, 'items');
+      const validModules = modulesWithProgress.filter((m): m is EnrolledItem => m !== null);
+      validModules.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
+      setEnrolledModules(validModules);
 
       // Calculate stats
-      const totalProgress = validItems.reduce((sum, item) => sum + item.progress_percentage, 0);
-      const avgProgress = validItems.length > 0 ? Math.round(totalProgress / validItems.length) : 0;
-      const completed = validItems.filter(item => item.completed).length;
-      const inProgress = validItems.filter(item => !item.completed && item.progress_percentage > 0).length;
+      const totalProgress = validModules.reduce((sum, item) => sum + item.progress_percentage, 0);
+      const avgProgress = validModules.length > 0 ? Math.round(totalProgress / validModules.length) : 0;
+      const completed = validModules.filter(item => item.completed).length;
+      const inProgress = validModules.filter(item => !item.completed && item.progress_percentage > 0).length;
 
       setStats({
-        totalEnrolled: validItems.length,
+        totalEnrolled: validModules.length,
         completed,
         inProgress,
         averageProgress: avgProgress

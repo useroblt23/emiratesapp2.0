@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp, BookOpen, Award, PlayCircle, ChevronRight, CheckCircle, Folder, Layers } from 'lucide-react';
+import { TrendingUp, BookOpen, Award, PlayCircle, ChevronRight, CheckCircle, Folder, Layers, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
 import {
@@ -11,14 +11,16 @@ import {
   ModuleEnrollment
 } from '../services/enrollmentService';
 import { getMainModule, getSubmodule } from '../services/mainModuleService';
+import { getUserEnrollments as getCourseEnrollments } from '../services/courseService';
+import { getCourseById } from '../services/courseService';
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
 
-interface EnrolledModule {
+interface EnrolledItem {
   id: string;
   title: string;
   description: string;
-  type: 'main_module' | 'submodule';
+  type: 'main_module' | 'submodule' | 'course';
   coverImage: string;
   enrolled_at: string;
   progress_percentage: number;
@@ -29,7 +31,7 @@ interface EnrolledModule {
 export default function MyProgressPage() {
   const navigate = useNavigate();
   const { currentUser } = useApp();
-  const [enrolledModules, setEnrolledModules] = useState<EnrolledModule[]>([]);
+  const [enrolledModules, setEnrolledModules] = useState<EnrolledItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
     totalEnrolled: 0,
@@ -55,12 +57,17 @@ export default function MyProgressPage() {
       setLoading(true);
       console.log('Fetching enrollments for user:', currentUser.uid);
 
-      const enrollments = await getUserEnrollments(currentUser.uid);
-      console.log('User enrollments:', enrollments);
-      console.log('Number of enrollments:', enrollments.length);
+      // Fetch module enrollments
+      const moduleEnrollments = await getUserEnrollments(currentUser.uid);
+      console.log('Module enrollments:', moduleEnrollments);
 
+      // Fetch course enrollments
+      const courseEnrollments = await getCourseEnrollments(currentUser.uid);
+      console.log('Course enrollments:', courseEnrollments);
+
+      // Process module enrollments
       const modulesWithDetails = await Promise.all(
-        enrollments.map(async (enrollment) => {
+        moduleEnrollments.map(async (enrollment) => {
           try {
             if (!enrollment.module_id) {
               console.warn('Enrollment missing module_id:', enrollment);
@@ -88,18 +95,48 @@ export default function MyProgressPage() {
         })
       );
 
-      const validModules = modulesWithDetails.filter((m): m is EnrolledModule => m !== null);
-      console.log('Valid modules after filtering:', validModules);
-      validModules.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
-      setEnrolledModules(validModules);
-      console.log('Enrolled modules set to:', validModules.length, 'modules');
+      // Process course enrollments
+      const coursesWithDetails = await Promise.all(
+        courseEnrollments.map(async (enrollment) => {
+          try {
+            const course = await getCourseById(enrollment.course_id);
+            if (course) {
+              return {
+                id: enrollment.course_id,
+                title: course.title,
+                description: course.description || '',
+                type: 'course' as const,
+                coverImage: course.thumbnailUrl || '',
+                enrolled_at: enrollment.enrolled_at,
+                progress_percentage: enrollment.progress || 0,
+                completed: enrollment.completed || false,
+                last_accessed: enrollment.last_accessed || enrollment.enrolled_at
+              };
+            }
+          } catch (error) {
+            console.error('Error loading course details:', error);
+          }
+          return null;
+        })
+      );
 
-      const avgProgress = await getAverageProgress(currentUser.uid);
-      const completed = await getCompletedModulesCount(currentUser.uid);
-      const inProgress = await getInProgressModulesCount(currentUser.uid);
+      // Combine and filter valid items
+      const allItems = [...modulesWithDetails, ...coursesWithDetails];
+      const validItems = allItems.filter((m): m is EnrolledItem => m !== null);
+      console.log('Valid items after filtering:', validItems);
+
+      validItems.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
+      setEnrolledModules(validItems);
+      console.log('Enrolled items set to:', validItems.length, 'items');
+
+      // Calculate stats
+      const totalProgress = validItems.reduce((sum, item) => sum + item.progress_percentage, 0);
+      const avgProgress = validItems.length > 0 ? Math.round(totalProgress / validItems.length) : 0;
+      const completed = validItems.filter(item => item.completed).length;
+      const inProgress = validItems.filter(item => !item.completed && item.progress_percentage > 0).length;
 
       setStats({
-        totalEnrolled: validModules.length,
+        totalEnrolled: validItems.length,
         completed,
         inProgress,
         averageProgress: avgProgress
@@ -112,11 +149,13 @@ export default function MyProgressPage() {
     }
   };
 
-  const handleModuleClick = (moduleId: string, moduleType: 'main_module' | 'submodule') => {
+  const handleModuleClick = (moduleId: string, moduleType: 'main_module' | 'submodule' | 'course') => {
     if (moduleType === 'main_module') {
       navigate(`/main-modules/${moduleId}`);
-    } else {
+    } else if (moduleType === 'submodule') {
       navigate(`/submodules/${moduleId}`);
+    } else {
+      navigate(`/courses/${moduleId}`);
     }
   };
 
@@ -283,8 +322,10 @@ export default function MyProgressPage() {
                   <div className="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
                     {module.type === 'main_module' ? (
                       <Folder className="w-16 h-16 text-gray-400" />
-                    ) : (
+                    ) : module.type === 'submodule' ? (
                       <Layers className="w-16 h-16 text-gray-400" />
+                    ) : (
+                      <FileText className="w-16 h-16 text-gray-400" />
                     )}
                   </div>
                 )}
@@ -298,15 +339,23 @@ export default function MyProgressPage() {
 
               <div className="p-6">
                 <div className="flex items-center gap-2 mb-2">
-                  <div className={`p-2 rounded-lg ${module.type === 'main_module' ? 'bg-red-100' : 'bg-blue-100'}`}>
+                  <div className={`p-2 rounded-lg ${
+                    module.type === 'main_module' ? 'bg-red-100' :
+                    module.type === 'submodule' ? 'bg-blue-100' :
+                    'bg-purple-100'
+                  }`}>
                     {module.type === 'main_module' ? (
                       <Folder className="w-5 h-5 text-[#D71920]" />
-                    ) : (
+                    ) : module.type === 'submodule' ? (
                       <Layers className="w-5 h-5 text-blue-600" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-purple-600" />
                     )}
                   </div>
                   <span className="text-xs font-semibold text-gray-500 uppercase">
-                    {module.type === 'main_module' ? 'Main Module' : 'Submodule'}
+                    {module.type === 'main_module' ? 'Main Module' :
+                     module.type === 'submodule' ? 'Submodule' :
+                     'Course'}
                   </span>
                 </div>
 

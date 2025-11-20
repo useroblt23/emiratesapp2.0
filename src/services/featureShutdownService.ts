@@ -170,33 +170,27 @@ export async function activateFeatureShutdown(
   try {
     const docRef = doc(db, 'systemSettings', 'featuresShutdown');
 
-    const shutdownData: FeatureShutdown = {
+    const safePerformedBy = performedBy || 'UNKNOWN';
+
+    const shutdownData = {
       featureKey,
       isShutdown: true,
       shutdownReason,
       maintenanceMessage,
-      maintenanceEndsAt,
-      updatedBy: performedBy,
-      updatedAt: new Date()
+      maintenanceEndsAt: Timestamp.fromDate(maintenanceEndsAt),
+      updatedBy: safePerformedBy,
+      updatedAt: Timestamp.now()
     };
 
     const docSnap = await getDoc(docRef);
 
     if (!docSnap.exists()) {
       await setDoc(docRef, {
-        [featureKey]: {
-          ...shutdownData,
-          maintenanceEndsAt: Timestamp.fromDate(maintenanceEndsAt),
-          updatedAt: Timestamp.now()
-        }
+        [featureKey]: shutdownData
       });
     } else {
       await updateDoc(docRef, {
-        [featureKey]: {
-          ...shutdownData,
-          maintenanceEndsAt: Timestamp.fromDate(maintenanceEndsAt),
-          updatedAt: Timestamp.now()
-        }
+        [featureKey]: shutdownData
       });
     }
 
@@ -208,7 +202,7 @@ export async function activateFeatureShutdown(
         maintenanceMessage,
         maintenanceEndsAt: maintenanceEndsAt.toISOString()
       },
-      performedBy
+      safePerformedBy
     );
   } catch (error) {
     console.error('Error activating feature shutdown:', error);
@@ -223,16 +217,18 @@ export async function deactivateFeatureShutdown(
   try {
     const docRef = doc(db, 'systemSettings', 'featuresShutdown');
 
+    const safePerformedBy = performedBy || 'UNKNOWN';
+
     await updateDoc(docRef, {
       [`${featureKey}.isShutdown`]: false,
-      [`${featureKey}.updatedBy`]: performedBy,
+      [`${featureKey}.updatedBy`]: safePerformedBy,
       [`${featureKey}.updatedAt`]: Timestamp.now()
     });
 
     await addAuditLog(
       'FEATURE_SHUTDOWN_DEACTIVATED',
       { featureKey },
-      performedBy
+      safePerformedBy
     );
   } catch (error) {
     console.error('Error deactivating feature shutdown:', error);

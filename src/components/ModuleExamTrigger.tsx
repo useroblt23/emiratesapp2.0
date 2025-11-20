@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, Trophy } from 'lucide-react';
-import { getUserProgress } from '../services/progressService';
+import { getCourseProgress } from '../services/enrollmentService';
 import { courseExams } from '../data/examData';
 import ExamInterface from './ExamInterface';
 import ExamResultModal from './ExamResultModal';
 import { ExamResult } from '../services/examService';
+import { doc, getDoc, query, collection, where, getDocs } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 interface ModuleExamTriggerProps {
   userId: string;
@@ -32,9 +34,25 @@ export default function ModuleExamTrigger({ userId, courseIds, moduleId, moduleN
 
       const progressChecks = await Promise.all(
         courseIds.map(async (courseId) => {
-          const progress = await getUserProgress(userId, courseId);
-          const isComplete = progress && progress.progress >= 100;
-          console.log(`Course ${courseId} complete:`, isComplete, 'progress:', progress?.progress);
+          const courseProgress = await getCourseProgress(userId, courseId);
+
+          const examsRef = collection(db, 'exams');
+          const examQuery = query(examsRef, where('courseId', '==', courseId));
+          const examSnapshot = await getDocs(examQuery);
+
+          let examPassed = false;
+          if (!examSnapshot.empty) {
+            const exam = examSnapshot.docs[0];
+            const examId = exam.id;
+            const resultRef = doc(db, 'userExams', `${examId}_${userId}_latest`);
+            const resultSnap = await getDoc(resultRef);
+            examPassed = resultSnap.exists() && resultSnap.data().passed === true;
+          } else {
+            examPassed = true;
+          }
+
+          const isComplete = courseProgress?.completed === true && examPassed;
+          console.log(`Course ${courseId} - completed:`, courseProgress?.completed, 'exam passed:', examPassed, 'isComplete:', isComplete);
           return isComplete;
         })
       );

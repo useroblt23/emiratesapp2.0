@@ -223,7 +223,7 @@ export default function CommunityPage() {
 
   if (showGroupCreation) {
     return (
-      <div className="fixed inset-0 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-50 md:z-0 md:mx-0">
+      <div className="fixed left-0 right-0 bottom-0 top-16 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-30 md:z-0">
         <div className="glass-light border-b border-white/20 px-3 md:px-4 py-3 flex items-center justify-between flex-shrink-0">
           <div className="flex items-center gap-2">
             <button
@@ -321,7 +321,7 @@ export default function CommunityPage() {
 
   if (showPrivateChatCreation) {
     return (
-      <div className="fixed inset-0 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-50 md:z-0 md:mx-0">
+      <div className="fixed left-0 right-0 bottom-0 top-16 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-30 md:z-0">
         <div className="glass-light border-b border-white/20 px-3 md:px-4 py-3 flex items-center gap-2 flex-shrink-0">
           <button
             onClick={() => {
@@ -371,7 +371,7 @@ export default function CommunityPage() {
 
   if (selectedConversationId) {
     return (
-      <div className="fixed inset-0 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-50 md:z-0 md:mx-0">
+      <div className="fixed left-0 right-0 bottom-0 top-16 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-30 md:z-0">
         <div className="glass-light border-b border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 flex-shrink-0">
           <button
             onClick={() => setSelectedConversationId(null)}
@@ -465,7 +465,7 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="fixed inset-0 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-50 md:z-0 md:mx-0">
+    <div className="fixed left-0 right-0 bottom-0 top-16 md:static md:h-[calc(100vh-12rem)] flex flex-col glass-light overflow-hidden md:rounded-xl z-30 md:z-0">
       <div className="glass-light border-b border-white/20 p-3 md:p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <h1 className="text-xl md:text-2xl font-bold text-gray-900">Messages</h1>

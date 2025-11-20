@@ -97,11 +97,11 @@ export default function SystemAnnouncementBanner() {
               onClick={() => setIsExpanded(false)}
             />
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[90%] sm:w-[85%] md:w-[70%] max-w-md"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 w-[90%] max-w-sm"
             >
               <div className={`bg-gradient-to-br ${config.bgGradient} rounded-xl shadow-2xl p-3 sm:p-4`}>
                 <div className="flex items-start gap-2 mb-2">

@@ -7,6 +7,8 @@ export default function SystemAnnouncementBanner() {
   const { systemAnnouncement } = useApp();
   const [isDismissed, setIsDismissed] = useState(false);
 
+  console.log('SystemAnnouncementBanner - systemAnnouncement:', systemAnnouncement);
+
   if (!systemAnnouncement.active || isDismissed) return null;
 
   const getAnnouncementConfig = () => {

@@ -68,11 +68,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [maintenanceMessage, setMaintenanceMessage] = useState('System under maintenance. Please check back soon.');
   const [banners, setBanners] = useState<Banner[]>([]);
   const [systemFeatures, setSystemFeatures] = useState<SystemFeatures>({
-    chat: true,
-    quiz: true,
-    englishTest: true,
-    profileEdit: true,
-    openDayModule: true,
+    chat: { enabled: true },
+    quiz: { enabled: true },
+    englishTest: { enabled: true },
+    profileEdit: { enabled: true },
+    openDayModule: { enabled: true },
+    courses: { enabled: true },
+    aiTrainer: { enabled: true },
+    recruiters: { enabled: true },
+    openDays: { enabled: true },
+    simulator: { enabled: true },
+    messages: { enabled: true },
+    leaderboard: { enabled: true },
+    community: { enabled: true },
   });
   const [systemAnnouncement, setSystemAnnouncement] = useState<SystemAnnouncement>({
     active: false,
@@ -84,18 +92,22 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const loadSystemControl = async () => {
       const control = await getSystemControl();
+      console.log('AppContext - Loaded system control:', control);
       if (control) {
         setSystemFeatures(control.features);
         setSystemAnnouncement(control.announcement);
+        console.log('AppContext - Set announcement:', control.announcement);
       }
     };
 
     loadSystemControl();
 
     const unsubscribe = subscribeToSystemControl((control) => {
+      console.log('AppContext - System control updated:', control);
       if (control) {
         setSystemFeatures(control.features);
         setSystemAnnouncement(control.announcement);
+        console.log('AppContext - Updated announcement:', control.announcement);
       }
     });
 

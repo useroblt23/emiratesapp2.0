@@ -3,7 +3,6 @@ import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
-import SystemAnnouncementBanner from '../SystemAnnouncementBanner';
 import { useApp } from '../../context/AppContext';
 import { AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,7 +20,6 @@ export default function Layout({ children }: LayoutProps) {
     return (
       <div className="h-screen flex flex-col overflow-hidden">
         <Navbar />
-        <SystemAnnouncementBanner />
 
         <AnimatePresence>
           {banners.map((banner) => (
@@ -30,13 +28,12 @@ export default function Layout({ children }: LayoutProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="liquid-card-overlay text-white px-4 py-3 mx-4 my-2 rounded-2xl"
+              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
             >
-              <div className="max-w-7xl mx-auto flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <div className="max-w-7xl mx-auto flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" />
                 <div className="flex-1">
-                  <p className="font-bold">{banner.title}</p>
-                  <p className="text-sm opacity-90">Expires: {banner.expiration}</p>
+                  <p className="text-sm font-bold">{banner.title}</p>
                 </div>
               </div>
             </motion.div>
@@ -62,7 +59,6 @@ export default function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen relative flex flex-col">
       <Navbar />
-      <SystemAnnouncementBanner />
 
       <AnimatePresence>
         {banners.map((banner) => (
@@ -71,13 +67,12 @@ export default function Layout({ children }: LayoutProps) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="liquid-card-overlay text-white px-4 py-3 mx-4 my-2 rounded-2xl"
+            className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
           >
-            <div className="max-w-7xl mx-auto flex items-center gap-3">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+            <div className="max-w-7xl mx-auto flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 flex-shrink-0" />
               <div className="flex-1">
-                <p className="font-bold">{banner.title}</p>
-                <p className="text-sm opacity-90">Expires: {banner.expiration}</p>
+                <p className="text-sm font-bold">{banner.title}</p>
               </div>
             </div>
           </motion.div>

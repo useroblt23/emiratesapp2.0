@@ -5,6 +5,7 @@ import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
+import SystemAnnouncementBanner from '../SystemAnnouncementBanner';
 
 export default function Navbar() {
   const { currentUser, logout } = useApp();
@@ -46,6 +47,7 @@ export default function Navbar() {
   return (
     <>
       <nav className="liquid-navbar sticky top-0 z-40">
+        <SystemAnnouncementBanner />
         <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 md:h-20">
             <Link to="/dashboard" className="flex items-center">

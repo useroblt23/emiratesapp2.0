@@ -48,44 +48,31 @@ export default function SystemAnnouncementBanner() {
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -50 }}
+        initial={{ opacity: 0, height: 0 }}
+        animate={{ opacity: 1, height: 'auto' }}
+        exit={{ opacity: 0, height: 0 }}
         transition={{ duration: 0.3, ease: 'easeOut' }}
-        className="fixed top-20 md:top-24 left-0 right-0 mx-auto z-[60] w-[95%] sm:w-[90%] md:w-[80%] lg:w-[70%] xl:w-[60%] max-w-4xl px-2 sm:px-4"
+        className={`bg-gradient-to-r ${config.bgGradient} border-b ${config.borderColor}`}
       >
-        <div className={`relative bg-gradient-to-r ${config.bgGradient} backdrop-blur-xl border ${config.borderColor} rounded-xl md:rounded-2xl shadow-2xl overflow-hidden`}>
-          <div className="absolute inset-0 bg-white/5 backdrop-blur-sm"></div>
-
-          <div className="relative p-3 sm:p-4 md:p-6">
-            <div className="flex items-start gap-2 sm:gap-3 md:gap-4">
-              <div className={`${config.iconColor} flex-shrink-0 mt-0.5`}>
-                <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
-              </div>
-
-              <div className="flex-1 min-w-0 text-center sm:text-left">
-                <p className="text-white font-medium text-xs sm:text-sm md:text-base leading-relaxed whitespace-pre-wrap break-words">
-                  {systemAnnouncement.message}
-                </p>
-                {systemAnnouncement.timestamp && (
-                  <p className="text-white/70 text-[10px] sm:text-xs mt-1 sm:mt-2">
-                    {new Date(systemAnnouncement.timestamp).toLocaleString()}
-                  </p>
-                )}
-              </div>
-
-              <button
-                onClick={() => setIsDismissed(true)}
-                className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1.5 sm:p-2 transition flex-shrink-0"
-                aria-label="Dismiss announcement"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
+        <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8 py-2">
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className={`${config.iconColor} flex-shrink-0`}>
+              <Icon className="w-4 h-4 md:w-5 md:h-5" />
             </div>
-          </div>
 
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 animate-pulse"></div>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium text-xs md:text-sm truncate">
+                {systemAnnouncement.message}
+              </p>
+            </div>
+
+            <button
+              onClick={() => setIsDismissed(true)}
+              className="text-white/80 hover:text-white hover:bg-white/10 rounded-lg p-1 transition flex-shrink-0"
+              aria-label="Dismiss announcement"
+            >
+              <X className="w-3 h-3 md:w-4 md:h-4" />
+            </button>
           </div>
         </div>
       </motion.div>

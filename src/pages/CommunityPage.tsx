@@ -161,15 +161,15 @@ export default function CommunityPage() {
 
   if (selectedConversationId) {
     return (
-      <div className="fixed inset-0 flex flex-col glass-light overflow-hidden">
-        <div className="glass-light border-b border-white/20 px-4 py-3 flex items-center gap-3 flex-shrink-0">
+      <div className="h-full flex flex-col glass-light overflow-hidden rounded-xl">
+        <div className="glass-light border-b border-white/20 px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 flex-shrink-0">
           <button
             onClick={() => setSelectedConversationId(null)}
-            className="w-10 h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all"
+            className="w-8 h-8 md:w-10 md:h-10 rounded-full glass-bubble flex items-center justify-center hover:bg-white/50 transition-all"
           >
-            <ChevronLeft className="w-5 h-5 text-gray-700" />
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-gray-700" />
           </button>
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center ${
             selectedConversation?.id === 'publicRoom'
               ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-base'
               : selectedConversation?.type === 'group'
@@ -179,16 +179,16 @@ export default function CommunityPage() {
             {selectedConversation?.id === 'publicRoom'
               ? '🌍'
               : selectedConversation?.type === 'group'
-                ? <Users className="w-5 h-5" />
+                ? <Users className="w-4 h-4 md:w-5 md:h-5" />
                 : selectedConversation?.title.charAt(0).toUpperCase()}
           </div>
-          <div>
-            <h2 className="font-bold text-gray-900">{selectedConversation?.title}</h2>
-            <p className="text-xs text-gray-500">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Private Chat'}</p>
+          <div className="min-w-0 flex-1">
+            <h2 className="font-bold text-gray-900 text-sm md:text-base truncate">{selectedConversation?.title}</h2>
+            <p className="text-xs text-gray-500 truncate">{selectedConversation?.type === 'group' ? 'Group Chat' : 'Private Chat'}</p>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 min-h-0">
+        <div className="flex-1 overflow-y-auto px-3 md:px-4 py-3 md:py-4 space-y-3 md:space-y-4 min-h-0">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <div className="relative">
@@ -229,7 +229,7 @@ export default function CommunityPage() {
         </div>
 
         {typingUsers.length > 0 && (
-          <div className="px-4 py-2 glass-light border-t border-white/20 flex-shrink-0">
+          <div className="px-3 md:px-4 py-2 glass-light border-t border-white/20 flex-shrink-0">
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
@@ -247,7 +247,7 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="glass-light border-t border-white/20 px-4 py-4 flex-shrink-0">
+        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-3 md:py-4 flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </div>
       </div>
@@ -255,46 +255,46 @@ export default function CommunityPage() {
   }
 
   return (
-    <div className="fixed inset-0 flex flex-col glass-light overflow-hidden">
-      <div className="glass-light border-b border-white/20 p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+    <div className="h-full flex flex-col glass-light overflow-hidden rounded-xl">
+      <div className="glass-light border-b border-white/20 p-3 md:p-4 flex-shrink-0">
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900">Messages</h1>
           <div className="relative">
             <button
               onClick={() => setShowCreateMenu(!showCreateMenu)}
-              className="w-10 h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center hover:bg-[#B01419] transition-all shadow-lg"
+              className="w-9 h-9 md:w-10 md:h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center hover:bg-[#B01419] transition-all shadow-lg"
             >
-              <Plus className="w-5 h-5" />
+              <Plus className="w-4 h-4 md:w-5 md:h-5" />
             </button>
 
             {showCreateMenu && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: -10 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="absolute right-0 mt-2 w-56 glass-bubble rounded-xl shadow-xl border border-white/20 overflow-hidden z-50"
+                className="absolute right-0 mt-2 w-48 md:w-56 glass-bubble rounded-xl shadow-xl border border-white/20 overflow-hidden z-50"
               >
                 <button
                   onClick={handleCreateGroupChat}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/50 transition-all text-left"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-white/50 transition-all text-left"
                 >
-                  <div className="w-10 h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center">
-                    <Users className="w-5 h-5" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-[#D71921] text-white flex items-center justify-center flex-shrink-0">
+                    <Users className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">New Group</p>
-                    <p className="text-xs text-gray-500">Create a group chat</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm">New Group</p>
+                    <p className="text-xs text-gray-500 truncate">Create a group chat</p>
                   </div>
                 </button>
                 <button
                   onClick={handleCreatePrivateChat}
-                  className="w-full px-4 py-3 flex items-center gap-3 hover:bg-white/50 transition-all text-left border-t border-white/20"
+                  className="w-full px-3 md:px-4 py-2 md:py-3 flex items-center gap-2 md:gap-3 hover:bg-white/50 transition-all text-left border-t border-white/20"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gray-700 text-white flex items-center justify-center">
-                    <UserPlus className="w-5 h-5" />
+                  <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-700 text-white flex items-center justify-center flex-shrink-0">
+                    <UserPlus className="w-4 h-4 md:w-5 md:h-5" />
                   </div>
-                  <div>
-                    <p className="font-semibold text-gray-900">New Chat</p>
-                    <p className="text-xs text-gray-500">Start a private conversation</p>
+                  <div className="min-w-0">
+                    <p className="font-semibold text-gray-900 text-sm">New Chat</p>
+                    <p className="text-xs text-gray-500 truncate">Start a private conversation</p>
                   </div>
                 </button>
               </motion.div>
@@ -321,17 +321,17 @@ export default function CommunityPage() {
               <button
                 key={conversation.id}
                 onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 transition-all hover:glass-bubble"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:glass-bubble"
               >
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                <div className={`w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
                   conversation.id === 'publicRoom'
-                    ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-xl'
+                    ? 'bg-gradient-to-br from-[#FF6B35] to-[#FFA500] text-white text-lg md:text-xl'
                     : 'bg-[#D71921] text-white'
                 }`}>
-                  {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-5 h-5" />}
+                  {conversation.id === 'publicRoom' ? '🌍' : <Users className="w-4 h-4 md:w-5 md:h-5" />}
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{conversation.title}</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{conversation.title}</h3>
                   <p className="text-xs text-gray-500">Tap to open</p>
                 </div>
               </button>
@@ -348,13 +348,13 @@ export default function CommunityPage() {
               <button
                 key={conversation.id}
                 onClick={() => setSelectedConversationId(conversation.id)}
-                className="w-full px-4 py-3 flex items-center gap-3 transition-all hover:glass-bubble"
+                className="w-full px-3 md:px-4 py-2.5 md:py-3 flex items-center gap-2 md:gap-3 transition-all hover:glass-bubble"
               >
-                <div className="w-12 h-12 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-700 text-white flex items-center justify-center font-bold text-base md:text-lg flex-shrink-0">
                   {conversation.title.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 text-left min-w-0">
-                  <h3 className="font-semibold text-gray-900 truncate">{conversation.title}</h3>
+                  <h3 className="font-semibold text-gray-900 text-sm md:text-base truncate">{conversation.title}</h3>
                   <p className="text-xs text-gray-500">Tap to open</p>
                 </div>
               </button>

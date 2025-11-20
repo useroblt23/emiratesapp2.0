@@ -176,9 +176,9 @@ export default function MessageComposer({
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
             rows={1}
-            className="w-full px-3 py-2 glass-bubble border border-white/20 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20 focus:border-transparent resize-none text-base"
+            className="w-full px-3 py-2 bg-transparent border border-white/20 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#D71921]/20 focus:border-transparent resize-none text-base"
             disabled={sending}
-            style={{ minHeight: '38px', maxHeight: '100px', fontSize: '16px' }}
+            style={{ minHeight: '38px', maxHeight: '100px', fontSize: '16px', background: 'transparent' }}
           />
         </div>
 

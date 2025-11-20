@@ -12,17 +12,23 @@ import FeatureAccessGuard from '../components/FeatureAccessGuard';
 const COMMUNITY_CHAT_ID = 'publicRoom';
 
 function ChatPageContent() {
-  const [selectedConversationId, setSelectedConversationId] = useState<string>(COMMUNITY_CHAT_ID);
+  const [selectedConversationId, setSelectedConversationId] = useState<string | null>(null);
   const [conversationTitle, setConversationTitle] = useState('Community Chat');
   const [messages, setMessages] = useState<Message[]>([]);
   const [typingUsers, setTypingUsers] = useState<TypingData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showConversationList, setShowConversationList] = useState(false);
+  const [showConversationList, setShowConversationList] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     presenceService.initializePresence();
     ensureCommunityChat();
+
+    // On desktop, auto-select community chat
+    if (window.innerWidth >= 768) {
+      setSelectedConversationId(COMMUNITY_CHAT_ID);
+      setShowConversationList(false);
+    }
 
     return () => {
       presenceService.cleanup();

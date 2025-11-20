@@ -19,39 +19,7 @@ export default function UpgradePlanPage() {
 
     setLoading(planName);
     try {
-      const user = auth.currentUser;
-      if (!user) {
-        alert('Please log in to upgrade your plan');
-        navigate('/login');
-        return;
-      }
-
-      const token = await user.getIdToken();
-
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          price_id: priceId,
-          success_url: `${window.location.origin}/dashboard?upgrade=success`,
-          cancel_url: `${window.location.origin}/upgrade?upgrade=cancelled`,
-          mode: 'subscription',
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        alert(`Error: ${data.error}`);
-        return;
-      }
-
-      if (data.url) {
-        window.location.href = data.url;
-      }
+      alert('Stripe payment integration is currently being configured. Please check back soon or contact support for assistance.');
     } catch (error) {
       console.error('Upgrade error:', error);
       alert('Failed to initiate upgrade. Please try again.');

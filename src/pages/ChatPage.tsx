@@ -160,7 +160,7 @@ function ChatPageContent() {
       }`}>
         <div className="h-full flex flex-col">
           <div className="px-4 py-4 border-b border-gray-200 bg-white">
-            <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Messages v2.0</h1>
             <p className="text-sm text-gray-600 mt-1">Connect with the community</p>
           </div>
           <div className="flex-1 overflow-y-auto">

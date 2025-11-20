@@ -12,6 +12,8 @@ import FeatureAccessGuard from '../components/FeatureAccessGuard';
 import CourseExamInterface from '../components/CourseExamInterface';
 import ExamResultModal from '../components/ExamResultModal';
 import { AnimatePresence } from 'framer-motion';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../lib/firebase';
 
 function CourseViewerPageContent() {
   const { courseId } = useParams<{ courseId: string }>();
@@ -126,19 +128,14 @@ function CourseViewerPageContent() {
         }
         setExam(examData);
 
-        if (currentUser) {
-          console.log('CourseViewer: Fetching exam result for:', {
-            userId: currentUser.uid,
-            moduleId: examData.moduleId,
-            lessonId: examData.lessonId
-          });
-          const result = await getUserExamResult(
-            currentUser.uid,
-            examData.moduleId,
-            examData.lessonId
-          );
-          console.log('CourseViewer: Exam result fetched:', result);
-          if (result) {
+        if (currentUser && examData.id) {
+          console.log('CourseViewer: Fetching exam result for exam ID:', examData.id);
+          const resultRef = doc(db, 'userExams', `${examData.id}_${currentUser.uid}_latest`);
+          const resultSnap = await getDoc(resultRef);
+
+          if (resultSnap.exists()) {
+            const result = resultSnap.data();
+            console.log('CourseViewer: Exam result fetched:', result);
             setLastExamResult(result);
             if (result.passed) {
               setHasPassed(true);

@@ -1,9 +1,55 @@
 import { Check, Crown, Shield, Circle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
+import { useState } from 'react';
+import { supabase } from '../lib/supabase';
 
 export default function UpgradePlanPage() {
   const { currentUser } = useApp();
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleUpgrade = async (planName: string, priceId: string) => {
+    if (!currentUser) return;
+
+    setLoading(planName);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Please log in to upgrade your plan');
+        return;
+      }
+
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          price_id: priceId,
+          success_url: `${window.location.origin}/dashboard?upgrade=success`,
+          cancel_url: `${window.location.origin}/upgrade?upgrade=cancelled`,
+          mode: 'subscription',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(`Error: ${data.error}`);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      alert('Failed to initiate upgrade. Please try again.');
+    } finally {
+      setLoading(null);
+    }
+  };
 
   const plans = [
     {
@@ -11,6 +57,7 @@ export default function UpgradePlanPage() {
       plan: 'free' as const,
       icon: Circle,
       price: '0',
+      priceId: '',
       color: 'gray',
       features: [
         'Access to dashboard',
@@ -26,6 +73,7 @@ export default function UpgradePlanPage() {
       plan: 'pro' as const,
       icon: Shield,
       price: '29',
+      priceId: 'price_pro_monthly',
       color: 'blue',
       popular: true,
       features: [
@@ -43,6 +91,7 @@ export default function UpgradePlanPage() {
       plan: 'vip' as const,
       icon: Crown,
       price: '79',
+      priceId: 'price_vip_monthly',
       color: 'gold',
       features: [
         'Everything in Pro',
@@ -116,7 +165,9 @@ export default function UpgradePlanPage() {
                   </div>
                 ) : (
                   <button
-                    className={`w-full px-6 py-3 rounded-xl font-bold transition ${
+                    onClick={() => planItem.priceId && handleUpgrade(planItem.name, planItem.priceId)}
+                    disabled={loading === planItem.name || planItem.plan === 'free'}
+                    className={`w-full px-6 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed ${
                       planItem.color === 'gray'
                         ? 'bg-gray-500 hover:bg-gray-600 text-white'
                         : planItem.color === 'blue'
@@ -124,7 +175,7 @@ export default function UpgradePlanPage() {
                         : 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] hover:shadow-lg text-[#000000]'
                     }`}
                   >
-                    {planItem.plan === 'free' ? 'Current Plan' : 'Upgrade Now'}
+                    {loading === planItem.name ? 'Processing...' : planItem.plan === 'free' ? 'Current Plan' : 'Upgrade Now'}
                   </button>
                 )}
               </div>

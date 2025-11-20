@@ -24,6 +24,7 @@
     min-height: 100vh;
     position: relative;
     isolation: isolate;
+    padding-bottom: env(safe-area-inset-bottom);
   }
 
   /* Background container with enhanced quality */

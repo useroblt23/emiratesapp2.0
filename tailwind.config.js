@@ -15,6 +15,15 @@ export default {
           'gray-light': '#F5F5F5',
         },
       },
+      spacing: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
+      padding: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
+      height: {
+        'safe': 'env(safe-area-inset-bottom)',
+      },
     },
   },
   plugins: [],

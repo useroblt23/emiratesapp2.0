@@ -461,9 +461,10 @@ export default function CommunityPage() {
           </div>
         )}
 
-        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 flex-shrink-0">
+        <div className="glass-light border-t border-white/20 px-3 md:px-4 py-2.5 md:py-3 pb-safe flex-shrink-0">
           <MessageComposer onSendMessage={handleSendMessage} onTyping={handleTyping} />
         </div>
+        <div className="h-safe bg-transparent flex-shrink-0" />
       </div>
     );
   }

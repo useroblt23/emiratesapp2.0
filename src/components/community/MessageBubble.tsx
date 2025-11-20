@@ -46,7 +46,7 @@ export default function MessageBubble({
         <div
           className={`relative px-4 py-3 rounded-3xl shadow-xl backdrop-blur-2xl ${
             isOwnMessage
-              ? 'bg-[#D71921]/90 text-white border border-white/20'
+              ? 'bg-white/95 text-gray-900 border border-white/50'
               : 'glass-card border border-white/30 text-gray-900'
           }`}
         >
@@ -114,7 +114,7 @@ export default function MessageBubble({
           )}
 
           <div className={`flex items-center justify-between mt-2 text-xs ${
-            isOwnMessage ? 'text-white text-opacity-70' : 'text-gray-400'
+            isOwnMessage ? 'text-gray-500' : 'text-gray-400'
           }`}>
             <span>
               {message.createdAt.toDate().toLocaleTimeString([], {

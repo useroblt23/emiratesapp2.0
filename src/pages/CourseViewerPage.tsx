@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import PDFViewer from '../components/PDFViewer';
 import UpgradePrompt from '../components/UpgradePrompt';
 import { markLessonWatched } from '../services/rewardsService';
-import { trackCourseProgress } from '../services/enrollmentService';
+import { trackCourseProgress, getCourseProgress } from '../services/enrollmentService';
 import { getExamByCourseId, getUserExamResult, Exam, ExamResult } from '../services/examService';
 import FeatureAccessGuard from '../components/FeatureAccessGuard';
 import CourseExamInterface from '../components/CourseExamInterface';
@@ -103,6 +103,15 @@ function CourseViewerPageContent() {
       }
 
       const examData = await getExamByCourseId(courseId);
+
+      if (currentUser) {
+        const progress = await getCourseProgress(currentUser.uid, courseId);
+        if (progress && progress.completed) {
+          console.log('CourseViewer: Course already completed, setting watch progress to 100%');
+          setWatchProgress(100);
+          setVideoWatched(true);
+        }
+      }
 
       if (examData) {
         if (!examData.courseId) {

@@ -1,6 +1,6 @@
-import { Bell, ChevronDown, User, Settings, LogOut } from 'lucide-react';
+import { Bell, ChevronDown, User, Settings, LogOut, Menu, X } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
@@ -9,8 +9,11 @@ import { db } from '../../lib/firebase';
 export default function Navbar() {
   const { currentUser, logout } = useApp();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+  const isCommunityPage = location.pathname === '/chat';
 
   useEffect(() => {
     if (!currentUser) return;
@@ -30,19 +33,42 @@ export default function Navbar() {
 
   if (!currentUser) return null;
 
-  return (
-    <nav className="liquid-navbar sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
-          <Link to="/dashboard" className="flex items-center">
-            <img
-              src="/Crews (2).png"
-              alt="The Crew Academy"
-              className="h-16 md:h-24 w-auto object-contain"
-            />
-          </Link>
+  const navLinks = [
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/courses', label: 'Courses' },
+    { path: '/chat', label: 'Chat' },
+    { path: '/my-progress', label: 'My Progress' },
+    { path: '/leaderboard', label: 'Leaderboard' },
+    { path: '/profile', label: 'Profile' },
+    { path: '/support', label: 'Support' },
+  ];
 
-          <div className="flex items-center gap-2 md:gap-4">
+  return (
+    <>
+      <nav className="liquid-navbar sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-3 md:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 md:h-20">
+            <Link to="/dashboard" className="flex items-center">
+              <img
+                src="/Crews (2).png"
+                alt="The Crew Academy"
+                className="h-16 md:h-24 w-auto object-contain"
+              />
+            </Link>
+
+            <div className="flex items-center gap-2 md:gap-4">
+              {isCommunityPage && (
+                <button
+                  onClick={() => setShowMobileMenu(!showMobileMenu)}
+                  className="md:hidden relative p-1.5 liquid-button-secondary rounded-full transition-all"
+                >
+                  {showMobileMenu ? (
+                    <X className="w-4 h-4 text-gray-900" />
+                  ) : (
+                    <Menu className="w-4 h-4 text-gray-900" />
+                  )}
+                </button>
+              )}
             <button
               onClick={() => navigate('/notifications')}
               className="relative p-1.5 md:p-2 liquid-button-secondary rounded-full transition-all"
@@ -119,5 +145,71 @@ export default function Navbar() {
         </div>
       </div>
     </nav>
+
+    <AnimatePresence>
+      {showMobileMenu && isCommunityPage && (
+        <>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 z-50 md:hidden"
+            onClick={() => setShowMobileMenu(false)}
+          />
+          <motion.div
+            initial={{ x: '-100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '-100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className="fixed top-0 left-0 h-full w-64 liquid-navbar z-50 md:hidden shadow-2xl"
+          >
+            <div className="p-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900">Menu</h2>
+                <button
+                  onClick={() => setShowMobileMenu(false)}
+                  className="p-2 liquid-button-secondary rounded-full"
+                >
+                  <X className="w-5 h-5 text-gray-900" />
+                </button>
+              </div>
+
+              <nav className="space-y-2">
+                {navLinks.map((link) => (
+                  <Link
+                    key={link.path}
+                    to={link.path}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`block px-4 py-3 rounded-xl transition-all ${
+                      location.pathname === link.path
+                        ? 'glass-primary text-gray-900 font-semibold'
+                        : 'glass-button-secondary text-gray-700 hover:glass-primary'
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="mt-6 pt-6 border-t border-white/20">
+                <button
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    logout();
+                    navigate('/');
+                  }}
+                  className="flex items-center gap-3 px-4 py-3 w-full text-left rounded-xl glass-button-secondary text-red-600 hover:bg-red-50/50 transition-all"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+    </>
   );
 }

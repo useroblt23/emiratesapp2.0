@@ -6,8 +6,6 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import Dashboard from './pages/Dashboard';
 import CoursesPage from './pages/CoursesPage';
-import MessagesPage from './pages/MessagesPage';
-import ChatPage from './pages/ChatPage';
 import CommunityPage from './pages/CommunityPage';
 import ProfilePage from './pages/ProfilePage';
 import SupportPage from './pages/SupportPage';

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useApp } from '../../context/AppContext';
 import { Plane, User, Mail, Lock, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -7,8 +7,13 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import { auth, db } from '../../lib/firebase';
 import { countries } from '../../data/countries';
+import { supabase } from '../../lib/supabase';
 
 export default function RegisterPage() {
+  const [searchParams] = useSearchParams();
+  const selectedPlan = searchParams.get('plan');
+  const priceId = searchParams.get('priceId');
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -56,6 +61,36 @@ export default function RegisterPage() {
       };
 
       setCurrentUser(newUser);
+
+      if (selectedPlan && selectedPlan !== 'free' && priceId) {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${session?.access_token || user.accessToken}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              price_id: priceId,
+              success_url: `${window.location.origin}/dashboard?upgrade=success&plan=${selectedPlan}`,
+              cancel_url: `${window.location.origin}/upgrade?upgrade=cancelled`,
+              mode: 'subscription',
+            }),
+          });
+
+          const data = await response.json();
+
+          if (data.url) {
+            window.location.href = data.url;
+            return;
+          }
+        } catch (checkoutError) {
+          console.error('Checkout error:', checkoutError);
+        }
+      }
+
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Registration error details:', err);
@@ -96,9 +131,20 @@ export default function RegisterPage() {
           <h1 className="text-2xl md:text-3xl font-bold text-center text-gray-900 mb-2">
             Join The Crew Academy
           </h1>
-          <p className="text-center text-sm md:text-base text-gray-600 mb-6 md:mb-8">
+          <p className="text-center text-sm md:text-base text-gray-600 mb-4">
             Start your Emirates cabin crew journey
           </p>
+
+          {selectedPlan && selectedPlan !== 'free' && (
+            <div className="bg-gradient-to-r from-[#D71920]/10 to-[#CBA135]/10 border border-[#D71920]/20 rounded-xl p-3 mb-4">
+              <p className="text-center text-sm font-semibold text-gray-900">
+                Selected Plan: <span className="text-[#D71920] uppercase">{selectedPlan}</span>
+              </p>
+              <p className="text-center text-xs text-gray-600 mt-1">
+                You'll be redirected to checkout after registration
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleRegister} className="space-y-4 md:space-y-5">
             <div>

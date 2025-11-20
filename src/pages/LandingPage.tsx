@@ -1,9 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Plane, Shield, Sparkles, Brain, BookOpen, MessageCircle, Check, ChevronRight, Award, Users, Target, TrendingUp, Star, Globe } from 'lucide-react';
+import { useState } from 'react';
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [processingPlan, setProcessingPlan] = useState<string | null>(null);
 
   const features = [
     {
@@ -64,11 +66,31 @@ export default function LandingPage() {
     }
   ];
 
+  const handlePlanSelection = async (planName: string, priceId: string) => {
+    setProcessingPlan(planName);
+
+    if (planName === 'Free') {
+      navigate('/register');
+      return;
+    }
+
+    try {
+      const checkoutUrl = `${window.location.origin}/register?plan=${planName.toLowerCase()}&priceId=${priceId}`;
+      navigate(`/register?plan=${planName.toLowerCase()}&priceId=${priceId}`);
+    } catch (error) {
+      console.error('Plan selection error:', error);
+      navigate('/register');
+    } finally {
+      setProcessingPlan(null);
+    }
+  };
+
   const plans = [
     {
       name: 'Free',
       price: '$0',
       period: 'forever',
+      priceId: 'price_1SUxdh02SYry0M3gRlX4gFwt',
       features: [
         'Access to basic courses',
         'Community chat access',
@@ -84,6 +106,7 @@ export default function LandingPage() {
       name: 'Pro',
       price: '$29',
       period: 'per month',
+      priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       features: [
         'Everything in Free',
         'AI Trainer & CV optimizer',
@@ -101,6 +124,7 @@ export default function LandingPage() {
       name: 'VIP',
       price: '$79',
       period: 'per month',
+      priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       features: [
         'Everything in Pro',
         '1-on-1 mentor sessions (monthly)',
@@ -370,14 +394,15 @@ export default function LandingPage() {
                 </ul>
 
                 <button
-                  onClick={() => navigate('/register')}
-                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                  onClick={() => handlePlanSelection(plan.name, plan.priceId)}
+                  disabled={processingPlan === plan.name}
+                  className={`w-full py-4 rounded-xl font-bold text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                     plan.highlighted
                       ? 'bg-gradient-to-r from-[#D71920] to-[#B91518] text-white hover:shadow-xl transform hover:-translate-y-1'
                       : 'bg-gray-100 text-gray-900 hover:bg-gray-200'
                   }`}
                 >
-                  {plan.cta}
+                  {processingPlan === plan.name ? 'Processing...' : plan.cta}
                 </button>
               </motion.div>
             ))}

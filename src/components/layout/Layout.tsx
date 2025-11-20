@@ -18,8 +18,10 @@ export default function Layout({ children }: LayoutProps) {
 
   if (isCommunityPage) {
     return (
-      <div className="h-screen flex flex-col overflow-hidden">
-        <Navbar />
+      <div className="h-screen flex flex-col">
+        <div className="flex-shrink-0">
+          <Navbar />
+        </div>
 
         <AnimatePresence>
           {banners.map((banner) => (
@@ -28,7 +30,7 @@ export default function Layout({ children }: LayoutProps) {
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: 'auto', opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl"
+              className="liquid-card-overlay text-white px-4 py-2 mx-4 rounded-xl flex-shrink-0"
             >
               <div className="max-w-7xl mx-auto flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 flex-shrink-0" />
@@ -40,16 +42,16 @@ export default function Layout({ children }: LayoutProps) {
           ))}
         </AnimatePresence>
 
-        <div className="flex flex-1 overflow-hidden">
-          <div className="hidden md:block">
+        <div className="flex flex-1 min-h-0">
+          <div className="hidden md:block flex-shrink-0">
             <Sidebar />
           </div>
-          <main className="flex-1 overflow-hidden relative">
+          <main className="flex-1 overflow-y-auto">
             {children}
           </main>
         </div>
 
-        <div className="flex-shrink-0 z-20">
+        <div className="flex-shrink-0 border-t border-gray-200">
           <Footer />
         </div>
       </div>

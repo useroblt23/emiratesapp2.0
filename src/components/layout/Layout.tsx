@@ -44,7 +44,9 @@ export default function Layout({ children }: LayoutProps) {
         </AnimatePresence>
 
         <div className="flex flex-1 overflow-hidden">
-          <Sidebar />
+          <div className="hidden md:block">
+            <Sidebar />
+          </div>
           <main className="flex-1 overflow-hidden relative">
             {children}
           </main>

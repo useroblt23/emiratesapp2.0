@@ -39,9 +39,7 @@ export default function LandingPage() {
   ];
 
   const stats = [
-    { number: '10,000+', label: 'Active Students' },
     { number: '95%', label: 'Success Rate' },
-    { number: '50+', label: 'Airlines Represented' },
     { number: '24/7', label: 'Support Available' }
   ];
 
@@ -124,9 +122,9 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             <div className="flex items-center gap-3">
-              <img src="/logo.png" alt="The Crew Academy" className="h-14 w-auto" />
+              <img src="/Crews (2) copy.png" alt="The Crew Academy" className="h-14 w-auto" />
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3">
+            <div className="flex flex-row items-center gap-2 sm:gap-3">
               <button
                 onClick={() => navigate('/login')}
                 className="px-4 sm:px-6 py-2.5 text-gray-700 font-semibold hover:text-[#D71920] transition rounded-lg hover:bg-white/50 text-sm sm:text-base"

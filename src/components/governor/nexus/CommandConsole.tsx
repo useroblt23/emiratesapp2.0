@@ -48,13 +48,13 @@ export default function CommandConsole() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-light rounded-xl shadow-lg p-6 border-2 border-transparent hover:border-gray-200 transition"
+      className="w-full glass-light rounded-xl shadow-lg p-3 md:p-6 border-2 border-transparent hover:border-gray-200 transition overflow-hidden"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <Terminal className="w-5 h-5 text-gray-700" />
-        <h2 className="text-xl font-bold text-gray-900 tracking-tight">Command Console</h2>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <Terminal className="w-4 h-4 md:w-5 md:h-5 text-gray-700 flex-shrink-0" />
+        <h2 className="text-base md:text-xl font-bold text-gray-900 tracking-tight">Command Console</h2>
         {!isGovernor && (
-          <span className="ml-auto text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full uppercase tracking-wide font-bold border border-yellow-300">
+          <span className="ml-auto text-xs bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full uppercase tracking-wide font-bold border border-yellow-300 flex-shrink-0">
             View Only
           </span>
         )}
@@ -70,26 +70,26 @@ export default function CommandConsole() {
       )}
 
       <form onSubmit={handleSubmit} className="mb-4">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={command}
             onChange={(e) => setCommand(e.target.value)}
-            placeholder={isGovernor ? "Enter command (e.g., /shutdown chat)" : "Command execution disabled"}
+            placeholder={isGovernor ? "/shutdown chat" : "Command disabled"}
             disabled={!isGovernor || loading}
-            className="flex-1 px-4 py-3 bg-gray-900 text-green-400 font-mono text-sm rounded-lg border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 px-3 md:px-4 py-2 md:py-3 bg-gray-900 text-green-400 font-mono text-xs md:text-sm rounded-lg border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-[#D71920] focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <button
             type="submit"
             disabled={!isGovernor || loading || !command.trim()}
-            className="px-6 py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg font-bold hover:from-[#B91518] hover:to-[#A01315] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center gap-2 shadow-md uppercase tracking-wide"
+            className="px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-[#D71920] to-[#B91518] text-white rounded-lg text-sm font-bold hover:from-[#B91518] hover:to-[#A01315] disabled:opacity-50 disabled:cursor-not-allowed transition flex items-center justify-center gap-2 shadow-md uppercase tracking-wide"
           >
             {loading ? (
               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
-              <Send className="w-4 h-4" />
+              <Send className="w-3 h-3 md:w-4 md:h-4" />
             )}
-            Execute
+            <span className="hidden sm:inline">Execute</span>
           </button>
         </div>
       </form>

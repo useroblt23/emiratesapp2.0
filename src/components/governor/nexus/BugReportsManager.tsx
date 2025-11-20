@@ -221,23 +221,30 @@ export default function BugReportsManager() {
       )}
 
       {selectedReport && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[80] flex items-center justify-center p-4" onClick={() => setSelectedReport(null)}>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="glass-light rounded-xl shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="sticky top-0 glass-light p-6 border-b border-gray-300">
-              <h3 className="text-2xl font-bold text-gray-900">{selectedReport.title}</h3>
-              <div className="flex items-center gap-2 mt-2">
-                <span className={`px-2 py-1 rounded text-xs font-bold ${getPriorityColor(selectedReport.priority)}`}>
-                  {selectedReport.priority.toUpperCase()}
-                </span>
-                <span className={`px-2 py-1 rounded border text-xs font-semibold ${getStatusColor(selectedReport.status)}`}>
-                  {selectedReport.status.toUpperCase()}
-                </span>
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+          className="glass-light rounded-xl shadow-xl border-2 border-[#D71920] mt-4 overflow-hidden"
+        >
+            <div className="glass-light p-3 md:p-6 border-b border-gray-300 flex items-start justify-between gap-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg md:text-2xl font-bold text-gray-900 break-words">{selectedReport.title}</h3>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span className={`px-2 py-1 rounded text-xs font-bold ${getPriorityColor(selectedReport.priority)}`}>
+                    {selectedReport.priority.toUpperCase()}
+                  </span>
+                  <span className={`px-2 py-1 rounded border text-xs font-semibold ${getStatusColor(selectedReport.status)}`}>
+                    {selectedReport.status.toUpperCase()}
+                  </span>
+                </div>
               </div>
+              <button
+                onClick={() => setSelectedReport(null)}
+                className="text-gray-500 hover:text-gray-700 text-2xl font-bold flex-shrink-0"
+              >
+                ×
+              </button>
             </div>
 
             <div className="p-6 space-y-6">
@@ -297,8 +304,7 @@ export default function BugReportsManager() {
                 </button>
               </div>
             </div>
-          </motion.div>
-        </div>
+        </motion.div>
       )}
     </div>
   );

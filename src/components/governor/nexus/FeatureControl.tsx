@@ -143,11 +143,11 @@ export default function FeatureControl() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="glass-light rounded-2xl shadow-lg p-6"
+      className="glass-light rounded-2xl shadow-lg p-3 md:p-6"
     >
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-        <Power className="w-6 h-6 text-[#D71920]" />
-        Feature Control Center
+      <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-4 md:mb-6 flex items-center gap-2 md:gap-3">
+        <Power className="w-5 h-5 md:w-6 md:h-6 text-[#D71920]" />
+        <span className="truncate">Feature Control</span>
       </h2>
 
       <div className="space-y-4">
@@ -159,33 +159,33 @@ export default function FeatureControl() {
           return (
             <div
               key={featureName}
-              className={`border-2 rounded-xl p-4 transition ${
+              className={`border-2 rounded-xl p-3 md:p-4 transition ${
                 feature.enabled
                   ? 'border-green-200 bg-green-50'
                   : 'border-red-200 bg-[#D71920]/10'
               }`}
             >
               {isEditing ? (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-lg font-bold text-gray-900">
+                <div className="space-y-3 md:space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <h3 className="text-base md:text-lg font-bold text-gray-900 break-words">
                       {featureName.replace(/([A-Z])/g, ' $1').trim()}
                     </h3>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                       <button
                         onClick={handleSave}
                         disabled={isLoading}
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition disabled:opacity-50 flex items-center gap-2"
+                        className="px-3 md:px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-semibold transition disabled:opacity-50 flex items-center gap-2"
                       >
-                        <Save className="w-4 h-4" />
-                        Save
+                        <Save className="w-3 h-3 md:w-4 md:h-4" />
+                        <span className="hidden sm:inline">Save</span>
                       </button>
                       <button
                         onClick={() => setEditingFeature(null)}
-                        className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg font-semibold transition flex items-center gap-2"
+                        className="px-3 md:px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-900 rounded-lg text-sm font-semibold transition flex items-center gap-2"
                       >
-                        <X className="w-4 h-4" />
-                        Cancel
+                        <X className="w-3 h-3 md:w-4 md:h-4" />
+                        <span className="hidden sm:inline">Cancel</span>
                       </button>
                     </div>
                   </div>

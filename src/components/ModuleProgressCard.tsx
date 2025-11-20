@@ -40,34 +40,34 @@ export default function ModuleProgressCard({
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
       <div
-        className="p-6 cursor-pointer hover:bg-gray-50 transition"
+        className="p-3 md:p-6 cursor-pointer hover:bg-gray-50 transition"
         onClick={() => setIsExpanded(!isExpanded)}
       >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-3 flex-1">
-            <div className={`p-2 rounded-lg ${progressPercentage === 100 ? 'bg-green-100' : 'bg-blue-100'}`}>
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className={`p-2 rounded-lg flex-shrink-0 ${progressPercentage === 100 ? 'bg-green-100' : 'bg-blue-100'}`}>
               {progressPercentage === 100 ? (
-                <CheckCircle className="w-6 h-6 text-green-600" />
+                <CheckCircle className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
               ) : (
-                <BookOpen className="w-6 h-6 text-blue-600" />
+                <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-blue-600" />
               )}
             </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-lg text-gray-900">{moduleTitle}</h3>
-              <p className="text-sm text-gray-600">
-                {completedLessons} of {totalLessons} lessons completed
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-base md:text-lg text-gray-900 truncate">{moduleTitle}</h3>
+              <p className="text-xs md:text-sm text-gray-600">
+                {completedLessons} of {totalLessons} lessons
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-right">
-              <p className="text-2xl font-bold text-[#D71920]">{progressPercentage}%</p>
+          <div className="flex items-center justify-between md:gap-4">
+            <div className="text-left md:text-right">
+              <p className="text-xl md:text-2xl font-bold text-[#D71920]">{progressPercentage}%</p>
               <p className="text-xs text-gray-500">Complete</p>
             </div>
             {isExpanded ? (
-              <ChevronUp className="w-6 h-6 text-gray-400" />
+              <ChevronUp className="w-5 h-5 md:w-6 md:h-6 text-gray-400 flex-shrink-0" />
             ) : (
-              <ChevronDown className="w-6 h-6 text-gray-400" />
+              <ChevronDown className="w-5 h-5 md:w-6 md:h-6 text-gray-400 flex-shrink-0" />
             )}
           </div>
         </div>

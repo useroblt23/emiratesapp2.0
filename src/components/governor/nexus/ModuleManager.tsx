@@ -39,21 +39,21 @@ export default function ModuleManager() {
   }, {} as Record<string, Module[]>);
 
   return (
-    <div className="glass-light border border-gray-200 rounded-xl p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-3">
-          <FolderPlus className="w-6 h-6 text-blue-400" />
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Module Management</h2>
-            <p className="text-gray-600 text-sm">View course modules ({modules.length} total)</p>
-            <p className="text-gray-600 text-xs mt-1">Create modules from Coach Dashboard</p>
+    <div className="glass-light border border-gray-200 rounded-xl p-3 md:p-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-4 md:mb-6">
+        <div className="flex items-center gap-3 min-w-0">
+          <FolderPlus className="w-5 h-5 md:w-6 md:h-6 text-blue-400 flex-shrink-0" />
+          <div className="min-w-0">
+            <h2 className="text-base md:text-xl font-bold text-gray-900 truncate">Module Management</h2>
+            <p className="text-gray-600 text-xs md:text-sm">Modules: {modules.length}</p>
+            <p className="text-gray-600 text-xs hidden md:block">Create from Coach Dashboard</p>
           </div>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <div className="flex glass-light rounded-xl p-1">
             <button
               onClick={() => setViewMode('grouped')}
-              className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
+              className={`px-2 md:px-3 py-1.5 rounded text-xs md:text-sm font-semibold transition ${
                 viewMode === 'grouped'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-700'
@@ -63,13 +63,13 @@ export default function ModuleManager() {
             </button>
             <button
               onClick={() => setViewMode('all')}
-              className={`px-3 py-1.5 rounded text-sm font-semibold transition ${
+              className={`px-2 md:px-3 py-1.5 rounded text-xs md:text-sm font-semibold transition ${
                 viewMode === 'all'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-600 hover:text-gray-700'
               }`}
             >
-              All Modules
+              All
             </button>
           </div>
         </div>

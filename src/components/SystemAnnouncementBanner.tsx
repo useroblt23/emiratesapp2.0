@@ -101,8 +101,15 @@ export default function SystemAnnouncementBanner() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed inset-0 z-[100] flex items-end pb-24 justify-center p-4"
-              style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
+              className="fixed inset-0 z-[100] flex items-center justify-center"
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                padding: 'max(env(safe-area-inset-top), 1rem) max(env(safe-area-inset-right), 1rem) max(env(safe-area-inset-bottom), 1rem) max(env(safe-area-inset-left), 1rem)'
+              }}
             >
               <div className={`bg-gradient-to-br ${config.bgGradient} rounded-xl shadow-2xl p-4 w-full max-w-sm mx-auto`}>
                 <div className="flex items-start gap-2 mb-2">
@@ -123,21 +130,15 @@ export default function SystemAnnouncementBanner() {
                     <X className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="flex gap-2 mt-2">
-                  <button
-                    onClick={() => setIsExpanded(false)}
-                    className="flex-1 px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded-lg font-semibold transition text-xs sm:text-sm"
-                  >
-                    Close
-                  </button>
+                <div className="flex gap-2 mt-3">
                   <button
                     onClick={() => {
                       setIsExpanded(false);
                       setIsDismissed(true);
                     }}
-                    className="flex-1 px-3 py-1.5 bg-white hover:bg-white/90 text-gray-900 rounded-lg font-semibold transition text-xs sm:text-sm"
+                    className="w-full px-4 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg font-semibold transition text-sm"
                   >
-                    Dismiss
+                    Close
                   </button>
                 </div>
               </div>

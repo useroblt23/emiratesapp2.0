@@ -57,7 +57,7 @@ export default function UpgradePlanPage() {
       plan: 'free' as const,
       icon: Circle,
       price: '0',
-      priceId: '',
+      priceId: 'price_1SUxdh02SYry0M3gRlX4gFwt',
       color: 'gray',
       features: [
         'Access to dashboard',
@@ -73,7 +73,7 @@ export default function UpgradePlanPage() {
       plan: 'pro' as const,
       icon: Shield,
       price: '29',
-      priceId: 'price_pro_monthly',
+      priceId: 'price_1SUxeo02SYry0M3gdhJU01Xr',
       color: 'blue',
       popular: true,
       features: [
@@ -91,7 +91,7 @@ export default function UpgradePlanPage() {
       plan: 'vip' as const,
       icon: Crown,
       price: '79',
-      priceId: 'price_vip_monthly',
+      priceId: 'price_1SUxfV02SYry0M3gjVKsRY8l',
       color: 'gold',
       features: [
         'Everything in Pro',
@@ -163,19 +163,21 @@ export default function UpgradePlanPage() {
                   <div className="px-6 py-3 bg-gray-200 text-gray-600 rounded-xl font-bold">
                     Current Plan
                   </div>
+                ) : planItem.plan === 'free' ? (
+                  <div className="px-6 py-3 bg-gray-200 text-gray-600 rounded-xl font-bold">
+                    Free Plan
+                  </div>
                 ) : (
                   <button
-                    onClick={() => planItem.priceId && handleUpgrade(planItem.name, planItem.priceId)}
-                    disabled={loading === planItem.name || planItem.plan === 'free'}
+                    onClick={() => handleUpgrade(planItem.name, planItem.priceId)}
+                    disabled={loading === planItem.name}
                     className={`w-full px-6 py-3 rounded-xl font-bold transition disabled:opacity-50 disabled:cursor-not-allowed ${
-                      planItem.color === 'gray'
-                        ? 'bg-gray-500 hover:bg-gray-600 text-white'
-                        : planItem.color === 'blue'
+                      planItem.color === 'blue'
                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
                         : 'bg-gradient-to-r from-[#FFD700] to-[#D4AF37] hover:shadow-lg text-[#000000]'
                     }`}
                   >
-                    {loading === planItem.name ? 'Processing...' : planItem.plan === 'free' ? 'Current Plan' : 'Upgrade Now'}
+                    {loading === planItem.name ? 'Processing...' : 'Upgrade Now'}
                   </button>
                 )}
               </div>

@@ -166,6 +166,11 @@ export const getAllMainModules = async (): Promise<MainModule[]> => {
 
 export const getMainModule = async (moduleId: string): Promise<MainModule | null> => {
   try {
+    if (!moduleId || typeof moduleId !== 'string') {
+      console.error('Invalid moduleId provided to getMainModule:', moduleId);
+      return null;
+    }
+
     const moduleRef = doc(db, 'main_modules', moduleId);
     const moduleSnap = await getDoc(moduleRef);
 

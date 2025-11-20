@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { TrendingUp, BookOpen, Award, PlayCircle, ChevronRight, CheckCircle, Folder, Layers } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useApp } from '../context/AppContext';
-import { getUserEnrollments, ModuleEnrollment } from '../services/enrollmentService';
+import {
+  getUserEnrollments,
+  getAverageProgress,
+  getCompletedModulesCount,
+  getInProgressModulesCount,
+  CourseEnrollment
+} from '../services/moduleProgressService';
 import { getMainModule, getSubmodule } from '../services/mainModuleService';
 import { collection, getDocs, query, where, getDoc, doc } from 'firebase/firestore';
 import { db } from '../lib/firebase';
@@ -50,36 +56,24 @@ export default function MyProgressPage() {
       const modulesWithDetails = await Promise.all(
         enrollments.map(async (enrollment) => {
           try {
-            if (enrollment.module_type === 'main_module') {
-              const mainModule = await getMainModule(enrollment.module_id);
-              if (mainModule) {
-                return {
-                  id: enrollment.module_id,
-                  title: mainModule.title,
-                  description: mainModule.description,
-                  type: 'main_module' as const,
-                  coverImage: mainModule.coverImage,
-                  enrolled_at: enrollment.enrolled_at,
-                  progress_percentage: enrollment.progress_percentage,
-                  completed: enrollment.completed,
-                  last_accessed: enrollment.last_accessed
-                };
-              }
-            } else {
-              const submodule = await getSubmodule(enrollment.module_id);
-              if (submodule) {
-                return {
-                  id: enrollment.module_id,
-                  title: submodule.title,
-                  description: submodule.description,
-                  type: 'submodule' as const,
-                  coverImage: submodule.coverImage,
-                  enrolled_at: enrollment.enrolled_at,
-                  progress_percentage: enrollment.progress_percentage,
-                  completed: enrollment.completed,
-                  last_accessed: enrollment.last_accessed
-                };
-              }
+            if (!enrollment.module_id) {
+              console.warn('Enrollment missing module_id:', enrollment);
+              return null;
+            }
+
+            const mainModule = await getMainModule(enrollment.module_id);
+            if (mainModule) {
+              return {
+                id: enrollment.module_id,
+                title: mainModule.title,
+                description: mainModule.description,
+                type: 'main_module' as const,
+                coverImage: mainModule.coverImage,
+                enrolled_at: enrollment.enrolled_at,
+                progress_percentage: enrollment.progress,
+                completed: enrollment.completed,
+                last_accessed: enrollment.last_accessed
+              };
             }
           } catch (error) {
             console.error('Error loading module details:', error);
@@ -92,11 +86,9 @@ export default function MyProgressPage() {
       validModules.sort((a, b) => new Date(b.last_accessed).getTime() - new Date(a.last_accessed).getTime());
       setEnrolledModules(validModules);
 
-      const completed = validModules.filter(m => m.completed).length;
-      const inProgress = validModules.filter(m => !m.completed && m.progress_percentage > 0).length;
-      const avgProgress = validModules.length > 0
-        ? Math.round(validModules.reduce((sum, m) => sum + m.progress_percentage, 0) / validModules.length)
-        : 0;
+      const avgProgress = await getAverageProgress(currentUser.uid);
+      const completed = await getCompletedModulesCount(currentUser.uid);
+      const inProgress = await getInProgressModulesCount(currentUser.uid);
 
       setStats({
         totalEnrolled: validModules.length,

@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Footer from './Footer';
@@ -13,6 +14,44 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const { banners } = useApp();
+  const location = useLocation();
+  const isCommunityPage = location.pathname === '/chat';
+
+  if (isCommunityPage) {
+    return (
+      <div className="h-screen flex flex-col overflow-hidden">
+        <Navbar />
+        <SystemAnnouncementBanner />
+
+        <AnimatePresence>
+          {banners.map((banner) => (
+            <motion.div
+              key={banner.id}
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              className="liquid-card-overlay text-white px-4 py-3 mx-4 my-2 rounded-2xl"
+            >
+              <div className="max-w-7xl mx-auto flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="font-bold">{banner.title}</p>
+                  <p className="text-sm opacity-90">Expires: {banner.expiration}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+
+        <div className="flex flex-1 overflow-hidden">
+          <Sidebar />
+          <main className="flex-1 overflow-hidden">
+            {children}
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative flex flex-col">
